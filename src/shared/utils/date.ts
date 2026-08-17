@@ -19,3 +19,15 @@ export function addDaysIso(dateIso: string, days: number): string {
   date.setDate(date.getDate() + days)
   return getLocalDateIso(date)
 }
+
+// Every calendar date from fromDate to toDate, inclusive. Callers use
+// this to build a fixed-length day list before left-joining sparse
+// report data onto it — the list's length must come from the date range
+// itself, never from however many rows a query happened to return.
+export function buildDateRangeList(fromDate: string, toDate: string): string[] {
+  const days: string[] = []
+  for (let date = fromDate; date <= toDate; date = addDaysIso(date, 1)) {
+    days.push(date)
+  }
+  return days
+}

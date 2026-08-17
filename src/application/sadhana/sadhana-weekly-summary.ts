@@ -1,5 +1,5 @@
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
-import { addDaysIso } from '@/shared/utils/date'
+import { buildDateRangeList } from '@/shared/utils/date'
 
 export interface WeeklyChartPoint {
   date: string
@@ -32,10 +32,7 @@ export function calculateWeeklySummary(
 ): WeeklySadhanaSummary {
   const reportsByDate = new Map(reports.map((report) => [report.reportDate, report]))
 
-  const days: string[] = []
-  for (let date = startDate; date <= endDate; date = addDaysIso(date, 1)) {
-    days.push(date)
-  }
+  const days = buildDateRangeList(startDate, endDate)
 
   const chartData: WeeklyChartPoint[] = days.map((date) => {
     const report = reportsByDate.get(date)

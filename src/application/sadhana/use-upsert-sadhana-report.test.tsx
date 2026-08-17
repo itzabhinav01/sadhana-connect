@@ -137,6 +137,40 @@ describe('useUpsertSadhanaReport', () => {
     expect(queryClient.getQueryState(historyKey)?.isInvalidated).toBe(true)
   })
 
+  it('invalidates a non-7-day (e.g. Analytics 30-day) range query too, since it shares the same rangeAll prefix', async () => {
+    const savedReport = { id: 'report-1', ...params }
+    upsertReportMock.mockResolvedValue(savedReport)
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+
+    const analyticsRangeKey = sadhanaQueryKeys.range(
+      'user-1',
+      '2026-01-01',
+      '2026-01-31',
+    )
+    queryClient.setQueryData(analyticsRangeKey, [{ reportDate: '2026-01-14' }])
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useUpsertSadhanaReport(), {
+      wrapper: Wrapper,
+    })
+
+    result.current.mutate(params)
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryState(analyticsRangeKey)?.isInvalidated).toBe(
+      true,
+    )
+  })
+
   it('does not invalidate the detail query it just seeded via setQueryData', async () => {
     const savedReport = { id: 'report-1', ...params }
     upsertReportMock.mockResolvedValue(savedReport)

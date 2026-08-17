@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
+import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
               { path: '/', element: <DevoteeDashboardPage /> },
               { path: '/sadhana', element: <SadhanaFormPage /> },
               { path: '/history', element: <HistoryPage /> },
+              { path: '/analytics', element: <AnalyticsPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],

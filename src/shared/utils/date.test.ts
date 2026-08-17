@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, buildDateRangeList, getLocalDateIso } from '@/shared/utils/date'
 
 describe('getLocalDateIso', () => {
   it('formats a date as YYYY-MM-DD using local components', () => {
@@ -32,5 +32,36 @@ describe('addDaysIso', () => {
 
   it('returns the same date for a zero offset', () => {
     expect(addDaysIso('2026-01-15', 0)).toBe('2026-01-15')
+  })
+})
+
+describe('buildDateRangeList', () => {
+  it('returns a single-element list when from and to are the same date', () => {
+    expect(buildDateRangeList('2026-01-15', '2026-01-15')).toEqual([
+      '2026-01-15',
+    ])
+  })
+
+  it('returns every date inclusive of both endpoints', () => {
+    expect(buildDateRangeList('2026-01-13', '2026-01-16')).toEqual([
+      '2026-01-13',
+      '2026-01-14',
+      '2026-01-15',
+      '2026-01-16',
+    ])
+  })
+
+  it('spans a month boundary correctly', () => {
+    const days = buildDateRangeList('2026-01-30', '2026-02-02')
+    expect(days).toEqual([
+      '2026-01-30',
+      '2026-01-31',
+      '2026-02-01',
+      '2026-02-02',
+    ])
+  })
+
+  it('returns an empty list when fromDate is after toDate', () => {
+    expect(buildDateRangeList('2026-01-16', '2026-01-15')).toEqual([])
   })
 })

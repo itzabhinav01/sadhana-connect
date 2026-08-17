@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
 
 describe('getNavItemsForRole', () => {
-  it('returns the common foundation items plus the devotee Sadhana/History items', () => {
+  it('returns the common foundation items plus the devotee Sadhana/History/Analytics items', () => {
     const labels = getNavItemsForRole('devotee').map((item) => item.label)
     expect(labels).toEqual([
       'Home',
@@ -11,6 +11,7 @@ describe('getNavItemsForRole', () => {
       'Settings',
       'Sadhana',
       'History',
+      'Analytics',
     ])
   })
 

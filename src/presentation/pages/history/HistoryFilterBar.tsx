@@ -1,6 +1,5 @@
 import { Button } from '@/presentation/components/ui/button'
-import { Input } from '@/presentation/components/ui/input'
-import { Label } from '@/presentation/components/ui/label'
+import { DateRangeInputs } from '@/presentation/components/shared/DateRangeInputs'
 import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
 
 export interface HistoryDateFilters {
@@ -29,32 +28,13 @@ export function HistoryFilterBar({ filters, onChange }: HistoryFilterBarProps) {
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="history-from-date">From</Label>
-          <Input
-            id="history-from-date"
-            type="date"
-            max={today}
-            value={filters.fromDate}
-            onChange={(event) =>
-              onChange({ ...filters, fromDate: event.target.value })
-            }
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="history-to-date">To</Label>
-          <Input
-            id="history-to-date"
-            type="date"
-            max={today}
-            value={filters.toDate}
-            onChange={(event) =>
-              onChange({ ...filters, toDate: event.target.value })
-            }
-          />
-        </div>
-      </div>
+      <DateRangeInputs
+        idPrefix="history"
+        fromDate={filters.fromDate}
+        toDate={filters.toDate}
+        onFromDateChange={(fromDate) => onChange({ ...filters, fromDate })}
+        onToDateChange={(toDate) => onChange({ ...filters, toDate })}
+      />
 
       <div className="flex flex-wrap gap-2">
         <Button
