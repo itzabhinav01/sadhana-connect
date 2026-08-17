@@ -101,4 +101,30 @@ describe('useSignOut', () => {
     expect(queryClient.getQueryData(rangeKey)).toBeUndefined()
     expect(queryClient.getQueryData(recentKey)).toBeUndefined()
   })
+
+  it('removes cached history queries on sign-out', async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const historyKey = sadhanaQueryKeys.history('user-1', undefined, '2026-01-15')
+    queryClient.setQueryData(historyKey, {
+      pages: [{ reports: [{ reportDate: '2026-01-15' }] }],
+    })
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(historyKey)).toBeUndefined()
+  })
 })

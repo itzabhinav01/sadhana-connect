@@ -1,5 +1,7 @@
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import type {
+  ListSadhanaReportsOptions,
+  ListSadhanaReportsResult,
   SadhanaReportRepository,
   UpsertSadhanaReportParams,
 } from '@/domain/repositories/sadhana-report-repository'
@@ -136,5 +138,45 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
     if (error) throw error
 
     return (data as SadhanaReportRow[]).map(mapRow)
+  },
+
+  async listReports(
+    profileId,
+    options: ListSadhanaReportsOptions,
+  ): Promise<ListSadhanaReportsResult> {
+    // (profile_id, report_date) — the unique-constraint index — serves
+    // this as a single index range scan: equality on profile_id, then a
+    // bounded/ordered scan on report_date for the from/to/cursor bounds,
+    // already in the LIMIT's requested (descending) order. No new index,
+    // no COUNT(*) — `limit + 1` is how the next page is detected instead.
+    let query = supabase
+      .from('sadhana_reports')
+      .select(SELECT_COLUMNS)
+      .eq('profile_id', profileId)
+      .order('report_date', { ascending: false })
+      .limit(options.limit + 1)
+
+    if (options.fromDate) {
+      query = query.gte('report_date', options.fromDate)
+    }
+    if (options.toDate) {
+      query = query.lte('report_date', options.toDate)
+    }
+    if (options.cursor) {
+      query = query.lt('report_date', options.cursor)
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+
+    const rows = (data as SadhanaReportRow[]).map(mapRow)
+    const hasNextPage = rows.length > options.limit
+    const reports = hasNextPage ? rows.slice(0, options.limit) : rows
+    const nextCursor = hasNextPage
+      ? (reports[reports.length - 1]?.reportDate ?? null)
+      : null
+
+    return { reports, nextCursor }
   },
 }

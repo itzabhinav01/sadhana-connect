@@ -101,7 +101,7 @@ describe('useUpsertSadhanaReport', () => {
     ).toEqual(savedReport)
   })
 
-  it('invalidates the range and recent dashboard queries on success', async () => {
+  it('invalidates the range, recent, and history dashboard/history queries on success', async () => {
     const savedReport = { id: 'report-1', ...params }
     upsertReportMock.mockResolvedValue(savedReport)
     const queryClient = new QueryClient({
@@ -110,8 +110,12 @@ describe('useUpsertSadhanaReport', () => {
 
     const rangeKey = sadhanaQueryKeys.range('user-1', '2026-01-09', '2026-01-15')
     const recentKey = sadhanaQueryKeys.recent('user-1', 60)
+    const historyKey = sadhanaQueryKeys.history('user-1', undefined, '2026-01-15')
     queryClient.setQueryData(rangeKey, [{ reportDate: '2026-01-14' }])
     queryClient.setQueryData(recentKey, [{ reportDate: '2026-01-14' }])
+    queryClient.setQueryData(historyKey, {
+      pages: [{ reports: [{ reportDate: '2026-01-14' }] }],
+    })
 
     function Wrapper({ children }: { children: ReactNode }) {
       return (
@@ -130,6 +134,7 @@ describe('useUpsertSadhanaReport', () => {
 
     expect(queryClient.getQueryState(rangeKey)?.isInvalidated).toBe(true)
     expect(queryClient.getQueryState(recentKey)?.isInvalidated).toBe(true)
+    expect(queryClient.getQueryState(historyKey)?.isInvalidated).toBe(true)
   })
 
   it('does not invalidate the detail query it just seeded via setQueryData', async () => {

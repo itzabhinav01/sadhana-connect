@@ -1,4 +1,4 @@
-import { Home, NotebookPen, Settings, User } from 'lucide-react'
+import { History, Home, NotebookPen, Settings, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import type { AppRole } from '@/domain/entities/profile'
@@ -24,7 +24,10 @@ export const navigationConfig: {
     { label: 'Settings', href: '/settings', icon: Settings },
   ],
   byRole: {
-    devotee: [{ label: 'Sadhana', href: '/sadhana', icon: NotebookPen }],
+    devotee: [
+      { label: 'Sadhana', href: '/sadhana', icon: NotebookPen },
+      { label: 'History', href: '/history', icon: History },
+    ],
     mentor: [],
     super_admin: [],
   },

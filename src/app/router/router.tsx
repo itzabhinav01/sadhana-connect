@@ -4,6 +4,7 @@ import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
+import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
             children: [
               { path: '/', element: <DevoteeDashboardPage /> },
               { path: '/sadhana', element: <SadhanaFormPage /> },
+              { path: '/history', element: <HistoryPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],

@@ -1,5 +1,22 @@
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 
+export interface ListSadhanaReportsOptions {
+  fromDate?: string
+  toDate?: string
+  limit: number
+  // Last-seen report_date from the previous page. null/undefined = first
+  // page. report_date is unique per profile (the DB unique constraint),
+  // so it alone is a valid keyset cursor — no secondary tie-break needed.
+  cursor?: string | null
+}
+
+export interface ListSadhanaReportsResult {
+  reports: SadhanaReport[]
+  // Present iff there is a next page — pass this back as `cursor` to
+  // fetch it. null means this was the last page.
+  nextCursor: string | null
+}
+
 export interface UpsertSadhanaReportParams {
   reportDate: string
   roundsBefore430: number
@@ -50,4 +67,13 @@ export interface SadhanaReportRepository {
     profileId: string,
     limit: number,
   ): Promise<SadhanaReport[]>
+
+  // Paginated (keyset/cursor), optionally date-filtered, newest first —
+  // used by the History page. Unlike listReportsInRange, this is safe to
+  // call over an arbitrary/unbounded date span since it never returns
+  // more than `limit` rows.
+  listReports(
+    profileId: string,
+    options: ListSadhanaReportsOptions,
+  ): Promise<ListSadhanaReportsResult>
 }

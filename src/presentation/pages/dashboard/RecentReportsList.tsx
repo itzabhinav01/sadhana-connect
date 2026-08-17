@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 import { useRecentSadhanaReports } from '@/application/sadhana/use-recent-sadhana-reports'
 import {
   Card,
@@ -7,13 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/presentation/components/ui/card'
+import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
 
 const RECENT_REPORTS_DISPLAY_COUNT = 5
-
-function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
-}
 
 export function RecentReportsList() {
   // Same query (same key/limit) as useSadhanaStreak — TanStack Query
@@ -50,15 +44,7 @@ export function RecentReportsList() {
               .slice(0, RECENT_REPORTS_DISPLAY_COUNT)
               .map((report) => (
                 <li key={report.id}>
-                  <Link
-                    to={`/sadhana?date=${report.reportDate}`}
-                    className="flex items-center justify-between rounded-sm py-2 text-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <span>{formatDisplayDate(report.reportDate)}</span>
-                    <span className="text-muted-foreground">
-                      {report.totalRounds} rounds
-                    </span>
-                  </Link>
+                  <SadhanaReportSummaryRow report={report} variant="compact" />
                 </li>
               ))}
           </ul>

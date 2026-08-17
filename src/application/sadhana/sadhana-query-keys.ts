@@ -20,4 +20,13 @@ export const sadhanaQueryKeys = {
   recentAll: ['sadhana-report', 'recent'] as const,
   recent: (userId: string | null, limit: number) =>
     ['sadhana-report', 'recent', userId, limit] as const,
+  // No cursor in the key — useInfiniteQuery tracks pages internally
+  // under one key per (userId, fromDate, toDate) combination. Changing a
+  // filter is therefore automatically a fresh query starting at page 1.
+  historyAll: ['sadhana-report', 'history'] as const,
+  history: (
+    userId: string | null,
+    fromDate: string | undefined,
+    toDate: string | undefined,
+  ) => ['sadhana-report', 'history', userId, fromDate ?? null, toDate ?? null] as const,
 }
