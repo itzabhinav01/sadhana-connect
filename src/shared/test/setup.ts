@@ -19,6 +19,17 @@ if (!window.matchMedia) {
   })
 }
 
+// jsdom does not implement ResizeObserver either. Recharts'
+// ResponsiveContainer reads it to size the chart — without this, any
+// component rendering a chart throws on mount in tests.
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
 afterEach(() => {
   cleanup()
 })

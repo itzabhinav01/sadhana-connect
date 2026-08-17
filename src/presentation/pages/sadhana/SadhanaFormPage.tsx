@@ -1,12 +1,28 @@
-import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { useSadhanaReport } from '@/application/sadhana/use-sadhana-report'
 import { getLocalDateIso } from '@/shared/utils/date'
 import { SadhanaReportForm } from '@/presentation/pages/sadhana/SadhanaReportForm'
 
+function isValidDateParam(value: string | null): value is string {
+  return value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value)
+}
+
+// The date lives in the URL (?date=YYYY-MM-DD), not local component
+// state — this is what lets the dashboard's "Recent reports" list link
+// straight to a specific date's report.
 export function SadhanaFormPage() {
-  const [date, setDate] = useState(() => getLocalDateIso())
+  const [searchParams, setSearchParams] = useSearchParams()
+  const dateParam = searchParams.get('date')
+  const date = isValidDateParam(dateParam) ? dateParam : getLocalDateIso()
   const reportQuery = useSadhanaReport(date)
+
+  const handleDateChange = (nextDate: string) => {
+    setSearchParams(
+      nextDate === getLocalDateIso() ? {} : { date: nextDate },
+      { replace: true },
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,7 +51,7 @@ export function SadhanaFormPage() {
           key={date}
           date={date}
           existingReport={reportQuery.data}
-          onDateChange={setDate}
+          onDateChange={handleDateChange}
         />
       ) : null}
     </div>

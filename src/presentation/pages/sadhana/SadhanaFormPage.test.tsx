@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
@@ -20,6 +21,14 @@ vi.mock('@/application/sadhana/use-upsert-sadhana-report', () => ({
   }),
 }))
 
+function renderPage(initialPath = '/sadhana') {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <SadhanaFormPage />
+    </MemoryRouter>,
+  )
+}
+
 describe('SadhanaFormPage', () => {
   beforeEach(() => {
     useSadhanaReportMock.mockReset()
@@ -33,7 +42,7 @@ describe('SadhanaFormPage', () => {
       data: undefined,
     })
 
-    render(<SadhanaFormPage />)
+    renderPage()
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
     expect(
@@ -49,7 +58,7 @@ describe('SadhanaFormPage', () => {
       data: undefined,
     })
 
-    render(<SadhanaFormPage />)
+    renderPage()
 
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument()
     expect(
@@ -65,11 +74,37 @@ describe('SadhanaFormPage', () => {
       data: null,
     })
 
-    render(<SadhanaFormPage />)
+    renderPage()
 
     expect(
       screen.getByRole('button', { name: /save sadhana/i }),
     ).toBeInTheDocument()
+  })
+
+  it('reads the initial date from a ?date= URL param', () => {
+    useSadhanaReportMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: null,
+    })
+
+    renderPage('/sadhana?date=2026-01-15')
+
+    expect(useSadhanaReportMock).toHaveBeenCalledWith('2026-01-15')
+  })
+
+  it('falls back to today for an invalid ?date= param', () => {
+    useSadhanaReportMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: null,
+    })
+
+    renderPage('/sadhana?date=not-a-date')
+
+    expect(useSadhanaReportMock).not.toHaveBeenCalledWith('not-a-date')
   })
 
   it('renders a prefilled form for a date with an existing report', () => {
@@ -102,7 +137,7 @@ describe('SadhanaFormPage', () => {
       },
     })
 
-    render(<SadhanaFormPage />)
+    renderPage()
 
     expect(
       screen.getByRole('button', { name: /update sadhana/i }),

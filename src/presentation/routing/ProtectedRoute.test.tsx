@@ -20,7 +20,7 @@ vi.mock('@/application/profile/use-profile', () => ({
 
 // AccountDisabledPage (rendered for the disabled-profile branch) pulls in
 // useSignOut, which needs a QueryClientProvider ancestor we don't set up
-// here — mock it the same way HomePage.test.tsx mocks it.
+// here — mock it directly instead.
 vi.mock('@/application/auth/use-sign-out', () => ({
   useSignOut: () => ({ mutate: signOutMutateMock, isPending: false }),
 }))

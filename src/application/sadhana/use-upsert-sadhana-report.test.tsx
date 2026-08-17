@@ -100,4 +100,64 @@ describe('useUpsertSadhanaReport', () => {
       ),
     ).toEqual(savedReport)
   })
+
+  it('invalidates the range and recent dashboard queries on success', async () => {
+    const savedReport = { id: 'report-1', ...params }
+    upsertReportMock.mockResolvedValue(savedReport)
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+
+    const rangeKey = sadhanaQueryKeys.range('user-1', '2026-01-09', '2026-01-15')
+    const recentKey = sadhanaQueryKeys.recent('user-1', 60)
+    queryClient.setQueryData(rangeKey, [{ reportDate: '2026-01-14' }])
+    queryClient.setQueryData(recentKey, [{ reportDate: '2026-01-14' }])
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useUpsertSadhanaReport(), {
+      wrapper: Wrapper,
+    })
+
+    result.current.mutate(params)
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryState(rangeKey)?.isInvalidated).toBe(true)
+    expect(queryClient.getQueryState(recentKey)?.isInvalidated).toBe(true)
+  })
+
+  it('does not invalidate the detail query it just seeded via setQueryData', async () => {
+    const savedReport = { id: 'report-1', ...params }
+    upsertReportMock.mockResolvedValue(savedReport)
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useUpsertSadhanaReport(), {
+      wrapper: Wrapper,
+    })
+
+    result.current.mutate(params)
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(
+      queryClient.getQueryState(
+        sadhanaQueryKeys.detail('user-1', '2026-01-15'),
+      )?.isInvalidated,
+    ).toBe(false)
+  })
 })

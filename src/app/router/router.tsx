@@ -1,9 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom'
 
-import { HomePage } from '@/presentation/pages/HomePage'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
+import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
           {
             element: <AppLayout />,
             children: [
-              { path: '/', element: <HomePage /> },
+              { path: '/', element: <DevoteeDashboardPage /> },
               { path: '/sadhana', element: <SadhanaFormPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },

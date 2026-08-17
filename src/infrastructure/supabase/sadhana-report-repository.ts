@@ -108,4 +108,33 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     return mapRow(data as SadhanaReportRow)
   },
+
+  async listReportsInRange(profileId, startDate, endDate) {
+    // Uses the (profile_id, report_date) unique-constraint index as an
+    // index range scan — no new index required.
+    const { data, error } = await supabase
+      .from('sadhana_reports')
+      .select(SELECT_COLUMNS)
+      .eq('profile_id', profileId)
+      .gte('report_date', startDate)
+      .lte('report_date', endDate)
+      .order('report_date', { ascending: true })
+
+    if (error) throw error
+
+    return (data as SadhanaReportRow[]).map(mapRow)
+  },
+
+  async listRecentReports(profileId, limit) {
+    const { data, error } = await supabase
+      .from('sadhana_reports')
+      .select(SELECT_COLUMNS)
+      .eq('profile_id', profileId)
+      .order('report_date', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    return (data as SadhanaReportRow[]).map(mapRow)
+  },
 }

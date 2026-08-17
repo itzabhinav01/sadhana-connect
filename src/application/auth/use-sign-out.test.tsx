@@ -74,4 +74,31 @@ describe('useSignOut', () => {
       ),
     ).toBeUndefined()
   })
+
+  it('removes cached weekly-range and recent-reports (dashboard) queries on sign-out', async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const rangeKey = sadhanaQueryKeys.range('user-1', '2026-01-09', '2026-01-15')
+    const recentKey = sadhanaQueryKeys.recent('user-1', 60)
+    queryClient.setQueryData(rangeKey, [{ reportDate: '2026-01-15' }])
+    queryClient.setQueryData(recentKey, [{ reportDate: '2026-01-15' }])
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(rangeKey)).toBeUndefined()
+    expect(queryClient.getQueryData(recentKey)).toBeUndefined()
+  })
 })

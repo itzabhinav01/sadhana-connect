@@ -25,6 +25,14 @@ export function useUpsertSadhanaReport() {
         sadhanaQueryKeys.detail(userId, report.reportDate),
         report,
       )
+
+      // The dashboard's weekly summary/chart and recent-reports/streak
+      // views are derived from this same table — invalidate (not set)
+      // since recomputing them here would duplicate the pure-function
+      // logic those hooks already own. Scoped to range/recent only, so
+      // the detail query just seeded above isn't redundantly refetched.
+      queryClient.invalidateQueries({ queryKey: sadhanaQueryKeys.rangeAll })
+      queryClient.invalidateQueries({ queryKey: sadhanaQueryKeys.recentAll })
     },
   })
 }

@@ -34,4 +34,20 @@ export interface SadhanaReportRepository {
     profileId: string,
     params: UpsertSadhanaReportParams,
   ): Promise<SadhanaReport>
+
+  // Inclusive date range, ordered by report_date ascending — used to
+  // build the weekly summary/chart. Gap days (no report) are simply
+  // absent from the result; the caller fills them in, never this layer.
+  listReportsInRange(
+    profileId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<SadhanaReport[]>
+
+  // Most recent reports regardless of gaps, newest first — used for both
+  // the "recent reports" list and the streak calculation.
+  listRecentReports(
+    profileId: string,
+    limit: number,
+  ): Promise<SadhanaReport[]>
 }
