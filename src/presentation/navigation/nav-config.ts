@@ -1,0 +1,39 @@
+import { Home, Settings, User } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+import type { AppRole } from '@/domain/entities/profile'
+
+export interface NavItem {
+  label: string
+  href: string
+  icon: LucideIcon
+}
+
+// `common` items are visible to every authenticated role. `byRole` lists
+// are populated in later phases (Devotee dashboard items — Phase 7,
+// Mentor dashboard — Phase 12, Super Admin — Phase 14); the per-role
+// structure exists now so those phases only add data here, not new
+// plumbing.
+export const navigationConfig: {
+  common: NavItem[]
+  byRole: Record<AppRole, NavItem[]>
+} = {
+  common: [
+    { label: 'Home', href: '/', icon: Home },
+    { label: 'Profile', href: '/profile', icon: User },
+    { label: 'Settings', href: '/settings', icon: Settings },
+  ],
+  byRole: {
+    devotee: [],
+    mentor: [],
+    super_admin: [],
+  },
+}
+
+// UI convenience only — which links render for a role. Not an
+// authorization check: every route these links point to is (or will be)
+// independently protected by RLS and, where needed, RequireRole.
+export function getNavItemsForRole(role: AppRole | undefined): NavItem[] {
+  if (!role) return []
+  return [...navigationConfig.common, ...navigationConfig.byRole[role]]
+}

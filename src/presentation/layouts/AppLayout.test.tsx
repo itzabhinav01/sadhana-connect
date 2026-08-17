@@ -1,0 +1,155 @@
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { AppLayout } from '@/presentation/layouts/AppLayout'
+import { TooltipProvider } from '@/presentation/components/ui/tooltip'
+
+const {
+  useAuthMock,
+  useProfileMock,
+  useThemeMock,
+  signOutMutateMock,
+  navigateMock,
+} = vi.hoisted(() => ({
+  useAuthMock: vi.fn(),
+  useProfileMock: vi.fn(),
+  useThemeMock: vi.fn(),
+  signOutMutateMock: vi.fn(),
+  navigateMock: vi.fn(),
+}))
+
+vi.mock('@/application/auth/use-auth', () => ({
+  useAuth: useAuthMock,
+}))
+
+vi.mock('@/application/profile/use-profile', () => ({
+  useProfile: useProfileMock,
+}))
+
+vi.mock('@/application/theme/use-theme', () => ({
+  useTheme: useThemeMock,
+}))
+
+vi.mock('@/application/auth/use-sign-out', () => ({
+  useSignOut: () => ({ mutate: signOutMutateMock, isPending: false }),
+}))
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return { ...actual, useNavigate: () => navigateMock }
+})
+
+function renderAppLayout(initialPath = '/') {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <TooltipProvider>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<div>Home content</div>} />
+            <Route path="/profile" element={<div>Profile content</div>} />
+          </Route>
+        </Routes>
+      </TooltipProvider>
+    </MemoryRouter>,
+  )
+}
+
+describe('AppLayout', () => {
+  beforeEach(() => {
+    signOutMutateMock.mockReset()
+    navigateMock.mockReset()
+
+    useAuthMock.mockReturnValue({
+      session: { userId: '1', email: 'devotee@example.com', emailConfirmedAt: null },
+      isLoading: false,
+    })
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        id: '1',
+        fullName: 'Test Devotee',
+        role: 'devotee',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+    useThemeMock.mockReturnValue({
+      theme: 'light',
+      resolvedTheme: 'light',
+      setTheme: vi.fn(),
+    })
+  })
+
+  it('renders the shell with the routed page content', () => {
+    renderAppLayout()
+    expect(screen.getByText('Home content')).toBeInTheDocument()
+  })
+
+  it('renders the foundation navigation items for the current role', () => {
+    renderAppLayout()
+
+    // Desktop sidebar nav (mobile drawer nav only renders once opened).
+    const nav = screen.getByRole('navigation', { name: 'Primary' })
+    expect(within(nav).getByRole('link', { name: /home/i })).toBeInTheDocument()
+    expect(
+      within(nav).getByRole('link', { name: /profile/i }),
+    ).toBeInTheDocument()
+    expect(
+      within(nav).getByRole('link', { name: /settings/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows the theme toggle control', () => {
+    renderAppLayout()
+    expect(
+      screen.getByRole('button', { name: /switch to dark theme/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('opens the account menu with name, email, and role', async () => {
+    const user = userEvent.setup()
+    renderAppLayout()
+
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+
+    expect(await screen.findByText('Test Devotee')).toBeInTheDocument()
+    expect(screen.getByText('devotee@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Devotee')).toBeInTheDocument()
+  })
+
+  it('signs out and redirects to /login from the account menu', async () => {
+    signOutMutateMock.mockImplementation((_vars, options) => {
+      options?.onSuccess?.()
+    })
+    const user = userEvent.setup()
+    renderAppLayout()
+
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+    await user.click(await screen.findByText(/log out/i))
+
+    expect(signOutMutateMock).toHaveBeenCalled()
+    expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
+  })
+
+  it('opens the mobile navigation drawer and navigates to its links', async () => {
+    const user = userEvent.setup()
+    renderAppLayout()
+
+    const trigger = screen.getByRole('button', { name: /open navigation menu/i })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(trigger)
+
+    await waitFor(() => {
+      expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    const dialog = screen.getByRole('dialog')
+    expect(
+      within(dialog).getByRole('link', { name: /profile/i }),
+    ).toBeInTheDocument()
+  })
+})

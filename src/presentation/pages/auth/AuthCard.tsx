@@ -14,16 +14,16 @@ interface AuthCardProps {
   children: ReactNode
 }
 
+// Rendered inside AuthLayout, which supplies the centering <main>
+// wrapper — this component is just the card itself.
 export function AuthCard({ title, description, children }: AuthCardProps) {
   return (
-    <main className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          {description ? <CardDescription>{description}</CardDescription> : null}
-        </CardHeader>
-        <CardContent>{children}</CardContent>
-      </Card>
-    </main>
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        {description ? <CardDescription>{description}</CardDescription> : null}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   )
 }

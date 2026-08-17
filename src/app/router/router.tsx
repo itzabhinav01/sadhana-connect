@@ -2,30 +2,57 @@ import { createBrowserRouter } from 'react-router-dom'
 
 import { HomePage } from '@/presentation/pages/HomePage'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
+import { ProfilePage } from '@/presentation/pages/ProfilePage'
+import { SettingsPage } from '@/presentation/pages/SettingsPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
 import { ForgotPasswordPage } from '@/presentation/pages/auth/ForgotPasswordPage'
 import { LoginPage } from '@/presentation/pages/auth/LoginPage'
 import { RegisterPage } from '@/presentation/pages/auth/RegisterPage'
 import { ResetPasswordPage } from '@/presentation/pages/auth/ResetPasswordPage'
+import { AppLayout } from '@/presentation/layouts/AppLayout'
+import { AuthLayout } from '@/presentation/layouts/AuthLayout'
+import { RootLayout } from '@/presentation/layouts/RootLayout'
 import { ProtectedRoute } from '@/presentation/routing/ProtectedRoute'
 import { PublicOnlyRoute } from '@/presentation/routing/PublicOnlyRoute'
 
 export const router = createBrowserRouter([
   {
-    element: <ProtectedRoute />,
-    children: [{ path: '/', element: <HomePage /> }],
-  },
-  {
-    element: <PublicOnlyRoute />,
+    element: <RootLayout />,
     children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> },
-      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          {
+            element: <PublicOnlyRoute />,
+            children: [
+              { path: '/login', element: <LoginPage /> },
+              { path: '/register', element: <RegisterPage /> },
+              { path: '/forgot-password', element: <ForgotPasswordPage /> },
+            ],
+          },
+          // Deliberately not under PublicOnlyRoute — the password-recovery
+          // flow establishes a temporary session on /reset-password that
+          // must not be redirected away. See PublicOnlyRoute's own note.
+          { path: '/auth/confirm', element: <AuthConfirmPage /> },
+          { path: '/reset-password', element: <ResetPasswordPage /> },
+          { path: '/check-email', element: <CheckEmailPage /> },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            element: <AppLayout />,
+            children: [
+              { path: '/', element: <HomePage /> },
+              { path: '/profile', element: <ProfilePage /> },
+              { path: '/settings', element: <SettingsPage /> },
+            ],
+          },
+        ],
+      },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
-  { path: '/auth/confirm', element: <AuthConfirmPage /> },
-  { path: '/reset-password', element: <ResetPasswordPage /> },
-  { path: '/check-email', element: <CheckEmailPage /> },
-  { path: '*', element: <NotFoundPage /> },
 ])
