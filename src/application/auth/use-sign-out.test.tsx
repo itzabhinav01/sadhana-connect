@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
+import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 
 const { signOutMock } = vi.hoisted(() => ({ signOutMock: vi.fn() }))
 
@@ -41,6 +42,36 @@ describe('useSignOut', () => {
 
     expect(
       queryClient.getQueryData(profileQueryKeys.detail('user-1')),
+    ).toBeUndefined()
+  })
+
+  it('removes any cached sadhana report queries on successful sign-out', async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    queryClient.setQueryData(
+      sadhanaQueryKeys.detail('user-1', '2026-01-15'),
+      { id: 'report-1', signatureText: 'Test Devotee' },
+    )
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(
+      queryClient.getQueryData(
+        sadhanaQueryKeys.detail('user-1', '2026-01-15'),
+      ),
     ).toBeUndefined()
   })
 })

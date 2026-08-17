@@ -4,6 +4,7 @@ import { HomePage } from '@/presentation/pages/HomePage'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
+import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
 import { ForgotPasswordPage } from '@/presentation/pages/auth/ForgotPasswordPage'
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
             element: <AppLayout />,
             children: [
               { path: '/', element: <HomePage /> },
+              { path: '/sadhana', element: <SadhanaFormPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],
