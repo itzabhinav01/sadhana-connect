@@ -19,4 +19,14 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // shadcn/ui-generated components — machine-generated, re-created by
+    // `shadcn add`. They routinely export a hook/variants helper alongside
+    // the component (e.g. buttonVariants, useFormField), which is the
+    // standard shadcn pattern but trips react-refresh's single-export rule.
+    files: ['src/presentation/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

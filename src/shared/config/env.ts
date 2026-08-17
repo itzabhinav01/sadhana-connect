@@ -3,13 +3,13 @@ import { z } from 'zod'
 declare global {
   interface ImportMetaEnv {
     readonly VITE_SUPABASE_URL: string
-    readonly VITE_SUPABASE_ANON_KEY: string
+    readonly VITE_SUPABASE_PUBLISHABLE_KEY: string
   }
 }
 
 const envSchema = z.object({
   VITE_SUPABASE_URL: z.string().url(),
-  VITE_SUPABASE_ANON_KEY: z.string().min(1),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
 })
 
 function loadEnv() {
