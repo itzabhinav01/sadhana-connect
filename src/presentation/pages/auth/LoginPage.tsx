@@ -16,6 +16,7 @@ import {
 } from '@/presentation/components/ui/form'
 import { Input } from '@/presentation/components/ui/input'
 import { AuthCard } from '@/presentation/pages/auth/AuthCard'
+import { PASSWORD_RESET_EMAIL_ENABLED } from '@/shared/constants/feature-flags'
 
 function getLoginErrorMessage(error: unknown) {
   if (
@@ -96,9 +97,16 @@ export function LoginPage() {
       </Form>
 
       <div className="mt-4 flex flex-col gap-1 text-center text-sm text-muted-foreground">
-        <Link to="/forgot-password" className="underline underline-offset-4">
-          Forgot your password?
-        </Link>
+        {PASSWORD_RESET_EMAIL_ENABLED ? (
+          <Link to="/forgot-password" className="underline underline-offset-4">
+            Forgot your password?
+          </Link>
+        ) : (
+          <span>
+            Password recovery by email will be available soon. Please
+            contact your administrator if you forget your password.
+          </span>
+        )}
         <span>
           Don&apos;t have an account?{' '}
           <Link to="/register" className="underline underline-offset-4">

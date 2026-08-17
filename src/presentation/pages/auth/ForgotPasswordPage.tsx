@@ -19,6 +19,7 @@ import {
 } from '@/presentation/components/ui/form'
 import { Input } from '@/presentation/components/ui/input'
 import { AuthCard } from '@/presentation/pages/auth/AuthCard'
+import { PASSWORD_RESET_EMAIL_ENABLED } from '@/shared/constants/feature-flags'
 
 export function ForgotPasswordPage() {
   const requestReset = useRequestPasswordReset()
@@ -31,6 +32,21 @@ export function ForgotPasswordPage() {
   const onSubmit = form.handleSubmit((values) => {
     requestReset.mutate(values.email)
   })
+
+  if (!PASSWORD_RESET_EMAIL_ENABLED) {
+    return (
+      <AuthCard
+        title="Forgot your password?"
+        description="Password recovery by email will be available soon. Please contact your administrator if you forget your password."
+      >
+        <div className="text-center text-sm">
+          <Link to="/login" className="underline underline-offset-4">
+            Back to sign in
+          </Link>
+        </div>
+      </AuthCard>
+    )
+  }
 
   if (requestReset.isSuccess) {
     return (
