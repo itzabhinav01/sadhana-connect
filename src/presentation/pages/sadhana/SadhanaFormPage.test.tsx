@@ -107,6 +107,32 @@ describe('SadhanaFormPage', () => {
     expect(useSadhanaReportMock).not.toHaveBeenCalledWith('not-a-date')
   })
 
+  it('reads ?prefillRounds= and applies it to the Total Rounds field', () => {
+    useSadhanaReportMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: null,
+    })
+
+    renderPage('/sadhana?date=2026-01-15&prefillRounds=12')
+
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
+  })
+
+  it('ignores an invalid ?prefillRounds= param', () => {
+    useSadhanaReportMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: null,
+    })
+
+    renderPage('/sadhana?date=2026-01-15&prefillRounds=not-a-number')
+
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('')
+  })
+
   it('renders a prefilled form for a date with an existing report', () => {
     useSadhanaReportMock.mockReturnValue({
       isPending: false,

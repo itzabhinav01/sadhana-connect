@@ -8,13 +8,24 @@ function isValidDateParam(value: string | null): value is string {
   return value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value)
 }
 
+function parsePrefillRoundsParam(value: string | null): number | undefined {
+  if (value === null) return undefined
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined
+}
+
 // The date lives in the URL (?date=YYYY-MM-DD), not local component
 // state — this is what lets the dashboard's "Recent reports" list link
-// straight to a specific date's report.
+// straight to a specific date's report. ?prefillRounds= (Phase 10, from
+// the Japa Counter) works the same way — read once at this level, not
+// tracked as ongoing state.
 export function SadhanaFormPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const dateParam = searchParams.get('date')
   const date = isValidDateParam(dateParam) ? dateParam : getLocalDateIso()
+  const prefillRounds = parsePrefillRoundsParam(
+    searchParams.get('prefillRounds'),
+  )
   const reportQuery = useSadhanaReport(date)
 
   const handleDateChange = (nextDate: string) => {
@@ -52,6 +63,7 @@ export function SadhanaFormPage() {
           date={date}
           existingReport={reportQuery.data}
           onDateChange={handleDateChange}
+          prefillRounds={prefillRounds}
         />
       ) : null}
     </div>

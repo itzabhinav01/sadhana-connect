@@ -6,6 +6,7 @@ import { SettingsPage } from '@/presentation/pages/SettingsPage'
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
+import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
               { path: '/sadhana', element: <SadhanaFormPage /> },
               { path: '/history', element: <HistoryPage /> },
               { path: '/analytics', element: <AnalyticsPage /> },
+              { path: '/japa', element: <JapaCounterPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],

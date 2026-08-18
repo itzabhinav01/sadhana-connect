@@ -30,6 +30,10 @@ interface SadhanaReportFormProps {
   date: string
   existingReport: SadhanaReport | null
   onDateChange: (date: string) => void
+  // Set only when arriving from the Japa Counter's "Use in Sadhana"
+  // action (Phase 10) — an explicitly devotee-chosen value, distinct
+  // from the before/till auto-suggestion below.
+  prefillRounds?: number
 }
 
 // Keyed by `date` at the call site (see SadhanaFormPage), so a full
@@ -39,24 +43,32 @@ export function SadhanaReportForm({
   date,
   existingReport,
   onDateChange,
+  prefillRounds,
 }: SadhanaReportFormProps) {
   const upsertReport = useUpsertSadhanaReport()
   const [isEditingMode, setIsEditingMode] = useState(Boolean(existingReport))
 
   // Total Rounds is only auto-suggested while editing a fresh (never
   // submitted) report and the devotee hasn't typed into it themselves —
-  // it must never silently overwrite a value that was already saved or
-  // that the devotee deliberately chose. This is a convenience default,
-  // never an enforced relationship (approved product decision, Phase 6).
+  // it must never silently overwrite a value that was already saved,
+  // that the devotee deliberately chose, or that arrived via
+  // prefillRounds (equally an explicit choice, made on the Japa Counter
+  // page instead of this form). This is a convenience default, never an
+  // enforced relationship (approved product decision, Phase 6).
   const [totalRoundsTouched, setTotalRoundsTouched] = useState(
-    Boolean(existingReport),
+    Boolean(existingReport) || prefillRounds !== undefined,
   )
 
   const form = useForm<SadhanaReportFormInput>({
     resolver: zodResolver(sadhanaReportSchema),
-    defaultValues: existingReport
-      ? reportToFormValues(existingReport)
-      : emptyFormValues(date),
+    defaultValues: (() => {
+      const base = existingReport
+        ? reportToFormValues(existingReport)
+        : emptyFormValues(date)
+      return prefillRounds !== undefined
+        ? { ...base, totalRounds: String(prefillRounds) }
+        : base
+    })(),
   })
 
   useEffect(() => {

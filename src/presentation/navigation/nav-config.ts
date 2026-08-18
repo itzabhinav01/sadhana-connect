@@ -1,4 +1,12 @@
-import { BarChart3, History, Home, NotebookPen, Settings, User } from 'lucide-react'
+import {
+  BarChart3,
+  Hand,
+  History,
+  Home,
+  NotebookPen,
+  Settings,
+  User,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import type { AppRole } from '@/domain/entities/profile'
@@ -28,6 +36,7 @@ export const navigationConfig: {
       { label: 'Sadhana', href: '/sadhana', icon: NotebookPen },
       { label: 'History', href: '/history', icon: History },
       { label: 'Analytics', href: '/analytics', icon: BarChart3 },
+      { label: 'Japa Counter', href: '/japa', icon: Hand },
     ],
     mentor: [],
     super_admin: [],

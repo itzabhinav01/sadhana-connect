@@ -221,6 +221,65 @@ describe('SadhanaReportForm', () => {
     expect(screen.queryByText(/row-level security|RLS|postgres/i)).toBeNull()
   })
 
+  it('prefills Total Rounds from prefillRounds on a fresh (no existing) report', () => {
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+        prefillRounds={12}
+      />,
+    )
+
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
+  })
+
+  it('prefillRounds overrides an existing report\'s stored Total Rounds', () => {
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={existingReport}
+        onDateChange={vi.fn()}
+        prefillRounds={20}
+      />,
+    )
+
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('20')
+  })
+
+  it('treats prefillRounds as an explicit choice: before/till auto-suggestion never overwrites it', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+        prefillRounds={12}
+      />,
+    )
+
+    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
+  })
+
+  it('does not auto-submit when prefillRounds is present — still requires a manual save', () => {
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+        prefillRounds={12}
+      />,
+    )
+
+    expect(mutateMock).not.toHaveBeenCalled()
+    expect(
+      screen.getByRole('button', { name: /save sadhana/i }),
+    ).toBeInTheDocument()
+  })
+
   it('shows a confirmation once the report has saved', () => {
     useUpsertSadhanaReportMock.mockReturnValue({
       mutate: mutateMock,
