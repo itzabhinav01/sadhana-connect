@@ -7,6 +7,7 @@ import {
   NotebookPen,
   Settings,
   User,
+  Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -40,7 +41,7 @@ export const navigationConfig: {
       { label: 'Japa Counter', href: '/japa', icon: Hand },
       { label: 'Verse of the Day', href: '/verse-of-the-day', icon: BookOpen },
     ],
-    mentor: [],
+    mentor: [{ label: 'Mentor Dashboard', href: '/mentor', icon: Users }],
     super_admin: [],
   },
 }

@@ -7,6 +7,8 @@ import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
+import { MentorDashboardPage } from '@/presentation/pages/mentor/MentorDashboardPage'
+import { MentorDevoteeDetailPage } from '@/presentation/pages/mentor/MentorDevoteeDetailPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { VerseOfTheDayPage } from '@/presentation/pages/verse/VerseOfTheDayPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
@@ -20,6 +22,7 @@ import { AuthLayout } from '@/presentation/layouts/AuthLayout'
 import { RootLayout } from '@/presentation/layouts/RootLayout'
 import { ProtectedRoute } from '@/presentation/routing/ProtectedRoute'
 import { PublicOnlyRoute } from '@/presentation/routing/PublicOnlyRoute'
+import { RequireRole } from '@/presentation/routing/RequireRole'
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +61,21 @@ export const router = createBrowserRouter([
               { path: '/verse-of-the-day', element: <VerseOfTheDayPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
+              {
+                // UX/navigation guard only — redirects non-mentors home.
+                // RLS (mentor_assignments_select, profiles_select,
+                // sadhana_reports_select, all via private.is_mentor_of)
+                // remains the real security boundary regardless of this
+                // guard; see RequireRole's own documentation.
+                element: <RequireRole allow={['mentor']} />,
+                children: [
+                  { path: '/mentor', element: <MentorDashboardPage /> },
+                  {
+                    path: '/mentor/devotee/:id',
+                    element: <MentorDevoteeDetailPage />,
+                  },
+                ],
+              },
             ],
           },
         ],

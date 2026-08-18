@@ -7,7 +7,7 @@ import type {
 } from '@/domain/repositories/sadhana-report-repository'
 import { supabase } from '@/infrastructure/supabase/client'
 
-interface SadhanaReportRow {
+export interface SadhanaReportRow {
   id: string
   profile_id: string
   report_date: string
@@ -31,10 +31,15 @@ interface SadhanaReportRow {
   updated_at: string
 }
 
-const SELECT_COLUMNS =
+export const SADHANA_REPORT_SELECT_COLUMNS =
   'id, profile_id, report_date, rounds_before_4_30am, rounds_till_7am, last_round_time, total_rounds, reading_minutes, book_name, hearing_minutes, speaker_name, sleep_time, wake_time, day_rest_minutes, total_rest_minutes, office_going_time, office_return_time, notes, signature_text, created_at, updated_at'
 
-function mapRow(row: SadhanaReportRow): SadhanaReport {
+// Kept as a short local alias so the rest of this file reads the same as
+// before the export — mentor-repository.ts imports the exported name
+// directly rather than through this alias.
+const SELECT_COLUMNS = SADHANA_REPORT_SELECT_COLUMNS
+
+export function mapSadhanaReportRow(row: SadhanaReportRow): SadhanaReport {
   return {
     id: row.id,
     profileId: row.profile_id,
@@ -94,7 +99,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    return data ? mapRow(data as SadhanaReportRow) : null
+    return data ? mapSadhanaReportRow(data as SadhanaReportRow) : null
   },
 
   async upsertReport(profileId, params) {
@@ -108,7 +113,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    return mapRow(data as SadhanaReportRow)
+    return mapSadhanaReportRow(data as SadhanaReportRow)
   },
 
   async listReportsInRange(profileId, startDate, endDate) {
@@ -124,7 +129,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    return (data as SadhanaReportRow[]).map(mapRow)
+    return (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
   },
 
   async listRecentReports(profileId, limit) {
@@ -137,7 +142,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    return (data as SadhanaReportRow[]).map(mapRow)
+    return (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
   },
 
   async listReports(
@@ -170,7 +175,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    const rows = (data as SadhanaReportRow[]).map(mapRow)
+    const rows = (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
     const hasNextPage = rows.length > options.limit
     const reports = hasNextPage ? rows.slice(0, options.limit) : rows
     const nextCursor = hasNextPage

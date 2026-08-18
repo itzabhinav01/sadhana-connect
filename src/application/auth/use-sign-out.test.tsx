@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
+import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 
@@ -126,5 +127,32 @@ describe('useSignOut', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(queryClient.getQueryData(historyKey)).toBeUndefined()
+  })
+
+  it("removes cached mentor devotee/detail queries on sign-out, so a mentor's data never survives into a different account's session", async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const devoteesKey = mentorQueryKeys.devotees('mentor-1')
+    const detailKey = mentorQueryKeys.devoteeProfile('mentor-1', 'devotee-1')
+    queryClient.setQueryData(devoteesKey, [{ devoteeId: 'devotee-1' }])
+    queryClient.setQueryData(detailKey, { id: 'devotee-1', fullName: 'D' })
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(devoteesKey)).toBeUndefined()
+    expect(queryClient.getQueryData(detailKey)).toBeUndefined()
   })
 })
