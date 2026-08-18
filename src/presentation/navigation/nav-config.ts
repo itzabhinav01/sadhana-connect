@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   Hand,
   History,
   Home,
@@ -37,6 +38,7 @@ export const navigationConfig: {
       { label: 'History', href: '/history', icon: History },
       { label: 'Analytics', href: '/analytics', icon: BarChart3 },
       { label: 'Japa Counter', href: '/japa', icon: Hand },
+      { label: 'Verse of the Day', href: '/verse-of-the-day', icon: BookOpen },
     ],
     mentor: [],
     super_admin: [],

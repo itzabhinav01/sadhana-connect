@@ -31,3 +31,13 @@ export function buildDateRangeList(fromDate: string, toDate: string): string[] {
   }
   return days
 }
+
+// Days since the Unix epoch for a 'YYYY-MM-DD' string, computed from the
+// date's own Y/M/D components via Date.UTC rather than local-timezone
+// parsing — so the same date string always maps to the same day number no
+// matter which timezone the caller is running in. Used to deterministically
+// rotate through a dataset by date (Verse of the Day selection).
+export function daysSinceEpoch(dateIso: string): number {
+  const [year, month, day] = dateIso.split('-').map(Number)
+  return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000)
+}

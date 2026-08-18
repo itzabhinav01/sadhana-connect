@@ -8,6 +8,7 @@ import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDash
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
+import { VerseOfTheDayPage } from '@/presentation/pages/verse/VerseOfTheDayPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
 import { CheckEmailPage } from '@/presentation/pages/auth/CheckEmailPage'
 import { ForgotPasswordPage } from '@/presentation/pages/auth/ForgotPasswordPage'
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
               { path: '/history', element: <HistoryPage /> },
               { path: '/analytics', element: <AnalyticsPage /> },
               { path: '/japa', element: <JapaCounterPage /> },
+              { path: '/verse-of-the-day', element: <VerseOfTheDayPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { addDaysIso, buildDateRangeList, getLocalDateIso } from '@/shared/utils/date'
+import {
+  addDaysIso,
+  buildDateRangeList,
+  daysSinceEpoch,
+  getLocalDateIso,
+} from '@/shared/utils/date'
 
 describe('getLocalDateIso', () => {
   it('formats a date as YYYY-MM-DD using local components', () => {
@@ -63,5 +68,25 @@ describe('buildDateRangeList', () => {
 
   it('returns an empty list when fromDate is after toDate', () => {
     expect(buildDateRangeList('2026-01-16', '2026-01-15')).toEqual([])
+  })
+})
+
+describe('daysSinceEpoch', () => {
+  it('returns 0 for the epoch date', () => {
+    expect(daysSinceEpoch('1970-01-01')).toBe(0)
+  })
+
+  it('increases by exactly 1 for each following day', () => {
+    expect(daysSinceEpoch('1970-01-02')).toBe(1)
+    expect(daysSinceEpoch('1970-01-03')).toBe(2)
+  })
+
+  it('spans a leap-year February correctly', () => {
+    expect(daysSinceEpoch('2028-03-01') - daysSinceEpoch('2028-02-01')).toBe(29)
+    expect(daysSinceEpoch('2026-03-01') - daysSinceEpoch('2026-02-01')).toBe(28)
+  })
+
+  it('is stable for the same input regardless of when it is called', () => {
+    expect(daysSinceEpoch('2026-06-15')).toBe(daysSinceEpoch('2026-06-15'))
   })
 })
