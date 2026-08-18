@@ -1,10 +1,19 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ComponentProps } from 'react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
+
+const { useSadhanaReportCommentsMock } = vi.hoisted(() => ({
+  useSadhanaReportCommentsMock: vi.fn(),
+}))
+
+vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
+  useSadhanaReportComments: useSadhanaReportCommentsMock,
+}))
 
 const baseReport: SadhanaReport = {
   id: 'report-1',
@@ -41,6 +50,10 @@ function renderRow(
 }
 
 describe('SadhanaReportSummaryRow', () => {
+  beforeEach(() => {
+    useSadhanaReportCommentsMock.mockReset()
+  })
+
   it('links to the dated Sadhana page', () => {
     renderRow({})
 
@@ -88,5 +101,59 @@ describe('SadhanaReportSummaryRow', () => {
     expect(
       screen.getByText('16 rounds · 15m reading · 30m hearing'),
     ).toBeInTheDocument()
+  })
+
+  it('does not fetch comments until the comments toggle is expanded', () => {
+    renderRow({})
+
+    expect(useSadhanaReportCommentsMock).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /show mentor comments/i })).toBeInTheDocument()
+  })
+
+  it('expands to show the read-only comment thread when toggled, without leaving the page', async () => {
+    useSadhanaReportCommentsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [],
+    })
+    const user = userEvent.setup()
+
+    renderRow({})
+    await user.click(screen.getByRole('button', { name: /show mentor comments/i }))
+
+    expect(screen.getByText('No mentor comments yet.')).toBeInTheDocument()
+    // Still exactly one link (the date/report link) — the comments toggle
+    // is a button, not a second navigable link.
+    expect(screen.getAllByRole('link')).toHaveLength(1)
+  })
+
+  it('never renders any input, textarea, or button that could write a comment — devotees are read-only', async () => {
+    useSadhanaReportCommentsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [
+        {
+          id: 'c1',
+          sadhanaReportId: 'report-1',
+          mentorId: 'mentor-1',
+          mentorName: 'Mentor One',
+          commentText: 'Well done!',
+          createdAt: '2026-01-15T00:00:00.000Z',
+          updatedAt: '2026-01-15T00:00:00.000Z',
+        },
+      ],
+    })
+    const user = userEvent.setup()
+
+    renderRow({})
+    await user.click(screen.getByRole('button', { name: /show mentor comments/i }))
+
+    expect(screen.getByText('Well done!')).toBeInTheDocument()
+    expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /post/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /edit/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
   })
 })

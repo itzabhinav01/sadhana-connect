@@ -1,8 +1,36 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
+
+const { useAuthMock, useProfileMock, useSadhanaReportCommentsMock, useAddCommentMock } =
+  vi.hoisted(() => ({
+    useAuthMock: vi.fn(),
+    useProfileMock: vi.fn(),
+    useSadhanaReportCommentsMock: vi.fn(),
+    useAddCommentMock: vi.fn(),
+  }))
+
+vi.mock('@/application/auth/use-auth', () => ({
+  useAuth: useAuthMock,
+}))
+vi.mock('@/application/profile/use-profile', () => ({
+  useProfile: useProfileMock,
+}))
+vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
+  useSadhanaReportComments: useSadhanaReportCommentsMock,
+}))
+vi.mock('@/application/comments/use-add-comment', () => ({
+  useAddComment: useAddCommentMock,
+}))
+vi.mock('@/application/comments/use-update-comment', () => ({
+  useUpdateComment: () => ({ mutate: vi.fn(), isPending: false }),
+}))
+vi.mock('@/application/comments/use-delete-comment', () => ({
+  useDeleteComment: () => ({ mutate: vi.fn(), isPending: false }),
+}))
 
 const report: SadhanaReport = {
   id: 'r1',
@@ -29,6 +57,21 @@ const report: SadhanaReport = {
 }
 
 describe('MentorDevoteeReportRow', () => {
+  beforeEach(() => {
+    useAuthMock.mockReset()
+    useProfileMock.mockReset()
+    useSadhanaReportCommentsMock.mockReset()
+    useAddCommentMock.mockReset()
+    useAuthMock.mockReturnValue({
+      session: { userId: 'mentor-1', email: 'm@b.com', emailConfirmedAt: null },
+      isLoading: false,
+    })
+    useProfileMock.mockReturnValue({
+      data: { id: 'mentor-1', fullName: 'Mentor One', role: 'mentor', templeGroupId: null, isActive: true },
+    })
+    useAddCommentMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false })
+  })
+
   it('displays the date, rounds, reading, and hearing minutes', () => {
     render(<MentorDevoteeReportRow report={report} />)
 
@@ -42,5 +85,39 @@ describe('MentorDevoteeReportRow', () => {
     render(<MentorDevoteeReportRow report={report} />)
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('does not fetch comments until the comments toggle is expanded', () => {
+    useSadhanaReportCommentsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
+    })
+
+    render(<MentorDevoteeReportRow report={report} />)
+
+    // The lazy-load hook is only invoked (rendered) once expanded — the
+    // collapsed row doesn't mount MentorReportCommentSection at all.
+    expect(screen.queryByText('No comments yet.')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /show comments/i })).toBeInTheDocument()
+  })
+
+  it('expands to show the comment thread and form when the toggle is clicked', async () => {
+    useSadhanaReportCommentsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [],
+    })
+    const user = userEvent.setup()
+
+    render(<MentorDevoteeReportRow report={report} />)
+
+    await user.click(screen.getByRole('button', { name: /show comments/i }))
+
+    expect(screen.getByText('No comments yet.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Add a comment')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hide comments/i })).toBeInTheDocument()
   })
 })

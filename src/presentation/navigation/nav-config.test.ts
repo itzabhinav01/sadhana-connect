@@ -17,13 +17,14 @@ describe('getNavItemsForRole', () => {
     ])
   })
 
-  it('returns the common items plus the Mentor Dashboard item for mentor', () => {
+  it('returns the common items plus Mentor Dashboard and Announcements for mentor', () => {
     const mentorLabels = getNavItemsForRole('mentor').map((item) => item.label)
     expect(mentorLabels).toEqual([
       'Home',
       'Profile',
       'Settings',
       'Mentor Dashboard',
+      'Announcements',
     ])
   })
 
@@ -34,9 +35,10 @@ describe('getNavItemsForRole', () => {
     expect(adminLabels).toEqual(['Home', 'Profile', 'Settings'])
   })
 
-  it('never shows Mentor Dashboard to a devotee', () => {
+  it('never shows Mentor Dashboard or Announcements to a devotee', () => {
     const labels = getNavItemsForRole('devotee').map((item) => item.label)
     expect(labels).not.toContain('Mentor Dashboard')
+    expect(labels).not.toContain('Announcements')
   })
 
   it('returns no items when there is no role', () => {

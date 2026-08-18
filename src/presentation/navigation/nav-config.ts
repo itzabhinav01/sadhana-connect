@@ -4,6 +4,7 @@ import {
   Hand,
   History,
   Home,
+  Megaphone,
   NotebookPen,
   Settings,
   User,
@@ -41,7 +42,10 @@ export const navigationConfig: {
       { label: 'Japa Counter', href: '/japa', icon: Hand },
       { label: 'Verse of the Day', href: '/verse-of-the-day', icon: BookOpen },
     ],
-    mentor: [{ label: 'Mentor Dashboard', href: '/mentor', icon: Users }],
+    mentor: [
+      { label: 'Mentor Dashboard', href: '/mentor', icon: Users },
+      { label: 'Announcements', href: '/mentor/announcements', icon: Megaphone },
+    ],
     super_admin: [],
   },
 }

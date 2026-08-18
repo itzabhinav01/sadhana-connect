@@ -7,6 +7,7 @@ import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
+import { MentorAnnouncementsPage } from '@/presentation/pages/mentor/MentorAnnouncementsPage'
 import { MentorDashboardPage } from '@/presentation/pages/mentor/MentorDashboardPage'
 import { MentorDevoteeDetailPage } from '@/presentation/pages/mentor/MentorDevoteeDetailPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
@@ -73,6 +74,10 @@ export const router = createBrowserRouter([
                   {
                     path: '/mentor/devotee/:id',
                     element: <MentorDevoteeDetailPage />,
+                  },
+                  {
+                    path: '/mentor/announcements',
+                    element: <MentorAnnouncementsPage />,
                   },
                 ],
               },

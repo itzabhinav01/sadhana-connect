@@ -4,6 +4,8 @@ import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
+import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
+import { commentQueryKeys } from '@/application/comments/comment-query-keys'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
@@ -154,5 +156,53 @@ describe('useSignOut', () => {
 
     expect(queryClient.getQueryData(devoteesKey)).toBeUndefined()
     expect(queryClient.getQueryData(detailKey)).toBeUndefined()
+  })
+
+  it("removes cached comment queries on sign-out, so a mentor's comment threads never survive into a different account's session", async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const commentsKey = commentQueryKeys.list('mentor-1', 'report-1')
+    queryClient.setQueryData(commentsKey, [{ id: 'c1' }])
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(commentsKey)).toBeUndefined()
+  })
+
+  it('removes cached announcement queries on sign-out', async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const announcementsKey = announcementQueryKeys.list('mentor-1')
+    queryClient.setQueryData(announcementsKey, [{ id: 'a1' }])
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(announcementsKey)).toBeUndefined()
   })
 })
