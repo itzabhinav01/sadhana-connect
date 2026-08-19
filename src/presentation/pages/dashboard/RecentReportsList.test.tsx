@@ -75,8 +75,9 @@ describe('RecentReportsList', () => {
 
     renderList()
 
+    // 5 displayed reports x 2 links each (date + Share to WhatsApp, Phase 15).
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(5)
+    expect(links).toHaveLength(10)
     expect(links[0]).toHaveAttribute('href', '/sadhana?date=2026-01-15')
   })
 })

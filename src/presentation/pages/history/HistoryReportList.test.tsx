@@ -117,10 +117,13 @@ describe('HistoryReportList', () => {
 
     renderList()
 
-    const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(2)
-    expect(links[0]).toHaveAttribute('href', '/sadhana?date=2026-01-15')
-    expect(links[1]).toHaveAttribute('href', '/sadhana?date=2026-01-14')
+    // Each row now renders two links: the date link and the Share to
+    // WhatsApp link (Phase 15) — 2 reports x 2 links each.
+    const dateLinks = screen.getAllByRole('link', { name: /01\/1[45]\/2026/ })
+    expect(dateLinks).toHaveLength(2)
+    expect(dateLinks[0]).toHaveAttribute('href', '/sadhana?date=2026-01-15')
+    expect(dateLinks[1]).toHaveAttribute('href', '/sadhana?date=2026-01-14')
+    expect(screen.getAllByRole('link', { name: 'Share to WhatsApp' })).toHaveLength(2)
   })
 
   it('flattens multiple fetched pages into one list', () => {
@@ -141,7 +144,8 @@ describe('HistoryReportList', () => {
 
     renderList()
 
-    expect(screen.getAllByRole('link')).toHaveLength(2)
+    // 2 reports across 2 pages x 2 links each (date + Share to WhatsApp).
+    expect(screen.getAllByRole('link')).toHaveLength(4)
   })
 
   it('shows a Load More button when there is a next page, and calls fetchNextPage', async () => {

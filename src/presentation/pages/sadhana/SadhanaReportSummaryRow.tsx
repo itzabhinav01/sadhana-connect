@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import { SadhanaReportComments } from '@/presentation/pages/sadhana/SadhanaReportComments'
 
@@ -63,15 +64,25 @@ export function SadhanaReportSummaryRow({
             </span>
           )}
         </Link>
-        <button
-          type="button"
-          onClick={() => setShowComments((current) => !current)}
-          aria-expanded={showComments}
-          aria-label={`${showComments ? 'Hide' : 'Show'} mentor comments for ${dateLabel}`}
-          className="shrink-0 rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {showComments ? 'Hide comments' : 'Comments'}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <a
+            href={buildWhatsAppShareUrl(report)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            Share to WhatsApp
+          </a>
+          <button
+            type="button"
+            onClick={() => setShowComments((current) => !current)}
+            aria-expanded={showComments}
+            aria-label={`${showComments ? 'Hide' : 'Show'} mentor comments for ${dateLabel}`}
+            className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {showComments ? 'Hide comments' : 'Comments'}
+          </button>
+        </div>
       </div>
       {showComments ? (
         <SadhanaReportComments sadhanaReportId={report.id} />

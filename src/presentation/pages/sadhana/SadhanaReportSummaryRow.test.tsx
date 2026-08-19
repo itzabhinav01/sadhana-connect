@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
 
@@ -57,10 +58,24 @@ describe('SadhanaReportSummaryRow', () => {
   it('links to the dated Sadhana page', () => {
     renderRow({})
 
-    expect(screen.getByRole('link')).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /01\/15\/2026/ })).toHaveAttribute(
       'href',
       '/sadhana?date=2026-01-15',
     )
+  })
+
+  it('renders a Share to WhatsApp link with the correct href, target, and rel', () => {
+    renderRow({})
+
+    const shareLink = screen.getByRole('link', { name: 'Share to WhatsApp' })
+    expect(shareLink).toHaveAttribute('href', buildWhatsAppShareUrl(baseReport))
+    expect(shareLink).toHaveAttribute('target', '_blank')
+    expect(shareLink).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('renders the Share to WhatsApp link in both the compact and detailed variants', () => {
+    renderRow({ variant: 'compact' })
+    expect(screen.getByRole('link', { name: 'Share to WhatsApp' })).toBeInTheDocument()
   })
 
   it('shows the formatted date', () => {
@@ -123,9 +138,9 @@ describe('SadhanaReportSummaryRow', () => {
     await user.click(screen.getByRole('button', { name: /show mentor comments/i }))
 
     expect(screen.getByText('No mentor comments yet.')).toBeInTheDocument()
-    // Still exactly one link (the date/report link) — the comments toggle
-    // is a button, not a second navigable link.
-    expect(screen.getAllByRole('link')).toHaveLength(1)
+    // Still exactly the date/report link and the Share to WhatsApp link —
+    // the comments toggle is a button, not a third navigable link.
+    expect(screen.getAllByRole('link')).toHaveLength(2)
   })
 
   it('never renders any input, textarea, or button that could write a comment — devotees are read-only', async () => {

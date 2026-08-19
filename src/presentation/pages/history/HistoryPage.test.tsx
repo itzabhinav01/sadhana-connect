@@ -74,7 +74,9 @@ describe('HistoryPage', () => {
 
     const user = userEvent.setup()
     renderPage()
-    expect(screen.getByRole('link')).toBeInTheDocument()
+    // One report row renders two links: the date link and the Share to
+    // WhatsApp link (Phase 15).
+    expect(screen.getAllByRole('link')).toHaveLength(2)
 
     // Simulate the hook's real "no placeholderData" behavior on a filter
     // change: it returns pending/no-data immediately, not stale results.

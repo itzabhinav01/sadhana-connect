@@ -87,6 +87,15 @@ describe('MentorDevoteeReportRow', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 
+  it('never shows a Share to WhatsApp action — sharing is devotee-only (Phase 15)', () => {
+    render(<MentorDevoteeReportRow report={report} />)
+
+    expect(
+      screen.queryByRole('link', { name: /share to whatsapp/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/share to whatsapp/i)).not.toBeInTheDocument()
+  })
+
   it('does not fetch comments until the comments toggle is expanded', () => {
     useSadhanaReportCommentsMock.mockReturnValue({
       isPending: false,

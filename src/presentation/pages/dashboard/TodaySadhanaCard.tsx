@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 
+import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
 import { useSadhanaReport } from '@/application/sadhana/use-sadhana-report'
 import { useSadhanaStreak } from '@/application/sadhana/use-sadhana-streak'
 import { getLocalDateIso } from '@/shared/utils/date'
@@ -80,9 +81,20 @@ export function TodaySadhanaCard() {
                 </dd>
               </div>
             </dl>
-            <Button asChild variant="outline" className="sm:self-start">
-              <Link to="/sadhana">Edit Sadhana</Link>
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild variant="outline" className="sm:self-start">
+                <Link to="/sadhana">Edit Sadhana</Link>
+              </Button>
+              <Button asChild variant="outline" className="sm:self-start">
+                <a
+                  href={buildWhatsAppShareUrl(reportQuery.data)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Share to WhatsApp
+                </a>
+              </Button>
+            </div>
           </>
         ) : null}
       </CardContent>
