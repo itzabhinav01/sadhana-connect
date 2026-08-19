@@ -1,0 +1,146 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+
+import { useAdminTempleGroups } from '@/application/admin/use-admin-temple-groups'
+import { useCreateAdminAnnouncement } from '@/application/admin/use-create-admin-announcement'
+import {
+  announcementSchema,
+  type AnnouncementFormValues,
+} from '@/application/announcements/announcement-schema'
+import type { AnnouncementScope } from '@/domain/entities/announcement'
+import { Button } from '@/presentation/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
+import { Input } from '@/presentation/components/ui/input'
+import { Select } from '@/presentation/components/ui/select'
+import { Textarea } from '@/presentation/components/ui/textarea'
+
+// Unlike the mentor form, a Super Admin genuinely chooses scope — RLS
+// (private.can_publish_announcement's is_super_admin() branch) allows any
+// scope, so this is the one form in the app that offers the choice.
+export function AdminAnnouncementForm() {
+  const createAnnouncement = useCreateAdminAnnouncement()
+  const templeGroupsQuery = useAdminTempleGroups()
+  const [publishNow, setPublishNow] = useState(true)
+  const [scope, setScope] = useState<AnnouncementScope>('all')
+  const [templeGroupId, setTempleGroupId] = useState('')
+  const [scopeError, setScopeError] = useState<string | null>(null)
+
+  const form = useForm<AnnouncementFormValues>({
+    resolver: zodResolver(announcementSchema),
+    defaultValues: { title: '', content: '' },
+  })
+
+  function onSubmit(values: AnnouncementFormValues) {
+    if (scope === 'temple_group' && !templeGroupId) {
+      setScopeError('Select a temple group for this scope.')
+      return
+    }
+    setScopeError(null)
+    createAnnouncement.mutate(
+      {
+        title: values.title,
+        content: values.content,
+        scope,
+        templeGroupId: scope === 'temple_group' ? templeGroupId : null,
+        isPublished: publishNow,
+      },
+      { onSuccess: () => form.reset() },
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h2>New Announcement</h2>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="admin-announcement-title" className="text-sm font-medium text-foreground">
+              Title
+            </label>
+            <Input
+              id="admin-announcement-title"
+              aria-invalid={form.formState.errors.title ? true : undefined}
+              {...form.register('title')}
+            />
+            {form.formState.errors.title ? (
+              <p className="text-xs text-destructive">{form.formState.errors.title.message}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="admin-announcement-content" className="text-sm font-medium text-foreground">
+              Content
+            </label>
+            <Textarea
+              id="admin-announcement-content"
+              rows={4}
+              aria-invalid={form.formState.errors.content ? true : undefined}
+              {...form.register('content')}
+            />
+            {form.formState.errors.content ? (
+              <p className="text-xs text-destructive">{form.formState.errors.content.message}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="admin-announcement-scope" className="text-sm font-medium text-foreground">
+              Audience
+            </label>
+            <Select
+              id="admin-announcement-scope"
+              value={scope}
+              onChange={(event) => setScope(event.target.value as AnnouncementScope)}
+            >
+              <option value="all">Everyone</option>
+              <option value="mentors">Mentors only</option>
+              <option value="devotees">Devotees only</option>
+              <option value="temple_group">A specific temple group</option>
+            </Select>
+          </div>
+
+          {scope === 'temple_group' ? (
+            <div className="flex flex-col gap-1">
+              <label htmlFor="admin-announcement-temple-group" className="text-sm font-medium text-foreground">
+                Temple group
+              </label>
+              <Select
+                id="admin-announcement-temple-group"
+                value={templeGroupId}
+                onChange={(event) => setTempleGroupId(event.target.value)}
+              >
+                <option value="">Select a temple group…</option>
+                {templeGroupsQuery.data?.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.name}
+                  </option>
+                ))}
+              </Select>
+              {scopeError ? <p className="text-xs text-destructive">{scopeError}</p> : null}
+            </div>
+          ) : null}
+
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={publishNow}
+              onChange={(event) => setPublishNow(event.target.checked)}
+            />
+            Publish immediately (uncheck to save as a draft)
+          </label>
+
+          <Button type="submit" disabled={createAnnouncement.isPending} className="self-start">
+            {createAnnouncement.isPending ? 'Posting…' : 'Post Announcement'}
+          </Button>
+          {createAnnouncement.isError ? (
+            <p className="text-xs text-destructive">Something went wrong posting this announcement.</p>
+          ) : null}
+        </form>
+      </CardContent>
+    </Card>
+  )
+}

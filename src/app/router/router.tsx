@@ -3,6 +3,13 @@ import { createBrowserRouter } from 'react-router-dom'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
+import { AdminAnnouncementsPage } from '@/presentation/pages/admin/AdminAnnouncementsPage'
+import { AdminAssignmentsPage } from '@/presentation/pages/admin/AdminAssignmentsPage'
+import { AdminDashboardPage } from '@/presentation/pages/admin/AdminDashboardPage'
+import { AdminMentorsPage } from '@/presentation/pages/admin/AdminMentorsPage'
+import { AdminTempleGroupsPage } from '@/presentation/pages/admin/AdminTempleGroupsPage'
+import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailPage'
+import { AdminUsersPage } from '@/presentation/pages/admin/AdminUsersPage'
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
@@ -79,6 +86,25 @@ export const router = createBrowserRouter([
                     path: '/mentor/announcements',
                     element: <MentorAnnouncementsPage />,
                   },
+                ],
+              },
+              {
+                // UX/navigation guard only, same caveat as the mentor
+                // RequireRole above — every admin route's actual data
+                // access is independently enforced by RLS
+                // (is_super_admin() branches) and, for the Auth-Admin
+                // operations, the trusted Edge Function's own
+                // authorization check. This guard just keeps a
+                // non-super-admin from seeing the admin shell at all.
+                element: <RequireRole allow={['super_admin']} />,
+                children: [
+                  { path: '/admin', element: <AdminDashboardPage /> },
+                  { path: '/admin/users', element: <AdminUsersPage /> },
+                  { path: '/admin/users/:id', element: <AdminUserDetailPage /> },
+                  { path: '/admin/mentors', element: <AdminMentorsPage /> },
+                  { path: '/admin/assignments', element: <AdminAssignmentsPage /> },
+                  { path: '/admin/temple-groups', element: <AdminTempleGroupsPage /> },
+                  { path: '/admin/announcements', element: <AdminAnnouncementsPage /> },
                 ],
               },
             ],

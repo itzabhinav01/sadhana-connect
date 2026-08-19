@@ -28,11 +28,21 @@ describe('getNavItemsForRole', () => {
     ])
   })
 
-  it('returns only the common items for super_admin (no role-specific items yet)', () => {
+  it('returns the common items plus the Phase 14 Super Admin items for super_admin', () => {
     const adminLabels = getNavItemsForRole('super_admin').map(
       (item) => item.label,
     )
-    expect(adminLabels).toEqual(['Home', 'Profile', 'Settings'])
+    expect(adminLabels).toEqual([
+      'Home',
+      'Profile',
+      'Settings',
+      'Admin Dashboard',
+      'Users',
+      'Mentors',
+      'Assignments',
+      'Temple Groups',
+      'Announcements',
+    ])
   })
 
   it('never shows Mentor Dashboard or Announcements to a devotee', () => {

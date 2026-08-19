@@ -1,13 +1,17 @@
 import {
   BarChart3,
   BookOpen,
+  Building2,
+  ClipboardList,
   Hand,
   History,
   Home,
+  LayoutDashboard,
   Megaphone,
   NotebookPen,
   Settings,
   User,
+  UserCog,
   Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -46,7 +50,14 @@ export const navigationConfig: {
       { label: 'Mentor Dashboard', href: '/mentor', icon: Users },
       { label: 'Announcements', href: '/mentor/announcements', icon: Megaphone },
     ],
-    super_admin: [],
+    super_admin: [
+      { label: 'Admin Dashboard', href: '/admin', icon: LayoutDashboard },
+      { label: 'Users', href: '/admin/users', icon: Users },
+      { label: 'Mentors', href: '/admin/mentors', icon: UserCog },
+      { label: 'Assignments', href: '/admin/assignments', icon: ClipboardList },
+      { label: 'Temple Groups', href: '/admin/temple-groups', icon: Building2 },
+      { label: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+    ],
   },
 }
 

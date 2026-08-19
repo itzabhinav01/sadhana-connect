@@ -18,6 +18,7 @@ function renderGuard(allow: AppRole[], initialPath = '/mentor') {
         <Route path="/" element={<div>Home page</div>} />
         <Route element={<RequireRole allow={allow} />}>
           <Route path="/mentor" element={<div>Mentor content</div>} />
+          <Route path="/admin" element={<div>Admin content</div>} />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -56,6 +57,48 @@ describe('RequireRole', () => {
   it('redirects to / when the profile has not loaded yet', () => {
     useProfileMock.mockReturnValue({ data: undefined })
     renderGuard(['mentor'])
+    expect(screen.getByText('Home page')).toBeInTheDocument()
+  })
+
+  it('renders the admin route tree for a super_admin', () => {
+    useProfileMock.mockReturnValue({
+      data: {
+        id: '1',
+        fullName: 'Admin',
+        role: 'super_admin',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+    renderGuard(['super_admin'], '/admin')
+    expect(screen.getByText('Admin content')).toBeInTheDocument()
+  })
+
+  it('redirects a mentor away from an admin-only route', () => {
+    useProfileMock.mockReturnValue({
+      data: {
+        id: '1',
+        fullName: 'M',
+        role: 'mentor',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+    renderGuard(['super_admin'], '/admin')
+    expect(screen.getByText('Home page')).toBeInTheDocument()
+  })
+
+  it('redirects a devotee away from an admin-only route', () => {
+    useProfileMock.mockReturnValue({
+      data: {
+        id: '1',
+        fullName: 'D',
+        role: 'devotee',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+    renderGuard(['super_admin'], '/admin')
     expect(screen.getByText('Home page')).toBeInTheDocument()
   })
 })

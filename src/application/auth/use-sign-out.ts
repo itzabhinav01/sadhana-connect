@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
@@ -24,6 +25,7 @@ export function useSignOut() {
       queryClient.removeQueries({ queryKey: mentorQueryKeys.all })
       queryClient.removeQueries({ queryKey: commentQueryKeys.all })
       queryClient.removeQueries({ queryKey: announcementQueryKeys.all })
+      queryClient.removeQueries({ queryKey: adminQueryKeys.all })
     },
   })
 }

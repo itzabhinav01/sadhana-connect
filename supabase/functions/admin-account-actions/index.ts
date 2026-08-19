@@ -1,0 +1,299 @@
+// Sadhana Connect — Phase 14: Super Admin trusted backend
+//
+// The ONLY place in this application that ever holds a Supabase secret
+// (service-role-equivalent) API key. It exposes exactly four Auth Admin
+// operations — ban, unban, generate_recovery_link, get_user_email — and
+// the secret-keyed client is used for nothing else: every public-table
+// read this function needs (caller's own profile, target's profile) goes
+// through the CALLER's own RLS-scoped client instead, never service-role.
+// Every other Super Admin operation (disable, anonymize, role change,
+// temple groups, announcements, reassignment) goes through the normal
+// authenticated client under existing RLS entirely outside this function;
+// this function is deliberately narrow.
+//
+// get_user_email exists because profiles.email was deliberately NOT added
+// to the schema (it would be exposed to a devotee's assigned mentor under
+// existing row-level, not column-level, profiles RLS) — email is fetched
+// on demand, admin-detail-view-only, through this trusted path instead.
+// It shares the exact same authorization/target-validation pipeline as
+// the other three actions, including self-target and peer-super_admin
+// rejection — kept uniform across all four actions rather than carving
+// out a read-only exception, to keep this file's one authorization path
+// easy to audit as a whole.
+//
+// Runtime: Deno (Supabase Edge Functions). Not part of the Vite build or
+// its TypeScript project — see tsconfig.app.json's `include: ["src"]` and
+// eslint.config.js's globalIgnores, which both deliberately exclude this
+// directory, since Deno's global APIs (Deno.serve, Deno.env) don't exist in
+// the browser/vite-node toolchain this repo otherwise targets.
+//
+// Required secrets (set via `supabase secrets set`, never committed, never
+// a VITE_* variable, never in .env/.env.example):
+//   ALLOWED_ORIGINS          comma-separated list of origins permitted to
+//                            call this function (CORS allow-list). Never "*".
+//   APP_ORIGIN               the single canonical origin where
+//                            /reset-password is hosted, used as
+//                            generateLink's redirectTo. This is where the
+//                            TARGET user's browser will land when they open
+//                            the recovery link — not necessarily the same
+//                            origin the admin console is running on.
+//   SERVICE_ROLE_SECRET_KEY  this project's new-format secret API key
+//                            (sb_secret_...), used for every Auth Admin
+//                            call. NOT named SUPABASE_*: this project has
+//                            legacy API keys (the old anon/service_role
+//                            JWTs) disabled, so the platform-auto-injected
+//                            SUPABASE_SERVICE_ROLE_KEY env var — which still
+//                            holds the legacy value — is rejected by the API
+//                            gateway ("Legacy API keys are disabled").
+//                            `supabase secrets set` also refuses any name
+//                            starting with SUPABASE_ regardless, so this had
+//                            to be a custom name either way. Set from the
+//                            "secret" (not "publishable") key returned by
+//                            `supabase projects api-keys --reveal`.
+//
+// SUPABASE_URL and SUPABASE_ANON_KEY are injected automatically by the
+// Supabase platform (and by the CLI for local `functions serve`) into every
+// Edge Function's environment — confirmed still functional for this project
+// (the caller-authorization path below uses SUPABASE_ANON_KEY successfully;
+// only the legacy service_role key is rejected).
+
+import { createClient } from 'npm:@supabase/supabase-js@2'
+import { z } from 'npm:zod@3'
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
+const SERVICE_ROLE_SECRET_KEY = Deno.env.get('SERVICE_ROLE_SECRET_KEY')
+const APP_ORIGIN = Deno.env.get('APP_ORIGIN')
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0)
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SERVICE_ROLE_SECRET_KEY || !APP_ORIGIN) {
+  throw new Error(
+    'admin-account-actions: missing required environment configuration (SUPABASE_URL, SUPABASE_ANON_KEY, SERVICE_ROLE_SECRET_KEY, APP_ORIGIN).',
+  )
+}
+
+// Indefinite ban, matching the approved account-lifecycle design: Supabase
+// has no literal "forever" duration, so ~100 years is the idiomatic
+// stand-in. Never auth.admin.deleteUser() anywhere in this file.
+const INDEFINITE_BAN_DURATION = '876000h'
+
+const requestSchema = z.object({
+  action: z.enum(['ban', 'unban', 'generate_recovery_link', 'get_user_email']),
+  targetUserId: z.string().uuid(),
+})
+
+type ServiceClient = ReturnType<typeof createClient>
+
+function jsonResponse(body: unknown, status: number, corsHeaders: Headers): Response {
+  const headers = new Headers(corsHeaders)
+  headers.set('Content-Type', 'application/json')
+  return new Response(JSON.stringify(body), { status, headers })
+}
+
+function buildCorsHeaders(origin: string | null): Headers {
+  const headers = new Headers()
+  headers.set('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type')
+  headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  // Never "*": only reflect an origin that is explicitly on the configured
+  // allow-list, and only that exact origin — never a wildcard.
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers.set('Access-Control-Allow-Origin', origin)
+    headers.set('Vary', 'Origin')
+  }
+  return headers
+}
+
+async function handleBan(serviceClient: ServiceClient, targetUserId: string) {
+  const { error } = await serviceClient.auth.admin.updateUserById(targetUserId, {
+    ban_duration: INDEFINITE_BAN_DURATION,
+  })
+  if (error) throw error
+  return { ok: true as const }
+}
+
+async function handleUnban(serviceClient: ServiceClient, targetUserId: string) {
+  const { error } = await serviceClient.auth.admin.updateUserById(targetUserId, {
+    ban_duration: 'none',
+  })
+  if (error) throw error
+  return { ok: true as const }
+}
+
+async function handleGenerateRecoveryLink(serviceClient: ServiceClient, targetUserId: string) {
+  const { data: targetUser, error: getUserError } =
+    await serviceClient.auth.admin.getUserById(targetUserId)
+
+  if (getUserError || !targetUser?.user?.email) {
+    throw getUserError ?? new Error('Target account has no email on file.')
+  }
+
+  const { data, error } = await serviceClient.auth.admin.generateLink({
+    type: 'recovery',
+    email: targetUser.user.email,
+    options: {
+      redirectTo: `${APP_ORIGIN}/reset-password`,
+    },
+  })
+  if (error) throw error
+
+  // Returned exactly once, directly in this HTTP response body. Never
+  // logged (see the catch block below, which never logs `data`), never
+  // written to any table, never cached — the caller (the admin browser) is
+  // responsible for the same discipline at the application layer.
+  return { ok: true as const, actionLink: data.properties.action_link }
+}
+
+async function handleGetUserEmail(serviceClient: ServiceClient, targetUserId: string) {
+  const { data: targetUser, error } = await serviceClient.auth.admin.getUserById(targetUserId)
+
+  if (error || !targetUser?.user?.email) {
+    throw error ?? new Error('Target account has no email on file.')
+  }
+
+  return { ok: true as const, email: targetUser.user.email }
+}
+
+const ACTION_HANDLERS: Record<
+  z.infer<typeof requestSchema>['action'],
+  (
+    serviceClient: ServiceClient,
+    targetUserId: string,
+  ) => Promise<{ ok: true; actionLink?: string; email?: string }>
+> = {
+  ban: handleBan,
+  unban: handleUnban,
+  generate_recovery_link: handleGenerateRecoveryLink,
+  get_user_email: handleGetUserEmail,
+}
+
+Deno.serve(async (req) => {
+  const origin = req.headers.get('origin')
+  const corsHeaders = buildCorsHeaders(origin)
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders })
+  }
+
+  // Requiring an allow-listed Origin header (in addition to JWT auth below)
+  // is defense-in-depth: this function should only ever be invoked by the
+  // application's own browser client, never a server-to-server caller.
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+    return jsonResponse({ ok: false, error: 'Origin not allowed.' }, 403, corsHeaders)
+  }
+
+  if (req.method !== 'POST') {
+    return jsonResponse({ ok: false, error: 'Method not allowed.' }, 405, corsHeaders)
+  }
+
+  let rawBody: unknown
+  try {
+    rawBody = await req.json()
+  } catch {
+    return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400, corsHeaders)
+  }
+
+  const parsedBody = requestSchema.safeParse(rawBody)
+  if (!parsedBody.success) {
+    return jsonResponse({ ok: false, error: 'Invalid request body.' }, 400, corsHeaders)
+  }
+  const { action, targetUserId } = parsedBody.data
+
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader) {
+    return jsonResponse({ ok: false, error: 'Missing authorization.' }, 401, corsHeaders)
+  }
+
+  // Scoped to the CALLER's own JWT — every query on this client is subject
+  // to that caller's own RLS, exactly as if they'd queried it themselves.
+  const callerClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  const { data: userData, error: userError } = await callerClient.auth.getUser()
+  if (userError || !userData?.user) {
+    return jsonResponse({ ok: false, error: 'Not authenticated.' }, 401, corsHeaders)
+  }
+  const callerId = userData.user.id
+
+  // Allowed only by the EXISTING profiles_select self-row branch
+  // (id = auth.uid()) defined in 0001_initial_schema.sql — no new policy,
+  // no new private.* wrapper function, no elevated privilege used here.
+  const { data: callerProfile, error: callerProfileError } = await callerClient
+    .from('profiles')
+    .select('role, is_active')
+    .eq('id', callerId)
+    .single()
+
+  if (
+    callerProfileError ||
+    !callerProfile ||
+    callerProfile.role !== 'super_admin' ||
+    !callerProfile.is_active
+  ) {
+    return jsonResponse({ ok: false, error: 'Not authorized.' }, 403, corsHeaders)
+  }
+
+  if (targetUserId === callerId) {
+    return jsonResponse({ ok: false, error: 'Cannot target your own account.' }, 400, corsHeaders)
+  }
+
+  // Target-profile lookup uses the CALLER's own RLS-scoped client, not
+  // service-role: the caller is already verified as an active super admin
+  // above, and profiles_select's is_super_admin() branch already grants
+  // them unrestricted SELECT on every profile row. This keeps service-role
+  // scoped to exactly what genuinely requires it — the Auth Admin API
+  // calls below — with zero public-table reads or writes on that client.
+  const { data: targetProfile, error: targetProfileError } = await callerClient
+    .from('profiles')
+    .select('role, anonymized_at')
+    .eq('id', targetUserId)
+    .maybeSingle()
+
+  if (targetProfileError) {
+    console.error('admin-account-actions: failed to load target profile', action)
+    return jsonResponse({ ok: false, error: 'Unable to load target account.' }, 500, corsHeaders)
+  }
+  if (!targetProfile) {
+    return jsonResponse({ ok: false, error: 'Target account does not exist.' }, 404, corsHeaders)
+  }
+  if (targetProfile.role === 'super_admin') {
+    return jsonResponse({ ok: false, error: 'Cannot target another super admin.' }, 403, corsHeaders)
+  }
+
+  if (action === 'unban' && targetProfile.anonymized_at !== null) {
+    return jsonResponse(
+      { ok: false, error: 'Anonymized accounts cannot be unbanned.' },
+      400,
+      corsHeaders,
+    )
+  }
+
+  try {
+    // Constructed only now, only for the Auth Admin call the requested
+    // action actually needs — never touches any public table.
+    const serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_SECRET_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const result = await ACTION_HANDLERS[action](serviceClient, targetUserId)
+    return jsonResponse(result, 200, corsHeaders)
+  } catch (error) {
+    // Deliberately generic to the client: never forward a raw
+    // Supabase/Postgres/Auth error, stack trace, or any target account
+    // detail. Server-side log carries only the action name and error
+    // message — never the recovery actionLink (which never appears in an
+    // error path) and never request/response bodies.
+    console.error('admin-account-actions: action failed', {
+      action,
+      message: error instanceof Error ? error.message : 'unknown error',
+    })
+    return jsonResponse(
+      { ok: false, error: 'The requested action could not be completed.' },
+      502,
+      corsHeaders,
+    )
+  }
+})

@@ -6,7 +6,12 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // supabase/functions is Deno runtime code (Deno.serve, Deno.env, npm:/
+  // jsr: specifiers) — a different toolchain entirely from this project's
+  // browser/vite-node target, just like it's excluded from tsconfig.app.json
+  // and tsconfig.node.json's `include`. Linting it against globals.browser
+  // would flag every Deno global as undefined.
+  globalIgnores(['dist', 'supabase/functions/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
