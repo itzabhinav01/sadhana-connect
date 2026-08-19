@@ -69,6 +69,7 @@ describe('VerseOfTheDayPage', () => {
         sourceUrl: 'https://vedabase.io/en/library/bg/2/47/',
         orderIndex: 0,
         scheduledDate: null,
+        content: null,
       },
     })
 

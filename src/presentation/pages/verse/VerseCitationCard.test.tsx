@@ -3,16 +3,22 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { VerseCitationCard } from '@/presentation/pages/verse/VerseCitationCard'
-import type { VerseCitation } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
 
-const verse: VerseCitation = {
+const verse: VerseOfTheDay = {
   id: 'v1',
   chapter: 2,
   verseNumber: '47',
   sourceUrl: 'https://vedabase.io/en/library/bg/2/47/',
   orderIndex: 0,
   scheduledDate: null,
+  content: {
+    sanskritTransliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
+    translation: 'You have a right to perform your prescribed duty, but you are not entitled to the fruits of action.',
+  },
 }
+
+const verseWithoutContent: VerseOfTheDay = { ...verse, content: null }
 
 describe('VerseCitationCard', () => {
   it('renders the formatted citation and the author', () => {
@@ -35,11 +41,30 @@ describe('VerseCitationCard', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('never renders any translation or purport text', () => {
+  it('renders the Sanskrit transliteration and translation when content is available', () => {
+    render(<VerseCitationCard verse={verse} />)
+
+    expect(
+      screen.getByText(verse.content!.sanskritTransliteration),
+    ).toBeInTheDocument()
+    expect(screen.getByText(verse.content!.translation)).toBeInTheDocument()
+  })
+
+  it('never renders purport text', () => {
     render(<VerseCitationCard verse={verse} />)
 
     expect(screen.queryByText(/purport/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/translation/i)).not.toBeInTheDocument()
+  })
+
+  it('falls back to a citation-only display when content is missing, without erroring', () => {
+    render(<VerseCitationCard verse={verseWithoutContent} />)
+
+    expect(
+      screen.getByRole('heading', { name: 'Bhagavad-gītā As It Is 2.47' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Read on VedaBase' }),
+    ).toBeInTheDocument()
   })
 
   it('copies the citation and source URL to the clipboard, and confirms it', async () => {

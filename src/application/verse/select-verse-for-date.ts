@@ -1,4 +1,4 @@
-import type { VerseCitation } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
 import { daysSinceEpoch } from '@/shared/utils/date'
 
 // Deterministic date -> verse selection, identical for every user (no
@@ -9,8 +9,8 @@ import { daysSinceEpoch } from '@/shared/utils/date'
 // published later.
 export function selectVerseForDate(
   dateIso: string,
-  verses: VerseCitation[],
-): VerseCitation | null {
+  verses: VerseOfTheDay[],
+): VerseOfTheDay | null {
   if (verses.length === 0) return null
 
   const scheduled = verses.find((verse) => verse.scheduledDate === dateIso)

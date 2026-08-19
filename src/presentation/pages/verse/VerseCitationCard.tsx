@@ -5,12 +5,12 @@ import {
   formatVerseCitation,
   formatVerseCitationForCopy,
 } from '@/application/verse/format-verse-citation'
-import type { VerseCitation } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent } from '@/presentation/components/ui/card'
 
 interface VerseCitationCardProps {
-  verse: VerseCitation
+  verse: VerseOfTheDay
 }
 
 const COPIED_RESET_MS = 2000
@@ -44,6 +44,28 @@ export function VerseCitationCard({ verse }: VerseCitationCardProps) {
           {formatVerseCitation(verse)}
         </h2>
         <p className="text-sm text-muted-foreground">{AUTHOR_NAME}</p>
+
+        {verse.content ? (
+          <div className="flex w-full flex-col gap-4 text-left">
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Sanskrit
+              </h3>
+              <p className="mt-1 whitespace-pre-line font-serif italic leading-relaxed text-foreground">
+                {verse.content.sanskritTransliteration}
+              </p>
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Translation
+              </h3>
+              <p className="mt-1 max-w-prose leading-relaxed text-foreground">
+                {verse.content.translation}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap justify-center gap-3">
           <Button asChild>
             <a href={verse.sourceUrl} target="_blank" rel="noopener noreferrer">

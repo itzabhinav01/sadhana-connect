@@ -42,6 +42,10 @@ describe('useVerseOfTheDay', () => {
         sourceUrl: 'https://vedabase.io/en/library/bg/2/47/',
         orderIndex: 0,
         scheduledDate: null,
+        content: {
+          sanskritTransliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
+          translation: 'You have a right to perform your prescribed duty.',
+        },
       },
     ])
 
@@ -53,6 +57,12 @@ describe('useVerseOfTheDay', () => {
     // A single-verse published dataset always resolves to that verse,
     // for any date, so this is deterministic regardless of "today".
     expect(result.current.data?.id).toBe('v0')
+    // The content arrives on the same object as the citation — one
+    // repository call, one cache entry, never a second query for content.
+    expect(listPublishedVersesMock).toHaveBeenCalledTimes(1)
+    expect(result.current.data?.content?.translation).toBe(
+      'You have a right to perform your prescribed duty.',
+    )
   })
 
   it('resolves to null (not an error) when there are no published verses', async () => {
@@ -76,6 +86,10 @@ describe('useVerseOfTheDay', () => {
         sourceUrl: 'https://vedabase.io/en/library/bg/2/47/',
         orderIndex: 0,
         scheduledDate: null,
+        content: {
+          sanskritTransliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
+          translation: 'You have a right to perform your prescribed duty.',
+        },
       },
     ])
     const queryClient = new QueryClient({

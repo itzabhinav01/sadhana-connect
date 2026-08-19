@@ -11,8 +11,8 @@ export function VerseOfTheDayPage() {
           Verse of the Day
         </h1>
         <p className="text-muted-foreground">
-          A daily citation from Bhagavad-gītā As It Is, linked to VedaBase
-          for the full translation and purport.
+          A daily verse from Bhagavad-gītā As It Is, linked to VedaBase for
+          the full purport.
         </p>
       </div>
 

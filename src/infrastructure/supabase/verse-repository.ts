@@ -1,4 +1,4 @@
-import type { VerseCitation } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
 import type { VerseRepository } from '@/domain/repositories/verse-repository'
 import { supabase } from '@/infrastructure/supabase/client'
 
@@ -9,9 +9,14 @@ interface VerseRow {
   source_url: string
   order_index: number
   scheduled_date: string | null
+  // verse_contents.verse_citation_id is itself that table's primary key, so
+  // this is a one-to-one relationship — PostgREST embeds it as a single
+  // object, or null when no content row exists (or is visible under RLS)
+  // for this citation, never an array.
+  verse_contents: { sanskrit_transliteration: string; translation: string } | null
 }
 
-function mapVerse(row: VerseRow): VerseCitation {
+function mapVerse(row: VerseRow): VerseOfTheDay {
   return {
     id: row.id,
     chapter: row.chapter,
@@ -19,6 +24,12 @@ function mapVerse(row: VerseRow): VerseCitation {
     sourceUrl: row.source_url,
     orderIndex: row.order_index,
     scheduledDate: row.scheduled_date,
+    content: row.verse_contents
+      ? {
+          sanskritTransliteration: row.verse_contents.sanskrit_transliteration,
+          translation: row.verse_contents.translation,
+        }
+      : null,
   }
 }
 
@@ -26,12 +37,16 @@ export const supabaseVerseRepository: VerseRepository = {
   async listPublishedVerses() {
     const { data, error } = await supabase
       .from('verse_citations')
-      .select('id, chapter, verse_number, source_url, order_index, scheduled_date')
+      .select(
+        'id, chapter, verse_number, source_url, order_index, scheduled_date, verse_contents(sanskrit_transliteration, translation)',
+      )
       .eq('is_published', true)
       .order('order_index', { ascending: true })
 
     if (error) throw error
 
-    return (data ?? []).map(mapVerse)
+    const rows = data as unknown as VerseRow[]
+
+    return rows.map(mapVerse)
   },
 }

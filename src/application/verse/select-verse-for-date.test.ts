@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
 import { selectVerseForDate } from '@/application/verse/select-verse-for-date'
-import type { VerseCitation } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
 
-function makeVerse(overrides: Partial<VerseCitation>): VerseCitation {
+function makeVerse(overrides: Partial<VerseOfTheDay>): VerseOfTheDay {
   return {
     id: 'id',
     chapter: 2,
@@ -11,6 +11,7 @@ function makeVerse(overrides: Partial<VerseCitation>): VerseCitation {
     sourceUrl: 'https://vedabase.io/en/library/bg/2/47/',
     orderIndex: 0,
     scheduledDate: null,
+    content: null,
     ...overrides,
   }
 }
