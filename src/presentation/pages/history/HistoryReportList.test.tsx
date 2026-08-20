@@ -5,23 +5,42 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HistoryReportList } from '@/presentation/pages/history/HistoryReportList'
 
-const { useSadhanaHistoryMock } = vi.hoisted(() => ({
+const { useSadhanaHistoryMock, downloadTextFileMock } = vi.hoisted(() => ({
   useSadhanaHistoryMock: vi.fn(),
+  downloadTextFileMock: vi.fn(),
 }))
 
 vi.mock('@/application/sadhana/use-sadhana-history', () => ({
   useSadhanaHistory: useSadhanaHistoryMock,
 }))
 
+vi.mock('@/shared/utils/download-text-file', () => ({
+  downloadTextFile: downloadTextFileMock,
+}))
+
 function makeReport(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 'report-1',
+    profileId: 'user-1',
     reportDate: '2026-01-15',
+    roundsBefore430: 4,
+    roundsTill7am: 8,
+    lastRoundTime: '06:45',
     totalRounds: 16,
     readingMinutes: 15,
+    bookName: null,
     hearingMinutes: 30,
+    speakerName: null,
     sleepTime: null,
     wakeTime: null,
+    dayRestMinutes: 0,
+    totalRestMinutes: 0,
+    officeGoingTime: null,
+    officeReturnTime: null,
+    notes: null,
+    signatureText: 'Test Devotee',
+    createdAt: '2026-01-15T00:00:00.000Z',
+    updatedAt: '2026-01-15T00:00:00.000Z',
     ...overrides,
   }
 }
@@ -204,5 +223,82 @@ describe('HistoryReportList', () => {
       fromDate: '2026-01-01',
       toDate: '2026-01-15',
     })
+  })
+
+  it('renders Export PDF and Export Text actions on every row', () => {
+    useSadhanaHistoryMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: { pages: [{ reports: [makeReport()] }] },
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    })
+
+    renderList()
+
+    expect(screen.getByRole('button', { name: 'Export PDF' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Export Text' })).toBeInTheDocument()
+  })
+
+  it('clicking Export Text downloads the exact formatted report with the correct filename', async () => {
+    const report = makeReport()
+    useSadhanaHistoryMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: { pages: [{ reports: [report] }] },
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    })
+    downloadTextFileMock.mockReset()
+    const user = userEvent.setup()
+
+    renderList()
+    await user.click(screen.getByRole('button', { name: 'Export Text' }))
+
+    expect(downloadTextFileMock).toHaveBeenCalledTimes(1)
+    const [filename, content] = downloadTextFileMock.mock.calls[0]
+    expect(filename).toBe('Sadhana-2026-01-15.txt')
+    expect(content).toContain('SADHANA REPORT')
+    expect(content).toContain('Date: 15-01-2026')
+  })
+
+  it('clicking Export PDF populates the single-report print view before printing, then clears it', async () => {
+    const report = makeReport({ signatureText: 'Print Test Devotee' })
+    useSadhanaHistoryMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: { pages: [{ reports: [report] }] },
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    })
+    // The print view is populated, then window.print() is called, then the
+    // print target is cleared — all within the same effect (see
+    // HistoryReportList.tsx). Capturing the DOM from inside the print()
+    // mock itself is the only way to observe the populated state, since by
+    // the time the click handler's promise resolves it has already been
+    // cleared again.
+    let printViewTextAtPrintTime: string | null = null
+    const printSpy = vi.fn(() => {
+      printViewTextAtPrintTime = screen.queryByText('Print Test Devotee')?.textContent ?? null
+    })
+    window.print = printSpy
+    const user = userEvent.setup()
+
+    renderList()
+    expect(screen.queryByText('Print Test Devotee')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Export PDF' }))
+
+    expect(printSpy).toHaveBeenCalledTimes(1)
+    expect(printViewTextAtPrintTime).toBe('Print Test Devotee')
+    // Cleared again afterward — never left mounted for a later export
+    // (row-level or range-level) to collide with.
+    expect(screen.queryByText('Print Test Devotee')).not.toBeInTheDocument()
   })
 })

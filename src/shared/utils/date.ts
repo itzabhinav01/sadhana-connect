@@ -32,6 +32,16 @@ export function buildDateRangeList(fromDate: string, toDate: string): string[] {
   return days
 }
 
+// 'YYYY-MM-DD' -> 'DD-MM-YYYY', by string manipulation only (no Date
+// object) — avoids any timezone-parsing pitfall entirely, since the input
+// is already a plain calendar-date string. Shared by the WhatsApp (Phase
+// 15) and PDF/Text export (Phase 16) formatters so both display the same
+// date convention from one implementation.
+export function formatIsoDateAsDdMmYyyy(dateIso: string): string {
+  const [year, month, day] = dateIso.split('-')
+  return `${day}-${month}-${year}`
+}
+
 // Days since the Unix epoch for a 'YYYY-MM-DD' string, computed from the
 // date's own Y/M/D components via Date.UTC rather than local-timezone
 // parsing — so the same date string always maps to the same day number no

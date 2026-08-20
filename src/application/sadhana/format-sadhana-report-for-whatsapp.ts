@@ -1,5 +1,7 @@
 import type { SadhanaReport } from '@/domain/entities/sadhana-report'
 import { WHATSAPP_RECIPIENT_NUMBER } from '@/shared/constants/whatsapp'
+import { formatIsoDateAsDdMmYyyy } from '@/shared/utils/date'
+import { formatTime12Hour } from '@/shared/utils/format-time-12-hour'
 
 // Placeholder for any unset nullable field (approved product decision,
 // Phase 15) — the WhatsApp template's line structure must stay identical
@@ -9,32 +11,6 @@ const EMPTY_FIELD_PLACEHOLDER = '—'
 
 function orDash(value: string | null): string {
   return value ?? EMPTY_FIELD_PLACEHOLDER
-}
-
-// Time fields arrive as 'HH:mm' (or 'HH:mm:ss' — Postgres time columns
-// serialize with seconds; the Sadhana form's own 'HH:mm' input behavior is
-// untouched by this) and render in the WhatsApp message as 12-hour
-// clock time (approved product decision, Phase 15) — the message is a
-// devotional greeting read by a person, not a form value, so this is
-// display-only and never feeds back into storage or the form. String
-// parsing only, no Date object, so there is no timezone involved at all.
-function formatTime12Hour(time: string | null): string {
-  if (!time) return EMPTY_FIELD_PLACEHOLDER
-
-  const [hourStr, minuteStr] = time.split(':')
-  const hour = Number(hourStr)
-  const period = hour >= 12 ? 'PM' : 'AM'
-  const displayHour = hour % 12 === 0 ? 12 : hour % 12
-  return `${displayHour}:${minuteStr} ${period}`
-}
-
-// 'YYYY-MM-DD' -> 'DD-MM-YYYY', by string manipulation only (no Date
-// object) — same reasoning as addDaysIso in shared/utils/date.ts: this
-// avoids any timezone-parsing pitfall entirely, since reportDate is
-// already a plain calendar-date string.
-function toDdMmYyyy(reportDate: string): string {
-  const [year, month, day] = reportDate.split('-')
-  return `${day}-${month}-${year}`
 }
 
 // Builds the exact WhatsApp sadhana-chart message from CLAUDE.md's
@@ -47,7 +23,7 @@ export function formatSadhanaReportForWhatsApp(report: SadhanaReport): string {
     'Hare Krishna prabhuji',
     'Dandvat pranam🙇‍♂️ 🙏',
     '*My Sadhna chart Dated for*',
-    `Date: ${toDdMmYyyy(report.reportDate)}`,
+    `Date: ${formatIsoDateAsDdMmYyyy(report.reportDate)}`,
     `Chant B4 4:30 Am :- ${report.roundsBefore430} Rounds`,
     `Till 7:00 am :- ${report.roundsTill7am} Rounds`,
     `Last Round :- ${formatTime12Hour(report.lastRoundTime)}`,

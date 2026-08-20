@@ -26,11 +26,20 @@ interface SadhanaReportSummaryRowProps {
   // sleep/wake when present. Same link/navigation behavior either way —
   // only how much is shown per row differs.
   variant?: 'compact' | 'detailed'
+  // Export actions (Phase 16) are opt-in via these callbacks rather than
+  // always rendered — this same row component is also used by the
+  // Dashboard's Recent Reports list, which must NOT show export controls
+  // (approved product decision, Phase 16). Only HistoryReportList passes
+  // these.
+  onExportPdf?: (report: SadhanaReport) => void
+  onExportText?: (report: SadhanaReport) => void
 }
 
 export function SadhanaReportSummaryRow({
   report,
   variant = 'detailed',
+  onExportPdf,
+  onExportText,
 }: SadhanaReportSummaryRowProps) {
   const [showComments, setShowComments] = useState(false)
   const sleepLabel = formatTime(report.sleepTime)
@@ -73,6 +82,24 @@ export function SadhanaReportSummaryRow({
           >
             Share to WhatsApp
           </a>
+          {onExportPdf ? (
+            <button
+              type="button"
+              onClick={() => onExportPdf(report)}
+              className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Export PDF
+            </button>
+          ) : null}
+          {onExportText ? (
+            <button
+              type="button"
+              onClick={() => onExportText(report)}
+              className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Export Text
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => setShowComments((current) => !current)}

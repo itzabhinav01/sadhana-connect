@@ -96,6 +96,13 @@ describe('MentorDevoteeReportRow', () => {
     expect(screen.queryByText(/share to whatsapp/i)).not.toBeInTheDocument()
   })
 
+  it('never shows Export PDF or Export Text — export is devotee-only (Phase 16)', () => {
+    render(<MentorDevoteeReportRow report={report} />)
+
+    expect(screen.queryByRole('button', { name: 'Export PDF' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Export Text' })).not.toBeInTheDocument()
+  })
+
   it('does not fetch comments until the comments toggle is expanded', () => {
     useSadhanaReportCommentsMock.mockReturnValue({
       isPending: false,

@@ -80,4 +80,17 @@ describe('RecentReportsList', () => {
     expect(links).toHaveLength(10)
     expect(links[0]).toHaveAttribute('href', '/sadhana?date=2026-01-15')
   })
+
+  it('never shows Export PDF or Export Text — export actions are History-only (Phase 16)', () => {
+    useRecentSadhanaReportsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: [{ id: 'report-1', reportDate: '2026-01-15', totalRounds: 16 }],
+    })
+
+    renderList()
+
+    expect(screen.queryByRole('button', { name: 'Export PDF' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Export Text' })).not.toBeInTheDocument()
+  })
 })

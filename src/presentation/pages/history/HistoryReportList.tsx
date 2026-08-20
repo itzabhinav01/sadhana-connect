@@ -1,7 +1,14 @@
+import { useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link } from 'react-router-dom'
 
+import { formatSadhanaReportForText } from '@/application/sadhana/format-sadhana-report-for-text'
+import { buildSadhanaSingleExportFilename } from '@/application/sadhana/sadhana-export-filename'
 import { useSadhanaHistory } from '@/application/sadhana/use-sadhana-history'
+import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import { downloadTextFile } from '@/shared/utils/download-text-file'
 import { Button } from '@/presentation/components/ui/button'
+import { SadhanaExportPrintView } from '@/presentation/pages/sadhana/SadhanaExportPrintView'
 import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
 
 interface HistoryReportListProps {
@@ -11,6 +18,31 @@ interface HistoryReportListProps {
 
 export function HistoryReportList({ fromDate, toDate }: HistoryReportListProps) {
   const historyQuery = useSadhanaHistory({ fromDate, toDate })
+
+  // Each row's report is already fully loaded (it's what's on screen) —
+  // exporting it needs no additional query.
+  const [printTarget, setPrintTarget] = useState<{ report: SadhanaReport } | null>(null)
+
+  // flushSync forces the print view to actually be in the DOM before
+  // window.print() runs (a plain setState here wouldn't commit until
+  // after this handler returns). Cleared again immediately afterward —
+  // window.print() blocks in real browsers until the dialog is dismissed
+  // — so this print view is never left mounted for a later export
+  // (row-level or page-level range) to collide with; without clearing it,
+  // two simultaneously non-null print targets would both be
+  // visibility:visible at once under the global print CSS.
+  function handleExportPdf(report: SadhanaReport) {
+    flushSync(() => setPrintTarget({ report }))
+    window.print()
+    flushSync(() => setPrintTarget(null))
+  }
+
+  function handleExportText(report: SadhanaReport) {
+    downloadTextFile(
+      buildSadhanaSingleExportFilename(report.reportDate, 'txt'),
+      formatSadhanaReportForText(report),
+    )
+  }
 
   const reports = historyQuery.data?.pages.flatMap((page) => page.reports) ?? []
 
@@ -42,7 +74,12 @@ export function HistoryReportList({ fromDate, toDate }: HistoryReportListProps) 
         <ul className="flex flex-col divide-y divide-border rounded-lg border px-4">
           {reports.map((report) => (
             <li key={report.id}>
-              <SadhanaReportSummaryRow report={report} variant="detailed" />
+              <SadhanaReportSummaryRow
+                report={report}
+                variant="detailed"
+                onExportPdf={handleExportPdf}
+                onExportText={handleExportText}
+              />
             </li>
           ))}
         </ul>
@@ -58,6 +95,10 @@ export function HistoryReportList({ fromDate, toDate }: HistoryReportListProps) 
         >
           {historyQuery.isFetchingNextPage ? 'Loading more…' : 'Load more'}
         </Button>
+      ) : null}
+
+      {printTarget ? (
+        <SadhanaExportPrintView mode="single" report={printTarget.report} />
       ) : null}
     </div>
   )

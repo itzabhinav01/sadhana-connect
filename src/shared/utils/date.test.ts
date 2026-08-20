@@ -4,6 +4,7 @@ import {
   addDaysIso,
   buildDateRangeList,
   daysSinceEpoch,
+  formatIsoDateAsDdMmYyyy,
   getLocalDateIso,
 } from '@/shared/utils/date'
 
@@ -68,6 +69,16 @@ describe('buildDateRangeList', () => {
 
   it('returns an empty list when fromDate is after toDate', () => {
     expect(buildDateRangeList('2026-01-16', '2026-01-15')).toEqual([])
+  })
+})
+
+describe('formatIsoDateAsDdMmYyyy', () => {
+  it('converts YYYY-MM-DD to DD-MM-YYYY', () => {
+    expect(formatIsoDateAsDdMmYyyy('2026-08-19')).toBe('19-08-2026')
+  })
+
+  it('preserves leading zeros in day and month', () => {
+    expect(formatIsoDateAsDdMmYyyy('2026-01-05')).toBe('05-01-2026')
   })
 })
 

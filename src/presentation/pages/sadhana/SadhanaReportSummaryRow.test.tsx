@@ -78,6 +78,44 @@ describe('SadhanaReportSummaryRow', () => {
     expect(screen.getByRole('link', { name: 'Share to WhatsApp' })).toBeInTheDocument()
   })
 
+  it('does not render Export PDF or Export Text when no export callbacks are provided', () => {
+    renderRow({})
+
+    expect(screen.queryByRole('button', { name: 'Export PDF' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Export Text' })).not.toBeInTheDocument()
+  })
+
+  it('renders Export PDF only when onExportPdf is provided, and calls it with the report', async () => {
+    const onExportPdf = vi.fn()
+    const user = userEvent.setup()
+    renderRow({ onExportPdf })
+
+    expect(screen.queryByRole('button', { name: 'Export Text' })).not.toBeInTheDocument()
+    const exportPdfButton = screen.getByRole('button', { name: 'Export PDF' })
+    await user.click(exportPdfButton)
+
+    expect(onExportPdf).toHaveBeenCalledWith(baseReport)
+  })
+
+  it('renders Export Text only when onExportText is provided, and calls it with the report', async () => {
+    const onExportText = vi.fn()
+    const user = userEvent.setup()
+    renderRow({ onExportText })
+
+    expect(screen.queryByRole('button', { name: 'Export PDF' })).not.toBeInTheDocument()
+    const exportTextButton = screen.getByRole('button', { name: 'Export Text' })
+    await user.click(exportTextButton)
+
+    expect(onExportText).toHaveBeenCalledWith(baseReport)
+  })
+
+  it('renders both export actions in the compact variant when provided', () => {
+    renderRow({ variant: 'compact', onExportPdf: vi.fn(), onExportText: vi.fn() })
+
+    expect(screen.getByRole('button', { name: 'Export PDF' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Export Text' })).toBeInTheDocument()
+  })
+
   it('shows the formatted date', () => {
     renderRow({})
 

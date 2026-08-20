@@ -116,3 +116,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Phase 16 — PDF export via browser print. Only .sadhana-print-view (see
+   SadhanaExportPrintView.tsx) should ever appear in printed output; the
+   app shell (sidebar, header, on-screen page content) is hidden here
+   rather than by adding print:hidden to every layout component
+   individually, which would be far more invasive to maintain. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .sadhana-print-view,
+  .sadhana-print-view * {
+    visibility: visible;
+  }
+  .sadhana-print-view {
+    position: absolute;
+    inset: 0;
+  }
+  @page {
+    margin: 18mm 15mm;
+  }
+}
