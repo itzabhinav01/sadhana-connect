@@ -83,7 +83,14 @@ describe('SadhanaReportForm', () => {
     expect(screen.getByLabelText(/^signature$/i)).toHaveValue('Test Devotee')
   })
 
-  it('auto-suggests Total Rounds from the two period fields on a new report', async () => {
+  // Data-model correction: roundsBefore430, roundsTill7am, and
+  // totalRounds are completely independent (a devotee may chant
+  // additional rounds after 7 AM that the sheet does not separately
+  // time-track, so Total Rounds is the authoritative daily total and is
+  // never derived from, or validated against, the other two). This form
+  // previously auto-suggested Total Rounds as before + till while
+  // editing a fresh report; that behavior has been removed entirely.
+  it('never derives Total Rounds from Rounds before 4:30 AM + Rounds till 7 AM on a new report', async () => {
     const user = userEvent.setup()
     render(
       <SadhanaReportForm
@@ -96,10 +103,40 @@ describe('SadhanaReportForm', () => {
     await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
     await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
 
-    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('')
   })
 
-  it('stops auto-suggesting Total Rounds once the user edits it directly', async () => {
+  it.each([
+    ['16', 'more rounds were chanted after 7 AM than the two tracked periods sum to'],
+    ['12', 'Total Rounds happens to equal the sum of the two tracked periods'],
+    ['8', 'Total Rounds is less than the sum of the two tracked periods'],
+  ])(
+    'accepts Total Rounds = %s independently of Before(4) + Till(8) — %s',
+    async (totalRoundsValue) => {
+      const user = userEvent.setup()
+      render(
+        <SadhanaReportForm
+          date="2026-01-15"
+          existingReport={null}
+          onDateChange={vi.fn()}
+        />,
+      )
+
+      await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+      await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+      await user.type(screen.getByLabelText(/^total rounds$/i), totalRoundsValue)
+      await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
+      await user.click(screen.getByRole('button', { name: /save sadhana/i }))
+
+      expect(mutateMock).toHaveBeenCalledTimes(1)
+      const [params] = mutateMock.mock.calls[0]
+      expect(params.roundsBefore430).toBe(4)
+      expect(params.roundsTill7am).toBe(8)
+      expect(params.totalRounds).toBe(Number(totalRoundsValue))
+    },
+  )
+
+  it('changing Rounds before 4:30 AM or Rounds till 7 AM never changes an already-entered Total Rounds', async () => {
     const user = userEvent.setup()
     render(
       <SadhanaReportForm
@@ -108,23 +145,62 @@ describe('SadhanaReportForm', () => {
         onDateChange={vi.fn()}
       />,
     )
-
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
-    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
 
     const totalRoundsInput = screen.getByLabelText(/^total rounds$/i)
-    await user.clear(totalRoundsInput)
-    await user.type(totalRoundsInput, '99')
-    expect(totalRoundsInput).toHaveValue('99')
+    await user.type(totalRoundsInput, '5')
 
-    // Further edits to the period fields must never override the
-    // devotee's own Total Rounds value once they've touched it.
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '1')
-    expect(totalRoundsInput).toHaveValue('99')
+    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+    expect(totalRoundsInput).toHaveValue('5')
+
+    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    expect(totalRoundsInput).toHaveValue('5')
   })
 
-  it('never auto-overwrites Total Rounds when editing an existing report', async () => {
+  it('changing Total Rounds never changes Rounds before 4:30 AM or Rounds till 7 AM', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^total rounds$/i), '99')
+
+    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toHaveValue('4')
+    expect(screen.getByLabelText(/rounds till 7 am/i)).toHaveValue('8')
+  })
+
+  it('has no cross-field validation between the rounds fields — a mismatched combination still saves', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    // Deliberately far lower than before + till (12) — must still be
+    // accepted, since the fields are unrelated.
+    await user.type(screen.getByLabelText(/^total rounds$/i), '1')
+    await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
+    await user.click(screen.getByRole('button', { name: /save sadhana/i }))
+
+    expect(
+      screen.queryByText(/total rounds must (be|equal|match|at least)/i),
+    ).not.toBeInTheDocument()
+    expect(mutateMock).toHaveBeenCalledTimes(1)
+    const [params] = mutateMock.mock.calls[0]
+    expect(params.totalRounds).toBe(1)
+  })
+
+  it('retains an existing report’s stored Total Rounds unchanged when its period fields are edited', async () => {
     const user = userEvent.setup()
     render(
       <SadhanaReportForm
@@ -247,7 +323,7 @@ describe('SadhanaReportForm', () => {
     expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('20')
   })
 
-  it('treats prefillRounds as an explicit choice: before/till auto-suggestion never overwrites it', async () => {
+  it('editing the period fields after a prefillRounds value is set never changes Total Rounds', async () => {
     const user = userEvent.setup()
     render(
       <SadhanaReportForm

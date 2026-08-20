@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -31,8 +31,8 @@ interface SadhanaReportFormProps {
   existingReport: SadhanaReport | null
   onDateChange: (date: string) => void
   // Set only when arriving from the Japa Counter's "Use in Sadhana"
-  // action (Phase 10) — an explicitly devotee-chosen value, distinct
-  // from the before/till auto-suggestion below.
+  // action (Phase 10) — an explicitly devotee-chosen initial value for
+  // Total Rounds.
   prefillRounds?: number
 }
 
@@ -48,17 +48,6 @@ export function SadhanaReportForm({
   const upsertReport = useUpsertSadhanaReport()
   const [isEditingMode, setIsEditingMode] = useState(Boolean(existingReport))
 
-  // Total Rounds is only auto-suggested while editing a fresh (never
-  // submitted) report and the devotee hasn't typed into it themselves —
-  // it must never silently overwrite a value that was already saved,
-  // that the devotee deliberately chose, or that arrived via
-  // prefillRounds (equally an explicit choice, made on the Japa Counter
-  // page instead of this form). This is a convenience default, never an
-  // enforced relationship (approved product decision, Phase 6).
-  const [totalRoundsTouched, setTotalRoundsTouched] = useState(
-    Boolean(existingReport) || prefillRounds !== undefined,
-  )
-
   const form = useForm<SadhanaReportFormInput>({
     resolver: zodResolver(sadhanaReportSchema),
     defaultValues: (() => {
@@ -70,23 +59,6 @@ export function SadhanaReportForm({
         : base
     })(),
   })
-
-  useEffect(() => {
-    if (totalRoundsTouched) return
-
-    const subscription = form.watch((values, { name }) => {
-      if (name !== 'roundsBefore430' && name !== 'roundsTill7am') return
-
-      const before = Number(values.roundsBefore430) || 0
-      const till = Number(values.roundsTill7am) || 0
-      form.setValue('totalRounds', String(before + till), {
-        shouldDirty: false,
-        shouldValidate: false,
-      })
-    })
-
-    return () => subscription.unsubscribe()
-  }, [form, totalRoundsTouched])
 
   const onSubmit = form.handleSubmit((values) => {
     upsertReport.mutate(formValuesToUpsertParams(values), {
@@ -185,15 +157,13 @@ export function SadhanaReportForm({
                 <FormItem>
                   <FormLabel>Total Rounds</FormLabel>
                   <FormControl>
-                    <Input
-                      inputMode="numeric"
-                      {...field}
-                      onChange={(event) => {
-                        setTotalRoundsTouched(true)
-                        field.onChange(event)
-                      }}
-                    />
+                    <Input inputMode="numeric" {...field} />
                   </FormControl>
+                  <p className="text-sm text-muted-foreground">
+                    Enter the complete number of rounds chanted today — this
+                    may include rounds chanted after 7 AM that aren&apos;t
+                    reflected in the fields above.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
