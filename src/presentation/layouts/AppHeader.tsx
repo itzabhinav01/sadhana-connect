@@ -4,6 +4,7 @@ import type { Profile } from '@/domain/entities/profile'
 import type { NavItem } from '@/presentation/navigation/nav-config'
 import { AccountMenu } from '@/presentation/layouts/AccountMenu'
 import { MobileNav } from '@/presentation/layouts/MobileNav'
+import { NotificationBell } from '@/presentation/layouts/NotificationBell'
 import { ThemeToggle } from '@/presentation/layouts/ThemeToggle'
 
 interface AppHeaderProps {
@@ -35,6 +36,7 @@ export function AppHeader({ navItems, profile, email }: AppHeaderProps) {
         </h1>
       ) : null}
       <div className="ml-auto flex items-center gap-2">
+        {profile.role === 'devotee' ? <NotificationBell /> : null}
         <ThemeToggle />
         <AccountMenu
           fullName={profile.fullName}

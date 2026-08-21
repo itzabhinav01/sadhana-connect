@@ -12,12 +12,14 @@ const {
   useThemeMock,
   signOutMutateMock,
   navigateMock,
+  useUnreadNotificationCountMock,
 } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
   useProfileMock: vi.fn(),
   useThemeMock: vi.fn(),
   signOutMutateMock: vi.fn(),
   navigateMock: vi.fn(),
+  useUnreadNotificationCountMock: vi.fn(),
 }))
 
 vi.mock('@/application/auth/use-auth', () => ({
@@ -34,6 +36,18 @@ vi.mock('@/application/theme/use-theme', () => ({
 
 vi.mock('@/application/auth/use-sign-out', () => ({
   useSignOut: () => ({ mutate: signOutMutateMock, isPending: false }),
+}))
+
+// Live-update wiring is exercised by use-notifications-realtime's own
+// test suite — a real (unmocked) call here would need a QueryClient
+// this test file never sets up, since every other hook in this shell is
+// also mocked at this same level rather than run for real.
+vi.mock('@/application/notifications/use-notifications-realtime', () => ({
+  useNotificationsRealtime: vi.fn(),
+}))
+
+vi.mock('@/application/notifications/use-unread-notification-count', () => ({
+  useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -81,6 +95,7 @@ describe('AppLayout', () => {
       resolvedTheme: 'light',
       setTheme: vi.fn(),
     })
+    useUnreadNotificationCountMock.mockReturnValue({ data: 0 })
   })
 
   it('renders the shell with the routed page content', () => {
@@ -151,5 +166,60 @@ describe('AppLayout', () => {
     expect(
       within(dialog).getByRole('link', { name: /profile/i }),
     ).toBeInTheDocument()
+  })
+
+  it('shows the notification bell for a devotee', () => {
+    renderAppLayout()
+
+    expect(screen.getByRole('link', { name: 'Notifications' })).toHaveAttribute(
+      'href',
+      '/notifications',
+    )
+  })
+
+  it('shows an unread-count badge on the bell when there are unread notifications', () => {
+    useUnreadNotificationCountMock.mockReturnValue({ data: 3 })
+
+    renderAppLayout()
+
+    expect(
+      screen.getByRole('link', { name: 'Notifications, 3 unread' }),
+    ).toBeInTheDocument()
+  })
+
+  it('never shows the notification bell for a mentor', () => {
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        id: '1',
+        fullName: 'Test Mentor',
+        role: 'mentor',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+
+    renderAppLayout()
+
+    expect(screen.queryByRole('link', { name: /notifications/i })).not.toBeInTheDocument()
+  })
+
+  it('never shows the notification bell for a super admin', () => {
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        id: '1',
+        fullName: 'Test Admin',
+        role: 'super_admin',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
+
+    renderAppLayout()
+
+    expect(screen.queryByRole('link', { name: /notifications/i })).not.toBeInTheDocument()
   })
 })

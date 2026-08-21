@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 
 import { useAuth } from '@/application/auth/use-auth'
+import { useNotificationsRealtime } from '@/application/notifications/use-notifications-realtime'
 import { useProfile } from '@/application/profile/use-profile'
 import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
 import { AppHeader } from '@/presentation/layouts/AppHeader'
@@ -14,6 +15,11 @@ import { AppSidebar } from '@/presentation/layouts/AppSidebar'
 export function AppLayout() {
   const { session } = useAuth()
   const profile = useProfile()
+  // Runs for the whole authenticated session (not just while on
+  // /notifications) so the header badge stays live wherever the devotee
+  // is — internally a no-op for non-devotee roles (see the hook's own
+  // doc comment).
+  useNotificationsRealtime()
 
   if (!profile.data) {
     return null

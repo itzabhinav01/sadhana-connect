@@ -102,6 +102,18 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
     return data ? mapSadhanaReportRow(data as SadhanaReportRow) : null
   },
 
+  async getReportDateById(reportId) {
+    const { data, error } = await supabase
+      .from('sadhana_reports')
+      .select('report_date')
+      .eq('id', reportId)
+      .maybeSingle()
+
+    if (error) throw error
+
+    return data ? (data as { report_date: string }).report_date : null
+  },
+
   async upsertReport(profileId, params) {
     const { data, error } = await supabase
       .from('sadhana_reports')

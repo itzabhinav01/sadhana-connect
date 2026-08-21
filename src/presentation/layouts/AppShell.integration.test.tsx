@@ -12,13 +12,19 @@ import { ProtectedRoute } from '@/presentation/routing/ProtectedRoute'
 // wiring ProtectedRoute and AppLayout together, the way the real router
 // does, rather than testing either in isolation.
 
-const { useAuthMock, useProfileMock, useThemeMock, signOutMutateMock } =
-  vi.hoisted(() => ({
-    useAuthMock: vi.fn(),
-    useProfileMock: vi.fn(),
-    useThemeMock: vi.fn(),
-    signOutMutateMock: vi.fn(),
-  }))
+const {
+  useAuthMock,
+  useProfileMock,
+  useThemeMock,
+  signOutMutateMock,
+  useUnreadNotificationCountMock,
+} = vi.hoisted(() => ({
+  useAuthMock: vi.fn(),
+  useProfileMock: vi.fn(),
+  useThemeMock: vi.fn(),
+  signOutMutateMock: vi.fn(),
+  useUnreadNotificationCountMock: vi.fn(),
+}))
 
 vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
@@ -34,6 +40,17 @@ vi.mock('@/application/theme/use-theme', () => ({
 
 vi.mock('@/application/auth/use-sign-out', () => ({
   useSignOut: () => ({ mutate: signOutMutateMock, isPending: false }),
+}))
+
+// See the matching note in AppLayout.test.tsx — every hook in this shell
+// is mocked at this level, not run for real, and these two need a
+// QueryClient this test file never sets up.
+vi.mock('@/application/notifications/use-notifications-realtime', () => ({
+  useNotificationsRealtime: vi.fn(),
+}))
+
+vi.mock('@/application/notifications/use-unread-notification-count', () => ({
+  useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 
 function renderShell() {
@@ -64,6 +81,7 @@ describe('Protected shell (ProtectedRoute + AppLayout)', () => {
       session: { userId: '1', email: 'a@b.com', emailConfirmedAt: null },
       isLoading: false,
     })
+    useUnreadNotificationCountMock.mockReturnValue({ data: 0 })
   })
 
   it('does not render navigation or page content while the profile is loading', () => {

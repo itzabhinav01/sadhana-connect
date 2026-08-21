@@ -12,11 +12,13 @@ import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailP
 import { AdminUsersPage } from '@/presentation/pages/admin/AdminUsersPage'
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
+import { AnnouncementDetailPage } from '@/presentation/pages/announcements/AnnouncementDetailPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
 import { MentorAnnouncementsPage } from '@/presentation/pages/mentor/MentorAnnouncementsPage'
 import { MentorDashboardPage } from '@/presentation/pages/mentor/MentorDashboardPage'
 import { MentorDevoteeDetailPage } from '@/presentation/pages/mentor/MentorDevoteeDetailPage'
+import { NotificationsPage } from '@/presentation/pages/notifications/NotificationsPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { VerseOfTheDayPage } from '@/presentation/pages/verse/VerseOfTheDayPage'
 import { AuthConfirmPage } from '@/presentation/pages/auth/AuthConfirmPage'
@@ -69,6 +71,20 @@ export const router = createBrowserRouter([
               { path: '/verse-of-the-day', element: <VerseOfTheDayPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
+              { path: '/announcements/:id', element: <AnnouncementDetailPage /> },
+              {
+                // UX/navigation guard only, same caveat as the mentor/admin
+                // RequireRole blocks below — notifications_select (0001)
+                // already scopes every row to recipient_id = auth.uid(),
+                // and no producer in this phase creates a notification for
+                // any role but devotee, so this guard's only job is
+                // keeping the notification center out of the mentor/admin
+                // shell (approved product decision, Phase 17).
+                element: <RequireRole allow={['devotee']} />,
+                children: [
+                  { path: '/notifications', element: <NotificationsPage /> },
+                ],
+              },
               {
                 // UX/navigation guard only — redirects non-mentors home.
                 // RLS (mentor_assignments_select, profiles_select,

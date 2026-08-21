@@ -45,6 +45,15 @@ export interface SadhanaReportRepository {
     reportDate: string,
   ): Promise<SadhanaReport | null>
 
+  // Resolves just the report_date for a known report id — used to build
+  // the /sadhana?date=... deep link from a mentor_comment notification's
+  // related_report_id (a uuid; the devotee-facing Sadhana route is
+  // date-addressed, not id-addressed). Returns null if the id doesn't
+  // resolve to a report this caller can read (RLS-enforced, same as
+  // every other method here) — the notification link falls back
+  // gracefully rather than erroring.
+  getReportDateById(reportId: string): Promise<string | null>
+
   // Upserts on (profile_id, report_date) — the same call handles both
   // first-time submission and editing an existing report.
   upsertReport(
