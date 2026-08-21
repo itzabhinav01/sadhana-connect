@@ -53,6 +53,18 @@ vi.mock('@/application/notifications/use-unread-notification-count', () => ({
   useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 
+vi.mock('@/application/pwa/use-online-status', () => ({
+  useOnlineStatus: () => true,
+}))
+
+vi.mock('@/application/pwa/use-service-worker-update', () => ({
+  useServiceWorkerUpdate: () => ({
+    needRefresh: false,
+    refresh: vi.fn(),
+    dismiss: vi.fn(),
+  }),
+}))
+
 function renderShell() {
   return render(
     <MemoryRouter initialEntries={['/']}>

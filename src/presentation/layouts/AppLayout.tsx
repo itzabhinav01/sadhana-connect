@@ -6,6 +6,8 @@ import { useProfile } from '@/application/profile/use-profile'
 import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
 import { AppHeader } from '@/presentation/layouts/AppHeader'
 import { AppSidebar } from '@/presentation/layouts/AppSidebar'
+import { OfflineBanner } from '@/presentation/layouts/OfflineBanner'
+import { UpdatePrompt } from '@/presentation/layouts/UpdatePrompt'
 
 // Rendered only inside ProtectedRoute's <Outlet/>, which has already
 // resolved the auth-loading, profile-loading, profile-error, and
@@ -28,26 +30,30 @@ export function AppLayout() {
   const navItems = getNavItemsForRole(profile.data.role)
 
   return (
-    <div className="flex min-h-svh">
+    <div className="flex min-h-svh flex-col">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:shadow focus:ring-2 focus:ring-ring"
       >
         Skip to main content
       </a>
-      <AppSidebar items={navItems} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader
-          navItems={navItems}
-          profile={profile.data}
-          email={session?.email ?? null}
-        />
-        <main
-          id="main-content"
-          className="flex-1 overflow-x-hidden p-4 md:p-6"
-        >
-          <Outlet />
-        </main>
+      <OfflineBanner />
+      <UpdatePrompt />
+      <div className="flex min-h-0 flex-1">
+        <AppSidebar items={navItems} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AppHeader
+            navItems={navItems}
+            profile={profile.data}
+            email={session?.email ?? null}
+          />
+          <main
+            id="main-content"
+            className="flex-1 overflow-x-hidden p-4 md:p-6"
+          >
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   )

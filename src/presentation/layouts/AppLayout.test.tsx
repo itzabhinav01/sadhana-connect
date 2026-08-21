@@ -50,6 +50,21 @@ vi.mock('@/application/notifications/use-unread-notification-count', () => ({
   useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 
+// OfflineBanner/UpdatePrompt are covered by their own test suites —
+// mocked here at the hook boundary so this shell test isn't also
+// exercising navigator.onLine/service-worker registration.
+vi.mock('@/application/pwa/use-online-status', () => ({
+  useOnlineStatus: () => true,
+}))
+
+vi.mock('@/application/pwa/use-service-worker-update', () => ({
+  useServiceWorkerUpdate: () => ({
+    needRefresh: false,
+    refresh: vi.fn(),
+    dismiss: vi.fn(),
+  }),
+}))
+
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>()
   return { ...actual, useNavigate: () => navigateMock }
@@ -203,6 +218,12 @@ describe('AppLayout', () => {
     renderAppLayout()
 
     expect(screen.queryByRole('link', { name: /notifications/i })).not.toBeInTheDocument()
+  })
+
+  it('never renders the offline banner while online', () => {
+    renderAppLayout()
+
+    expect(screen.queryByText(/you're offline/i)).not.toBeInTheDocument()
   })
 
   it('never shows the notification bell for a super admin', () => {
