@@ -58,6 +58,21 @@ describe('AnalyticsPage', () => {
     })
   })
 
+  // A direct "Suspense fallback is showing before the lazy import
+  // resolves" assertion is not reliably observable in this Vitest/Vite
+  // SSR-transform test environment: unlike a real browser fetching a
+  // network chunk, Vite's test-mode module loader can resolve a dynamic
+  // import() within the same synchronous render pass regardless of
+  // module-cache freshness (confirmed: neither reordering this test to
+  // run first, nor vi.resetModules() + a fresh dynamic re-import,
+  // produced an observable pending state). The Suspense wiring itself is
+  // covered by (a) ChartSkeleton.test.tsx, which verifies the fallback
+  // component renders correctly in isolation, (b) 'shows summary cards
+  // and both charts when there is data' below, which proves both
+  // lazy-loaded charts correctly appear through their Suspense
+  // boundaries, and (c) live browser E2E (Phase 20 report), which does
+  // observe the real fallback during genuine network latency.
+
   it('defaults to the last 7 days range', () => {
     renderPage()
 
@@ -120,14 +135,16 @@ describe('AnalyticsPage', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('shows summary cards and both charts when there is data', () => {
+  it('shows summary cards and both charts when there is data', async () => {
     renderPage()
 
+    // Both charts are code-split (Phase 20, React.lazy + Suspense) — their
+    // headings only appear once each lazy import resolves.
     expect(
-      screen.getByRole('heading', { name: /daily total rounds/i }),
+      await screen.findByRole('heading', { name: /daily total rounds/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: /reading & hearing/i }),
+      await screen.findByRole('heading', { name: /reading & hearing/i }),
     ).toBeInTheDocument()
     expect(
       screen.queryByText(/no sadhana reports found/i),
@@ -172,7 +189,7 @@ describe('AnalyticsPage', () => {
     expect(lastCall?.[2]).toEqual({ enabled: false })
   })
 
-  it('does not display results from the previous range while the new one is loading', () => {
+  it('does not display results from the previous range while the new one is loading', async () => {
     // First render: data for the default range.
     useSadhanaAnalyticsMock.mockReturnValue({
       isPending: false,
@@ -182,7 +199,7 @@ describe('AnalyticsPage', () => {
     })
     const { rerender } = renderPage()
     expect(
-      screen.getByRole('heading', { name: /daily total rounds/i }),
+      await screen.findByRole('heading', { name: /daily total rounds/i }),
     ).toBeInTheDocument()
 
     // Simulate the hook's real "no placeholderData" behavior once the

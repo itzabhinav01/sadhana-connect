@@ -1,5 +1,5 @@
 import type { MentorAssignedDevotee } from '@/domain/entities/mentor-devotee'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { MentorDevoteeReportSummary } from '@/domain/entities/sadhana-report'
 
 export interface DevoteeLastReportDate {
   devoteeId: string
@@ -16,11 +16,13 @@ export interface MentorRepository {
 
   // One batched query across every given devotee id, never one request
   // per devotee. Used for the 7-day recent-activity window (today's
-  // status/rounds + recent activity) — not full history.
+  // status/rounds + recent activity) — not full history. Narrowed
+  // (Phase 20) to exactly the fields calculateMentorDevoteeSummaries
+  // reads — traced, not guessed.
   listReportsForDevotees(
     devoteeIds: string[],
     fromDate: string,
-  ): Promise<SadhanaReport[]>
+  ): Promise<MentorDevoteeReportSummary[]>
 
   // All-time last report date per devotee, via the security_invoker
   // mentor_devotee_last_reports view (0003_mentor_devotee_last_reports).

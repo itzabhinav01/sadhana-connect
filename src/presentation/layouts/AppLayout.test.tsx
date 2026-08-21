@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppLayout } from '@/presentation/layouts/AppLayout'
@@ -70,18 +70,26 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
+// A data router (not <MemoryRouter>/<Routes>) — AppLayout's
+// useNavigation() call (Phase 20, drives the lazy-route loading
+// indicator) only works inside a data router context.
 function renderAppLayout(initialPath = '/') {
+  const router = createMemoryRouter(
+    [
+      {
+        element: <AppLayout />,
+        children: [
+          { path: '/', element: <div>Home content</div> },
+          { path: '/profile', element: <div>Profile content</div> },
+        ],
+      },
+    ],
+    { initialEntries: [initialPath] },
+  )
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <TooltipProvider>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<div>Home content</div>} />
-            <Route path="/profile" element={<div>Profile content</div>} />
-          </Route>
-        </Routes>
-      </TooltipProvider>
-    </MemoryRouter>,
+    <TooltipProvider>
+      <RouterProvider router={router} />
+    </TooltipProvider>,
   )
 }
 

@@ -1,4 +1,7 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type {
+  SadhanaReport,
+  SadhanaReportRangeSummary,
+} from '@/domain/entities/sadhana-report'
 
 export interface ListSadhanaReportsOptions {
   fromDate?: string
@@ -62,13 +65,16 @@ export interface SadhanaReportRepository {
   ): Promise<SadhanaReport>
 
   // Inclusive date range, ordered by report_date ascending — used to
-  // build the weekly summary/chart. Gap days (no report) are simply
-  // absent from the result; the caller fills them in, never this layer.
+  // build the weekly summary/chart AND the Analytics page (same method,
+  // different range). Gap days (no report) are simply absent from the
+  // result; the caller fills them in, never this layer. Narrowed
+  // (Phase 20) to exactly the fields calculateWeeklySummary /
+  // calculateSadhanaAnalytics read — traced, not guessed.
   listReportsInRange(
     profileId: string,
     startDate: string,
     endDate: string,
-  ): Promise<SadhanaReport[]>
+  ): Promise<SadhanaReportRangeSummary[]>
 
   // Most recent reports regardless of gaps, newest first — used for both
   // the "recent reports" list and the streak calculation.

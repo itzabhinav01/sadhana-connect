@@ -32,7 +32,7 @@ describe('useSetUserActive', () => {
     })
   })
 
-  it('invalidates the target detail and every admin query on success', async () => {
+  it('invalidates only the target detail, the users list, and the dashboard summary (Phase 20 — traced, not adminQueryKeys.all)', async () => {
     setUserActiveMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
@@ -47,6 +47,15 @@ describe('useSetUserActive', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: adminQueryKeys.userDetail('admin-1', 'user-1'),
     })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: adminQueryKeys.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'users', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.dashboardSummary('admin-1'),
+    })
+    // Exactly these three calls — never the blanket adminQueryKeys.all,
+    // and never assignments/mentor-devotee-counts/temple-groups, which
+    // is_active never affects.
+    expect(invalidateSpy).toHaveBeenCalledTimes(3)
   })
 })

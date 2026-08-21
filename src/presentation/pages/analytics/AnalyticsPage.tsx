@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
@@ -7,14 +7,28 @@ import {
   type SadhanaDateRange,
 } from '@/application/sadhana/sadhana-date-range'
 import { useSadhanaAnalytics } from '@/application/sadhana/use-sadhana-analytics'
+import { ChartSkeleton } from '@/presentation/components/ChartSkeleton'
 import { Button } from '@/presentation/components/ui/button'
 import {
   AnalyticsRangeSelector,
   type AnalyticsRangeOption,
 } from '@/presentation/pages/analytics/AnalyticsRangeSelector'
-import { AnalyticsRoundsChart } from '@/presentation/pages/analytics/AnalyticsRoundsChart'
-import { AnalyticsStudyChart } from '@/presentation/pages/analytics/AnalyticsStudyChart'
 import { AnalyticsSummaryCards } from '@/presentation/pages/analytics/AnalyticsSummaryCards'
+
+// Code-split (Phase 20) — see the matching note in DevoteeDashboardPage.tsx.
+// This whole page is chart-centric, so both charts defer together, but
+// each keeps its own Suspense boundary rather than sharing one, so a
+// slow fetch of one chart's chunk never blocks the other from appearing.
+const AnalyticsRoundsChart = lazy(() =>
+  import('@/presentation/pages/analytics/AnalyticsRoundsChart').then((m) => ({
+    default: m.AnalyticsRoundsChart,
+  })),
+)
+const AnalyticsStudyChart = lazy(() =>
+  import('@/presentation/pages/analytics/AnalyticsStudyChart').then((m) => ({
+    default: m.AnalyticsStudyChart,
+  })),
+)
 
 // One page-level query (not per-card/per-chart, unlike the dashboard) —
 // every section here is a facet of the exact same range query, so there
@@ -75,8 +89,12 @@ export function AnalyticsPage() {
         ) : (
           <>
             <AnalyticsSummaryCards summary={analyticsQuery.data} />
-            <AnalyticsRoundsChart chartData={analyticsQuery.data.roundsChartData} />
-            <AnalyticsStudyChart chartData={analyticsQuery.data.studyChartData} />
+            <Suspense fallback={<ChartSkeleton title="Daily Total Rounds" />}>
+              <AnalyticsRoundsChart chartData={analyticsQuery.data.roundsChartData} />
+            </Suspense>
+            <Suspense fallback={<ChartSkeleton title="Reading & Hearing" />}>
+              <AnalyticsStudyChart chartData={analyticsQuery.data.studyChartData} />
+            </Suspense>
           </>
         )
       ) : null}

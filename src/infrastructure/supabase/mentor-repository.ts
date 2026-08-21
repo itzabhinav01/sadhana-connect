@@ -1,13 +1,9 @@
 import type { MentorAssignedDevotee } from '@/domain/entities/mentor-devotee'
+import type { MentorDevoteeReportSummary } from '@/domain/entities/sadhana-report'
 import type {
   DevoteeLastReportDate,
   MentorRepository,
 } from '@/domain/repositories/mentor-repository'
-import {
-  mapSadhanaReportRow,
-  SADHANA_REPORT_SELECT_COLUMNS,
-  type SadhanaReportRow,
-} from '@/infrastructure/supabase/sadhana-report-repository'
 import { supabase } from '@/infrastructure/supabase/client'
 
 interface AssignedDevoteeRow {
@@ -17,6 +13,29 @@ interface AssignedDevoteeRow {
   // null when the embedded row is blocked by the embedded table's own RLS
   // (e.g. a disabled devotee) — never a partial/broken row.
   devotee: { id: string; full_name: string; is_active: boolean } | null
+}
+
+// Narrowed (Phase 20 performance) to exactly the fields
+// calculateMentorDevoteeSummaries reads — traced, not guessed. This is
+// its own select rather than SADHANA_REPORT_SELECT_COLUMNS because this
+// method's one consumer (useMentorDevotees) never reads anything beyond
+// these three fields for any assigned devotee's report.
+export const DEVOTEE_REPORT_SUMMARY_SELECT_COLUMNS = 'profile_id, report_date, total_rounds'
+
+interface DevoteeReportSummaryRow {
+  profile_id: string
+  report_date: string
+  total_rounds: number
+}
+
+function mapDevoteeReportSummaryRow(
+  row: DevoteeReportSummaryRow,
+): MentorDevoteeReportSummary {
+  return {
+    profileId: row.profile_id,
+    reportDate: row.report_date,
+    totalRounds: row.total_rounds,
+  }
 }
 
 export const supabaseMentorRepository: MentorRepository = {
@@ -52,14 +71,14 @@ export const supabaseMentorRepository: MentorRepository = {
 
     const { data, error } = await supabase
       .from('sadhana_reports')
-      .select(SADHANA_REPORT_SELECT_COLUMNS)
+      .select(DEVOTEE_REPORT_SUMMARY_SELECT_COLUMNS)
       .in('profile_id', devoteeIds)
       .gte('report_date', fromDate)
       .order('report_date', { ascending: false })
 
     if (error) throw error
 
-    return (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
+    return (data as DevoteeReportSummaryRow[]).map(mapDevoteeReportSummaryRow)
   },
 
   async listLastReportDates() {

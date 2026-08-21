@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppLayout } from '@/presentation/layouts/AppLayout'
@@ -65,20 +65,29 @@ vi.mock('@/application/pwa/use-service-worker-update', () => ({
   }),
 }))
 
+// A data router (not <MemoryRouter>/<Routes>) — AppLayout's
+// useNavigation() call (Phase 20, drives the lazy-route loading
+// indicator) only works inside a data router context.
 function renderShell() {
+  const router = createMemoryRouter(
+    [
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            element: <AppLayout />,
+            children: [{ path: '/', element: <div>Page content</div> }],
+          },
+        ],
+      },
+      { path: '/login', element: <div>Login page</div> },
+    ],
+    { initialEntries: ['/'] },
+  )
   return render(
-    <MemoryRouter initialEntries={['/']}>
-      <TooltipProvider>
-        <Routes>
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
-              <Route path="/" element={<div>Page content</div>} />
-            </Route>
-          </Route>
-          <Route path="/login" element={<div>Login page</div>} />
-        </Routes>
-      </TooltipProvider>
-    </MemoryRouter>,
+    <TooltipProvider>
+      <RouterProvider router={router} />
+    </TooltipProvider>,
   )
 }
 

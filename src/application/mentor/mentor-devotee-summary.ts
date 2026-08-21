@@ -1,6 +1,6 @@
 import type { DevoteeLastReportDate } from '@/domain/repositories/mentor-repository'
 import type { MentorAssignedDevotee } from '@/domain/entities/mentor-devotee'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { MentorDevoteeReportSummary } from '@/domain/entities/sadhana-report'
 
 export interface MentorDevoteeSummary {
   devoteeId: string
@@ -17,7 +17,7 @@ export interface MentorDevoteeSummary {
 // parameterizable for deterministic tests.
 export function calculateMentorDevoteeSummaries(
   devotees: MentorAssignedDevotee[],
-  recentReports: SadhanaReport[],
+  recentReports: MentorDevoteeReportSummary[],
   lastReportDates: DevoteeLastReportDate[],
   today: string,
 ): MentorDevoteeSummary[] {

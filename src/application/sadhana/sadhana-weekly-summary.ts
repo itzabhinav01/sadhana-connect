@@ -1,4 +1,4 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReportRangeSummary } from '@/domain/entities/sadhana-report'
 import { buildDateRangeList } from '@/shared/utils/date'
 
 export interface WeeklyChartPoint {
@@ -26,7 +26,7 @@ export interface WeeklySadhanaSummary {
 // are filled in here as zero-value, hasReport:false chart points, never
 // fabricated with a guessed non-zero value.
 export function calculateWeeklySummary(
-  reports: SadhanaReport[],
+  reports: SadhanaReportRangeSummary[],
   startDate: string,
   endDate: string,
 ): WeeklySadhanaSummary {

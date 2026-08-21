@@ -88,7 +88,7 @@ describe('useChangeUserRole', () => {
     expect(changeUserRoleMock).toHaveBeenCalledWith('mentor-1', 'devotee')
   })
 
-  it('invalidates the admin-scoped user detail and every admin query on success', async () => {
+  it('invalidates only the affected admin domains on success (Phase 20 — traced, not adminQueryKeys.all)', async () => {
     getMentorDevoteeCountMock.mockResolvedValue(0)
     changeUserRoleMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -103,6 +103,21 @@ describe('useChangeUserRole', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: adminQueryKeys.userDetail('admin-1', 'mentor-1'),
     })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: adminQueryKeys.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'users', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.mentorDevoteeCounts('admin-1'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'mentor-devotee-count', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.dashboardSummary('admin-1'),
+    })
+    // Exactly these five calls — never the blanket adminQueryKeys.all,
+    // and never assignments/temple-groups, which a role change never
+    // affects (mentor_assignments rows themselves are untouched).
+    expect(invalidateSpy).toHaveBeenCalledTimes(5)
   })
 })

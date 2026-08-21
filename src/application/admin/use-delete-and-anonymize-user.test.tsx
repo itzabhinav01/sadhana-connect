@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useDeleteAndAnonymizeUser } from '@/application/admin/use-delete-and-anonymize-user'
 
 const { useAuthMock, anonymizeUserMock, banUserMock } = vi.hoisted(() => ({
@@ -77,5 +78,40 @@ describe('useDeleteAndAnonymizeUser', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(banUserMock).not.toHaveBeenCalled()
+  })
+
+  it('invalidates every domain anonymization actually affects (Phase 20 — traced, not adminQueryKeys.all)', async () => {
+    anonymizeUserMock.mockResolvedValue(undefined)
+    banUserMock.mockResolvedValue(undefined)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useDeleteAndAnonymizeUser(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    result.current.mutate('user-1')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.userDetail('admin-1', 'user-1'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'users', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'assignments', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.mentorDevoteeCounts('admin-1'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['admin', 'mentor-devotee-count', 'admin-1'],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminQueryKeys.dashboardSummary('admin-1'),
+    })
+    // Exactly these six calls — never the blanket adminQueryKeys.all,
+    // and never temple-groups, which anonymization never affects.
+    expect(invalidateSpy).toHaveBeenCalledTimes(6)
   })
 })

@@ -41,11 +41,32 @@ export function useDeleteAndAnonymizeUser() {
 
       return { stage: 'complete' }
     },
+    // Traced (Phase 20): anonymization changes this user's own profile
+    // (is_active, anonymized_at) — affecting their detail view and the
+    // Users list — AND deactivates their mentor_assignments rows (see
+    // step 1's own doc comment above), affecting the Assignments
+    // list/panels and both mentor-devotee-count namespaces, plus the
+    // dashboard's active/disabled/anonymized/devoteesWithoutActiveMentor
+    // figures. temple_groups is unaffected, so left untouched.
     onSuccess: (_result, userId) => {
       queryClient.invalidateQueries({
         queryKey: adminQueryKeys.userDetail(adminUserId, userId),
       })
-      queryClient.invalidateQueries({ queryKey: adminQueryKeys.all })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', adminUserId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'assignments', adminUserId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.mentorDevoteeCounts(adminUserId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'mentor-devotee-count', adminUserId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.dashboardSummary(adminUserId),
+      })
     },
   })
 }

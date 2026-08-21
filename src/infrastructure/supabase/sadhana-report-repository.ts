@@ -1,4 +1,7 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type {
+  SadhanaReport,
+  SadhanaReportRangeSummary,
+} from '@/domain/entities/sadhana-report'
 import type {
   ListSadhanaReportsOptions,
   ListSadhanaReportsResult,
@@ -35,9 +38,40 @@ export const SADHANA_REPORT_SELECT_COLUMNS =
   'id, profile_id, report_date, rounds_before_4_30am, rounds_till_7am, last_round_time, total_rounds, reading_minutes, book_name, hearing_minutes, speaker_name, sleep_time, wake_time, day_rest_minutes, total_rest_minutes, office_going_time, office_return_time, notes, signature_text, created_at, updated_at'
 
 // Kept as a short local alias so the rest of this file reads the same as
-// before the export — mentor-repository.ts imports the exported name
-// directly rather than through this alias.
+// before the export.
 const SELECT_COLUMNS = SADHANA_REPORT_SELECT_COLUMNS
+
+// Narrower selection for listReportsInRange (Phase 20 performance) —
+// this method backs both the devotee weekly dashboard chart and the
+// Analytics page (useWeeklySadhanaSummary / useSadhanaAnalytics), and
+// neither consumer reads anything beyond these six fields (traced via
+// calculateWeeklySummary and calculateSadhanaAnalytics). Every other
+// SadhanaReport field (notes, book/speaker name, signature, times, id,
+// profile_id, timestamps...) is genuinely unused by either chart.
+export const RANGE_SUMMARY_SELECT_COLUMNS =
+  'report_date, total_rounds, reading_minutes, hearing_minutes, day_rest_minutes, total_rest_minutes'
+
+interface SadhanaReportRangeSummaryRow {
+  report_date: string
+  total_rounds: number
+  reading_minutes: number
+  hearing_minutes: number
+  day_rest_minutes: number
+  total_rest_minutes: number
+}
+
+function mapRangeSummaryRow(
+  row: SadhanaReportRangeSummaryRow,
+): SadhanaReportRangeSummary {
+  return {
+    reportDate: row.report_date,
+    totalRounds: row.total_rounds,
+    readingMinutes: row.reading_minutes,
+    hearingMinutes: row.hearing_minutes,
+    dayRestMinutes: row.day_rest_minutes,
+    totalRestMinutes: row.total_rest_minutes,
+  }
+}
 
 export function mapSadhanaReportRow(row: SadhanaReportRow): SadhanaReport {
   return {
@@ -133,7 +167,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
     // index range scan — no new index required.
     const { data, error } = await supabase
       .from('sadhana_reports')
-      .select(SELECT_COLUMNS)
+      .select(RANGE_SUMMARY_SELECT_COLUMNS)
       .eq('profile_id', profileId)
       .gte('report_date', startDate)
       .lte('report_date', endDate)
@@ -141,7 +175,7 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     if (error) throw error
 
-    return (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
+    return (data as SadhanaReportRangeSummaryRow[]).map(mapRangeSummaryRow)
   },
 
   async listRecentReports(profileId, limit) {

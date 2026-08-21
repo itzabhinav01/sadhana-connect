@@ -80,14 +80,30 @@ describe('DevoteeDashboardPage', () => {
     })
   })
 
-  it('renders every card', () => {
+  // A direct "Suspense fallback is showing before the lazy import
+  // resolves" assertion is not reliably observable in this Vitest/Vite
+  // SSR-transform test environment: unlike a real browser fetching a
+  // network chunk, Vite's test-mode module loader can resolve a dynamic
+  // import() within the same synchronous render pass regardless of
+  // module-cache freshness (confirmed: neither reordering this test to
+  // run first, nor vi.resetModules() + a fresh dynamic re-import,
+  // produced an observable pending state). The Suspense wiring itself is
+  // covered by (a) ChartSkeleton.test.tsx, which verifies the fallback
+  // component renders correctly in isolation, (b) 'renders every card'
+  // below, which proves the lazy-loaded chart correctly appears through
+  // the Suspense boundary, and (c) live browser E2E (Phase 20 report),
+  // which does observe the real fallback during genuine network latency.
+
+  it('renders every card', async () => {
     renderDashboard()
 
     expect(
       screen.getByRole('heading', { name: /today's sadhana/i }),
     ).toBeInTheDocument()
+    // Weekly Rounds is code-split (Phase 20, React.lazy + Suspense) — its
+    // heading only appears once the lazy import resolves.
     expect(
-      screen.getByRole('heading', { name: /weekly rounds/i }),
+      await screen.findByRole('heading', { name: /weekly rounds/i }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: /this week/i }),

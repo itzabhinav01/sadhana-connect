@@ -64,13 +64,31 @@ export function useChangeUserRole() {
       }
       await supabaseAdminUserRepository.changeUserRole(userId, newRole)
     },
+    // Traced (Phase 20): a role change affects this user's own detail
+    // view, the Users list (role is a filtered/displayed column), and the
+    // dashboard's totalDevotees/totalMentors figures. It can also add or
+    // remove this user from mentor-devotee-count views (a new mentor
+    // appears with a zero count; mentor -> devotee is only ever allowed
+    // once their count is already zero, per the guard above) — so both
+    // count namespaces are invalidated too. It never touches
+    // mentor_assignments rows themselves or temple_groups, so those are
+    // deliberately left untouched.
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({
         queryKey: adminQueryKeys.userDetail(adminUserId, variables.userId),
       })
-      // Role affects the users list, mentor list, and dashboard breakdown —
-      // invalidate every admin query rather than enumerating each one.
-      queryClient.invalidateQueries({ queryKey: adminQueryKeys.all })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', adminUserId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.mentorDevoteeCounts(adminUserId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'mentor-devotee-count', adminUserId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.dashboardSummary(adminUserId),
+      })
     },
   })
 }

@@ -25,3 +25,29 @@ export interface SadhanaReport {
   createdAt: string
   updatedAt: string
 }
+
+// Narrow projections of SadhanaReport for views that only ever read a
+// specific subset (Phase 20 performance) — declared explicitly here
+// rather than derived via Pick<> so each repository method's return
+// type states exactly what it fetches, keeping the contract honest
+// about what's actually selected from the database.
+
+// listReportsInRange's shape — shared by the devotee weekly dashboard
+// chart and the Analytics page, neither of which reads anything beyond
+// these six fields (see calculateWeeklySummary / calculateSadhanaAnalytics).
+export interface SadhanaReportRangeSummary {
+  reportDate: string
+  totalRounds: number
+  readingMinutes: number
+  hearingMinutes: number
+  dayRestMinutes: number
+  totalRestMinutes: number
+}
+
+// Mentor listReportsForDevotees' shape — calculateMentorDevoteeSummaries
+// only ever reads profileId/reportDate/totalRounds from these rows.
+export interface MentorDevoteeReportSummary {
+  profileId: string
+  reportDate: string
+  totalRounds: number
+}

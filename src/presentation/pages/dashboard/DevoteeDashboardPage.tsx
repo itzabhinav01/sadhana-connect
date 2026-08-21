@@ -1,7 +1,20 @@
+import { lazy, Suspense } from 'react'
+
+import { ChartSkeleton } from '@/presentation/components/ChartSkeleton'
 import { RecentReportsList } from '@/presentation/pages/dashboard/RecentReportsList'
 import { TodaySadhanaCard } from '@/presentation/pages/dashboard/TodaySadhanaCard'
-import { WeeklyRoundsChart } from '@/presentation/pages/dashboard/WeeklyRoundsChart'
 import { WeeklySummaryCard } from '@/presentation/pages/dashboard/WeeklySummaryCard'
+
+// Code-split (Phase 20): recharts pulls in a large internal Redux stack
+// (~1.16MB of source) that the dashboard shell itself never needs — this
+// keeps that entirely out of the initial bundle and out of the critical
+// render path for TodaySadhanaCard below, the one thing every devotee
+// opens this page to see/act on.
+const WeeklyRoundsChart = lazy(() =>
+  import('@/presentation/pages/dashboard/WeeklyRoundsChart').then((m) => ({
+    default: m.WeeklyRoundsChart,
+  })),
+)
 
 // Each card owns its own query/loading/error state independently — a
 // slow or failed chart must never block the Today card, which is the
@@ -17,7 +30,9 @@ export function DevoteeDashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <TodaySadhanaCard />
-          <WeeklyRoundsChart />
+          <Suspense fallback={<ChartSkeleton title="Weekly Rounds" />}>
+            <WeeklyRoundsChart />
+          </Suspense>
         </div>
         <div className="flex flex-col gap-6">
           <WeeklySummaryCard />

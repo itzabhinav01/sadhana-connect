@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigation } from 'react-router-dom'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { useNotificationsRealtime } from '@/application/notifications/use-notifications-realtime'
@@ -22,6 +22,12 @@ export function AppLayout() {
   // is — internally a no-op for non-devotee roles (see the hook's own
   // doc comment).
   useNotificationsRealtime()
+  // 'loading' only while react-router awaits a route's lazy() chunk
+  // fetch (Phase 20 — /mentor/* and /admin/* are the only lazy routes;
+  // every other route here has no loader/lazy, so this never flashes
+  // for a normal navigation between them).
+  const navigation = useNavigation()
+  const isRouteChunkLoading = navigation.state === 'loading'
 
   if (!profile.data) {
     return null
@@ -51,7 +57,17 @@ export function AppLayout() {
             id="main-content"
             className="flex-1 overflow-x-hidden p-4 md:p-6"
           >
-            <Outlet />
+            {isRouteChunkLoading ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex min-h-40 items-center justify-center"
+              >
+                <p className="text-sm text-muted-foreground">Loading…</p>
+              </div>
+            ) : (
+              <Outlet />
+            )}
           </main>
         </div>
       </div>

@@ -3,21 +3,11 @@ import { createBrowserRouter } from 'react-router-dom'
 import { NotFoundPage } from '@/presentation/pages/NotFoundPage'
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 import { SettingsPage } from '@/presentation/pages/SettingsPage'
-import { AdminAnnouncementsPage } from '@/presentation/pages/admin/AdminAnnouncementsPage'
-import { AdminAssignmentsPage } from '@/presentation/pages/admin/AdminAssignmentsPage'
-import { AdminDashboardPage } from '@/presentation/pages/admin/AdminDashboardPage'
-import { AdminMentorsPage } from '@/presentation/pages/admin/AdminMentorsPage'
-import { AdminTempleGroupsPage } from '@/presentation/pages/admin/AdminTempleGroupsPage'
-import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailPage'
-import { AdminUsersPage } from '@/presentation/pages/admin/AdminUsersPage'
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { AnnouncementDetailPage } from '@/presentation/pages/announcements/AnnouncementDetailPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
-import { MentorAnnouncementsPage } from '@/presentation/pages/mentor/MentorAnnouncementsPage'
-import { MentorDashboardPage } from '@/presentation/pages/mentor/MentorDashboardPage'
-import { MentorDevoteeDetailPage } from '@/presentation/pages/mentor/MentorDevoteeDetailPage'
 import { NotificationsPage } from '@/presentation/pages/notifications/NotificationsPage'
 import { SadhanaFormPage } from '@/presentation/pages/sadhana/SadhanaFormPage'
 import { VerseOfTheDayPage } from '@/presentation/pages/verse/VerseOfTheDayPage'
@@ -91,16 +81,42 @@ export const router = createBrowserRouter([
                 // sadhana_reports_select, all via private.is_mentor_of)
                 // remains the real security boundary regardless of this
                 // guard; see RequireRole's own documentation.
+                //
+                // Every child route below is lazy-loaded (Phase 20) from
+                // the single shared @/presentation/pages/mentor/mentor-routes
+                // module — router.tsx itself never statically imports any
+                // mentor page, so a devotee session's initial bundle never
+                // includes mentor-only code. Loading is purely a chunk-
+                // fetch timing change; RequireRole's own authorization
+                // check above is completely unmodified.
                 element: <RequireRole allow={['mentor']} />,
                 children: [
-                  { path: '/mentor', element: <MentorDashboardPage /> },
+                  {
+                    path: '/mentor',
+                    lazy: async () => {
+                      const { MentorDashboardPage } = await import(
+                        '@/presentation/pages/mentor/mentor-routes'
+                      )
+                      return { Component: MentorDashboardPage }
+                    },
+                  },
                   {
                     path: '/mentor/devotee/:id',
-                    element: <MentorDevoteeDetailPage />,
+                    lazy: async () => {
+                      const { MentorDevoteeDetailPage } = await import(
+                        '@/presentation/pages/mentor/mentor-routes'
+                      )
+                      return { Component: MentorDevoteeDetailPage }
+                    },
                   },
                   {
                     path: '/mentor/announcements',
-                    element: <MentorAnnouncementsPage />,
+                    lazy: async () => {
+                      const { MentorAnnouncementsPage } = await import(
+                        '@/presentation/pages/mentor/mentor-routes'
+                      )
+                      return { Component: MentorAnnouncementsPage }
+                    },
                   },
                 ],
               },
@@ -112,15 +128,75 @@ export const router = createBrowserRouter([
                 // operations, the trusted Edge Function's own
                 // authorization check. This guard just keeps a
                 // non-super-admin from seeing the admin shell at all.
+                //
+                // Every child route below is lazy-loaded (Phase 20) from
+                // the single shared @/presentation/pages/admin/admin-routes
+                // module — same reasoning as the mentor subtree above.
                 element: <RequireRole allow={['super_admin']} />,
                 children: [
-                  { path: '/admin', element: <AdminDashboardPage /> },
-                  { path: '/admin/users', element: <AdminUsersPage /> },
-                  { path: '/admin/users/:id', element: <AdminUserDetailPage /> },
-                  { path: '/admin/mentors', element: <AdminMentorsPage /> },
-                  { path: '/admin/assignments', element: <AdminAssignmentsPage /> },
-                  { path: '/admin/temple-groups', element: <AdminTempleGroupsPage /> },
-                  { path: '/admin/announcements', element: <AdminAnnouncementsPage /> },
+                  {
+                    path: '/admin',
+                    lazy: async () => {
+                      const { AdminDashboardPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminDashboardPage }
+                    },
+                  },
+                  {
+                    path: '/admin/users',
+                    lazy: async () => {
+                      const { AdminUsersPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminUsersPage }
+                    },
+                  },
+                  {
+                    path: '/admin/users/:id',
+                    lazy: async () => {
+                      const { AdminUserDetailPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminUserDetailPage }
+                    },
+                  },
+                  {
+                    path: '/admin/mentors',
+                    lazy: async () => {
+                      const { AdminMentorsPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminMentorsPage }
+                    },
+                  },
+                  {
+                    path: '/admin/assignments',
+                    lazy: async () => {
+                      const { AdminAssignmentsPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminAssignmentsPage }
+                    },
+                  },
+                  {
+                    path: '/admin/temple-groups',
+                    lazy: async () => {
+                      const { AdminTempleGroupsPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminTempleGroupsPage }
+                    },
+                  },
+                  {
+                    path: '/admin/announcements',
+                    lazy: async () => {
+                      const { AdminAnnouncementsPage } = await import(
+                        '@/presentation/pages/admin/admin-routes'
+                      )
+                      return { Component: AdminAnnouncementsPage }
+                    },
+                  },
                 ],
               },
             ],

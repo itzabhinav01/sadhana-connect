@@ -1,4 +1,4 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReportRangeSummary } from '@/domain/entities/sadhana-report'
 import { buildDateRangeList } from '@/shared/utils/date'
 
 export interface RoundsChartPoint {
@@ -50,7 +50,10 @@ function average(total: number, count: number): number {
   return count === 0 ? 0 : total / count
 }
 
-function sumBy(reports: SadhanaReport[], select: (report: SadhanaReport) => number): number {
+function sumBy(
+  reports: SadhanaReportRangeSummary[],
+  select: (report: SadhanaReportRangeSummary) => number,
+): number {
   return reports.reduce((sum, report) => sum + select(report), 0)
 }
 
@@ -61,7 +64,7 @@ function sumBy(reports: SadhanaReport[], select: (report: SadhanaReport) => numb
 // date can't safely produce a duration or a meaningful clock-time
 // average (see Phase 9 plan).
 export function calculateSadhanaAnalytics(
-  reports: SadhanaReport[],
+  reports: SadhanaReportRangeSummary[],
   fromDate: string,
   toDate: string,
 ): SadhanaAnalyticsSummary {
