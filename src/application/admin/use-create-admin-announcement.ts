@@ -11,6 +11,7 @@ interface CreateAdminAnnouncementInput {
   scope: AnnouncementScope
   templeGroupId: string | null
   isPublished: boolean
+  expiresAt: string | null
 }
 
 // Unlike useCreateMentorAnnouncement, a Super Admin genuinely chooses the
@@ -35,6 +36,7 @@ export function useCreateAdminAnnouncement() {
         scope: input.scope,
         templeGroupId: input.templeGroupId,
         isPublished: input.isPublished,
+        expiresAt: input.expiresAt,
       })
     },
     onSuccess: () => {

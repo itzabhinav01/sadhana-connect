@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
 
 describe('getNavItemsForRole', () => {
-  it('returns the common foundation items plus the devotee Sadhana/History/Analytics/Japa/Verse items', () => {
+  it('returns the common foundation items plus the devotee Sadhana/History/Analytics/Announcements/Japa/Verse items', () => {
     const labels = getNavItemsForRole('devotee').map((item) => item.label)
     expect(labels).toEqual([
       'Home',
@@ -12,6 +12,7 @@ describe('getNavItemsForRole', () => {
       'Sadhana',
       'History',
       'Analytics',
+      'Announcements',
       'Japa Counter',
       'Verse of the Day',
     ])
@@ -45,10 +46,13 @@ describe('getNavItemsForRole', () => {
     ])
   })
 
-  it('never shows Mentor Dashboard or Announcements to a devotee', () => {
+  it('never shows the mentor/admin Mentor Dashboard nav item to a devotee (the devotee Announcements item links to the /announcements feed, not /mentor/announcements)', () => {
     const labels = getNavItemsForRole('devotee').map((item) => item.label)
     expect(labels).not.toContain('Mentor Dashboard')
-    expect(labels).not.toContain('Announcements')
+    const announcementsHref = getNavItemsForRole('devotee').find(
+      (item) => item.label === 'Announcements',
+    )?.href
+    expect(announcementsHref).toBe('/announcements')
   })
 
   it('returns no items when there is no role', () => {

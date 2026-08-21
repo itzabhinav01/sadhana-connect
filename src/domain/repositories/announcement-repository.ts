@@ -7,12 +7,15 @@ export interface CreateAnnouncementParams {
   scope: AnnouncementScope
   templeGroupId: string | null
   isPublished: boolean
+  expiresAt: string | null
 }
 
 export interface UpdateAnnouncementParams {
   title: string
   content: string
   isPublished: boolean
+  expiresAt: string | null
+  isPinned: boolean
 }
 
 export interface AnnouncementRepository {

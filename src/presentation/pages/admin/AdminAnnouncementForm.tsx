@@ -5,6 +5,13 @@ import { useForm } from 'react-hook-form'
 import { useAdminTempleGroups } from '@/application/admin/use-admin-temple-groups'
 import { useCreateAdminAnnouncement } from '@/application/admin/use-create-admin-announcement'
 import {
+  ANNOUNCEMENT_EXPIRATION_PRESETS,
+  ANNOUNCEMENT_EXPIRATION_PRESET_LABELS,
+  resolveExpirationError,
+  resolveExpiresAt,
+  type AnnouncementExpirationPreset,
+} from '@/application/announcements/announcement-expiration'
+import {
   announcementSchema,
   type AnnouncementFormValues,
 } from '@/application/announcements/announcement-schema'
@@ -25,6 +32,9 @@ export function AdminAnnouncementForm() {
   const [scope, setScope] = useState<AnnouncementScope>('all')
   const [templeGroupId, setTempleGroupId] = useState('')
   const [scopeError, setScopeError] = useState<string | null>(null)
+  const [expirationPreset, setExpirationPreset] = useState<AnnouncementExpirationPreset>('never')
+  const [customExpiresAt, setCustomExpiresAt] = useState('')
+  const [expirationError, setExpirationError] = useState<string | null>(null)
 
   const form = useForm<AnnouncementFormValues>({
     resolver: zodResolver(announcementSchema),
@@ -37,6 +47,12 @@ export function AdminAnnouncementForm() {
       return
     }
     setScopeError(null)
+    const expirationErr = resolveExpirationError(expirationPreset, customExpiresAt || null)
+    if (expirationErr) {
+      setExpirationError(expirationErr)
+      return
+    }
+    setExpirationError(null)
     createAnnouncement.mutate(
       {
         title: values.title,
@@ -44,8 +60,15 @@ export function AdminAnnouncementForm() {
         scope,
         templeGroupId: scope === 'temple_group' ? templeGroupId : null,
         isPublished: publishNow,
+        expiresAt: resolveExpiresAt(expirationPreset, customExpiresAt || null),
       },
-      { onSuccess: () => form.reset() },
+      {
+        onSuccess: () => {
+          form.reset()
+          setExpirationPreset('never')
+          setCustomExpiresAt('')
+        },
+      },
     )
   }
 
@@ -123,6 +146,38 @@ export function AdminAnnouncementForm() {
               {scopeError ? <p className="text-xs text-destructive">{scopeError}</p> : null}
             </div>
           ) : null}
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="admin-announcement-expiration" className="text-sm font-medium text-foreground">
+              Expiration
+            </label>
+            <Select
+              id="admin-announcement-expiration"
+              value={expirationPreset}
+              onChange={(event) =>
+                setExpirationPreset(event.target.value as AnnouncementExpirationPreset)
+              }
+            >
+              {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
+                <option key={preset} value={preset}>
+                  {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
+                </option>
+              ))}
+            </Select>
+            {expirationPreset === 'custom' ? (
+              <Input
+                type="date"
+                aria-label="Expiration date"
+                value={customExpiresAt.slice(0, 10)}
+                onChange={(event) =>
+                  setCustomExpiresAt(
+                    event.target.value ? new Date(event.target.value).toISOString() : '',
+                  )
+                }
+              />
+            ) : null}
+            {expirationError ? <p className="text-xs text-destructive">{expirationError}</p> : null}
+          </div>
 
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input

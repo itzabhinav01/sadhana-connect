@@ -1,5 +1,13 @@
 import { useState } from 'react'
 
+import {
+  ANNOUNCEMENT_EXPIRATION_PRESETS,
+  ANNOUNCEMENT_EXPIRATION_PRESET_LABELS,
+  resolveExpirationError,
+  resolveExpiresAt,
+  toExpirationFormValue,
+  type AnnouncementExpirationPreset,
+} from '@/application/announcements/announcement-expiration'
 import { announcementSchema } from '@/application/announcements/announcement-schema'
 import { useAuth } from '@/application/auth/use-auth'
 import { useDeleteAnnouncement } from '@/application/announcements/use-delete-announcement'
@@ -8,6 +16,7 @@ import type { Announcement } from '@/domain/entities/announcement'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
+import { Select } from '@/presentation/components/ui/select'
 import { Textarea } from '@/presentation/components/ui/textarea'
 
 function formatDisplayDate(iso: string) {
@@ -46,6 +55,11 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [draftTitle, setDraftTitle] = useState(announcement.title)
   const [draftContent, setDraftContent] = useState(announcement.content)
+  const initialExpiration = toExpirationFormValue(announcement.expiresAt)
+  const [expirationPreset, setExpirationPreset] = useState<AnnouncementExpirationPreset>(
+    initialExpiration.preset,
+  )
+  const [customExpiresAt, setCustomExpiresAt] = useState(initialExpiration.customDateIso ?? '')
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const updateAnnouncement = useUpdateAnnouncement()
@@ -57,6 +71,11 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
       setValidationError(result.error.issues[0]?.message ?? 'Invalid announcement.')
       return
     }
+    const expirationErr = resolveExpirationError(expirationPreset, customExpiresAt || null)
+    if (expirationErr) {
+      setValidationError(expirationErr)
+      return
+    }
     setValidationError(null)
     updateAnnouncement.mutate(
       {
@@ -64,6 +83,8 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
         title: result.data.title,
         content: result.data.content,
         isPublished: announcement.isPublished,
+        expiresAt: resolveExpiresAt(expirationPreset, customExpiresAt || null),
+        isPinned: announcement.isPinned,
       },
       { onSuccess: () => setIsEditing(false) },
     )
@@ -73,20 +94,43 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
     setIsEditing(false)
     setDraftTitle(announcement.title)
     setDraftContent(announcement.content)
+    setExpirationPreset(initialExpiration.preset)
+    setCustomExpiresAt(initialExpiration.customDateIso ?? '')
     setValidationError(null)
+  }
+
+  function handleTogglePin() {
+    updateAnnouncement.mutate({
+      id: announcement.id,
+      title: announcement.title,
+      content: announcement.content,
+      isPublished: announcement.isPublished,
+      expiresAt: announcement.expiresAt,
+      isPinned: !announcement.isPinned,
+    })
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <h3 className="flex items-center gap-2">
+          <h3 className="flex flex-wrap items-center gap-2">
             {isEditing ? 'Editing Announcement' : announcement.title}
+            {announcement.isPinned ? (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                Pinned
+              </span>
+            ) : null}
             {!announcement.isPublished ? (
               <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                 Draft
               </span>
             ) : null}
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              {announcement.expiresAt
+                ? `Expires ${formatDisplayDate(announcement.expiresAt)}`
+                : 'Permanent'}
+            </span>
           </h3>
         </CardTitle>
       </CardHeader>
@@ -104,6 +148,31 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
               rows={4}
               aria-label="Edit content"
             />
+            <Select
+              aria-label="Edit expiration"
+              value={expirationPreset}
+              onChange={(event) =>
+                setExpirationPreset(event.target.value as AnnouncementExpirationPreset)
+              }
+            >
+              {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
+                <option key={preset} value={preset}>
+                  {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
+                </option>
+              ))}
+            </Select>
+            {expirationPreset === 'custom' ? (
+              <Input
+                type="date"
+                aria-label="Edit expiration date"
+                value={customExpiresAt.slice(0, 10)}
+                onChange={(event) =>
+                  setCustomExpiresAt(
+                    event.target.value ? new Date(event.target.value).toISOString() : '',
+                  )
+                }
+              />
+            ) : null}
             {validationError ? (
               <p className="text-xs text-destructive">{validationError}</p>
             ) : null}
@@ -128,13 +197,24 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
         )}
 
         {isOwn && !isEditing ? (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
               Edit
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={handleTogglePin}
+              disabled={updateAnnouncement.isPending}
+            >
+              {announcement.isPinned ? 'Unpin' : 'Pin'}
+            </Button>
             {confirmingDelete ? (
               <>
-                <span className="text-xs text-muted-foreground">Delete this announcement?</span>
+                <span className="text-xs text-muted-foreground">
+                  Deleting removes this announcement for devotees. This cannot be undone.
+                </span>
                 <Button
                   type="button"
                   size="sm"
@@ -142,7 +222,7 @@ function MentorAnnouncementItem({ announcement }: MentorAnnouncementItemProps) {
                   onClick={() => deleteAnnouncement.mutate(announcement.id)}
                   disabled={deleteAnnouncement.isPending}
                 >
-                  Confirm
+                  Confirm delete
                 </Button>
                 <Button type="button" size="sm" variant="outline" onClick={() => setConfirmingDelete(false)}>
                   Cancel

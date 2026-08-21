@@ -6,6 +6,7 @@ import { SettingsPage } from '@/presentation/pages/SettingsPage'
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
 import { DevoteeDashboardPage } from '@/presentation/pages/dashboard/DevoteeDashboardPage'
 import { AnnouncementDetailPage } from '@/presentation/pages/announcements/AnnouncementDetailPage'
+import { AnnouncementsFeedPage } from '@/presentation/pages/announcements/AnnouncementsFeedPage'
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
 import { JapaCounterPage } from '@/presentation/pages/japa/JapaCounterPage'
 import { NotificationsPage } from '@/presentation/pages/notifications/NotificationsPage'
@@ -61,6 +62,7 @@ export const router = createBrowserRouter([
               { path: '/verse-of-the-day', element: <VerseOfTheDayPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/settings', element: <SettingsPage /> },
+              { path: '/announcements', element: <AnnouncementsFeedPage /> },
               { path: '/announcements/:id', element: <AnnouncementDetailPage /> },
               {
                 // UX/navigation guard only, same caveat as the mentor/admin

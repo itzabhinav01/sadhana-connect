@@ -30,6 +30,8 @@ const ownAnnouncement: Announcement = {
   templeGroupId: 'group-1',
   isPublished: true,
   publishedAt: '2026-01-15T00:00:00.000Z',
+  expiresAt: null,
+  isPinned: false,
   createdAt: '2026-01-15T00:00:00.000Z',
   updatedAt: '2026-01-15T00:00:00.000Z',
 }
@@ -43,6 +45,8 @@ const otherAnnouncement: Announcement = {
   templeGroupId: 'group-1',
   isPublished: true,
   publishedAt: '2026-01-10T00:00:00.000Z',
+  expiresAt: null,
+  isPinned: false,
   createdAt: '2026-01-10T00:00:00.000Z',
   updatedAt: '2026-01-10T00:00:00.000Z',
 }
@@ -98,8 +102,11 @@ describe('MentorAnnouncementList', () => {
 
     await user.click(screen.getByRole('button', { name: 'Delete' }))
     expect(mutate).not.toHaveBeenCalled()
+    expect(
+      screen.getByText('Deleting removes this announcement for devotees. This cannot be undone.'),
+    ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    await user.click(screen.getByRole('button', { name: 'Confirm delete' }))
     expect(mutate).toHaveBeenCalledWith('a1')
   })
 
@@ -117,8 +124,51 @@ describe('MentorAnnouncementList', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(mutate).toHaveBeenCalledWith(
-      { id: 'a1', title: 'Updated Notice', content: 'Body text', isPublished: true },
+      {
+        id: 'a1',
+        title: 'Updated Notice',
+        content: 'Body text',
+        isPublished: true,
+        expiresAt: null,
+        isPinned: false,
+      },
       expect.anything(),
     )
+  })
+
+  it('shows "Permanent" for a null expiresAt and "Expires <date>" for a set one', () => {
+    const expiring: Announcement = { ...ownAnnouncement, id: 'a4', expiresAt: '2026-02-01T00:00:00.000Z' }
+    render(<MentorAnnouncementList announcements={[ownAnnouncement, expiring]} />)
+
+    expect(screen.getByText('Permanent')).toBeInTheDocument()
+    expect(screen.getByText(/Expires/)).toBeInTheDocument()
+  })
+
+  it('Pin/Unpin toggles isPinned while leaving every other field unchanged', async () => {
+    const mutate = vi.fn()
+    useUpdateAnnouncementMock.mockReturnValue({ mutate, isPending: false })
+    const user = userEvent.setup()
+
+    render(<MentorAnnouncementList announcements={[ownAnnouncement]} />)
+
+    expect(screen.queryByText('Pinned')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Pin' }))
+
+    expect(mutate).toHaveBeenCalledWith({
+      id: 'a1',
+      title: 'My Notice',
+      content: 'Body text',
+      isPublished: true,
+      expiresAt: null,
+      isPinned: true,
+    })
+  })
+
+  it('renders a "Pinned" badge and an Unpin button for an already-pinned announcement', () => {
+    const pinned: Announcement = { ...ownAnnouncement, isPinned: true }
+    render(<MentorAnnouncementList announcements={[pinned]} />)
+
+    expect(screen.getByText('Pinned')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Unpin' })).toBeInTheDocument()
   })
 })

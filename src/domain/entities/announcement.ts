@@ -11,6 +11,11 @@ export interface Announcement {
   templeGroupId: string | null
   isPublished: boolean
   publishedAt: string | null
+  // NULL = permanent (Phase 20A). Non-null: hard-deleted once
+  // expiresAt <= now() by the private.cleanup_expired_announcements()
+  // pg_cron job (0011) — never soft-expired.
+  expiresAt: string | null
+  isPinned: boolean
   createdAt: string
   updatedAt: string
 }

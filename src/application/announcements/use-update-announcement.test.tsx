@@ -48,6 +48,8 @@ describe('useUpdateAnnouncement', () => {
       templeGroupId: 'group-1',
       isPublished: true,
       publishedAt: '2026-01-15T00:00:00.000Z',
+      expiresAt: null,
+      isPinned: false,
       createdAt: '2026-01-15T00:00:00.000Z',
       updatedAt: '2026-01-16T00:00:00.000Z',
     })
@@ -57,16 +59,61 @@ describe('useUpdateAnnouncement', () => {
       wrapper: createWrapper(queryClient),
     })
 
-    result.current.mutate({ id: 'a1', title: 'Edited', content: 'Body', isPublished: true })
+    result.current.mutate({
+      id: 'a1',
+      title: 'Edited',
+      content: 'Body',
+      isPublished: true,
+      expiresAt: null,
+      isPinned: false,
+    })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(updateAnnouncementMock).toHaveBeenCalledWith('a1', {
       title: 'Edited',
       content: 'Body',
       isPublished: true,
+      expiresAt: null,
+      isPinned: false,
     })
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: announcementQueryKeys.list('mentor-1'),
     })
+  })
+
+  it('passes isPinned = true through to the repository (pin toggle)', async () => {
+    updateAnnouncementMock.mockResolvedValue({
+      id: 'a1',
+      authorId: 'mentor-1',
+      title: 'Edited',
+      content: 'Body',
+      scope: 'temple_group',
+      templeGroupId: 'group-1',
+      isPublished: true,
+      publishedAt: '2026-01-15T00:00:00.000Z',
+      expiresAt: null,
+      isPinned: true,
+      createdAt: '2026-01-15T00:00:00.000Z',
+      updatedAt: '2026-01-16T00:00:00.000Z',
+    })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { result } = renderHook(() => useUpdateAnnouncement(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    result.current.mutate({
+      id: 'a1',
+      title: 'Edited',
+      content: 'Body',
+      isPublished: true,
+      expiresAt: null,
+      isPinned: true,
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(updateAnnouncementMock).toHaveBeenCalledWith(
+      'a1',
+      expect.objectContaining({ isPinned: true }),
+    )
   })
 })

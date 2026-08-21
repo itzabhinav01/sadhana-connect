@@ -9,6 +9,7 @@ interface CreateMentorAnnouncementInput {
   title: string
   content: string
   isPublished: boolean
+  expiresAt: string | null
 }
 
 // Mentors may only author scope: 'temple_group' announcements, matching
@@ -43,6 +44,7 @@ export function useCreateMentorAnnouncement() {
         scope: 'temple_group',
         templeGroupId: profile.data.templeGroupId,
         isPublished: input.isPublished,
+        expiresAt: input.expiresAt,
       })
     },
     onSuccess: () => {

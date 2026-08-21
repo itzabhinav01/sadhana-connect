@@ -11,6 +11,13 @@ const { useAnnouncementsMock } = vi.hoisted(() => ({
 vi.mock('@/application/announcements/use-announcements', () => ({
   useAnnouncements: useAnnouncementsMock,
 }))
+// Comments have their own dedicated test coverage
+// (AnnouncementComments.test.tsx) — stubbed here so this file stays
+// focused on AnnouncementDetailPage's own loading/error/not-available/
+// found states.
+vi.mock('@/presentation/pages/announcements/AnnouncementComments', () => ({
+  AnnouncementComments: () => <div data-testid="announcement-comments-stub" />,
+}))
 
 function renderAtId(id: string) {
   return render(
@@ -55,7 +62,7 @@ describe('AnnouncementDetailPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows a not-available message when the id does not match any visible announcement', () => {
+  it('shows a generic not-available message when the id does not match any visible announcement', () => {
     useAnnouncementsMock.mockReturnValue({
       isPending: false,
       isError: false,
@@ -66,11 +73,11 @@ describe('AnnouncementDetailPage', () => {
     renderAtId('a1')
 
     expect(
-      screen.getByText('This announcement is not available.'),
+      screen.getByText('This announcement is no longer available.'),
     ).toBeInTheDocument()
   })
 
-  it('renders the title and content when the announcement is visible to this viewer', () => {
+  it('renders the title, content, and comment section when the announcement is visible to this viewer', () => {
     useAnnouncementsMock.mockReturnValue({
       isPending: false,
       isError: false,
@@ -78,6 +85,7 @@ describe('AnnouncementDetailPage', () => {
       data: [
         {
           id: 'a1',
+          authorId: 'mentor-1',
           title: 'Temple Closure',
           content: 'The temple will be closed for cleaning on Monday.',
         },
@@ -92,5 +100,6 @@ describe('AnnouncementDetailPage', () => {
     expect(
       screen.getByText('The temple will be closed for cleaning on Monday.'),
     ).toBeInTheDocument()
+    expect(screen.getByTestId('announcement-comments-stub')).toBeInTheDocument()
   })
 })
