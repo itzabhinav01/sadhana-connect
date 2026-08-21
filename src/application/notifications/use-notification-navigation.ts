@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
+import { useAuth } from '@/application/auth/use-auth'
 import type { SadhanaNotification } from '@/domain/entities/notification'
 import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
 
@@ -12,6 +13,8 @@ import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadha
 export function useNotificationNavigation() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { session } = useAuth()
+  const userId = session?.userId ?? null
 
   return async function navigateToNotification(
     notification: SadhanaNotification,
@@ -19,7 +22,11 @@ export function useNotificationNavigation() {
     if (notification.type === 'mentor_comment' && notification.relatedReportId) {
       const reportId = notification.relatedReportId
       const reportDate = await queryClient.fetchQuery({
-        queryKey: ['sadhana-report', 'date-by-id', reportId],
+        // Scoped by userId, consistent with every other query key in the
+        // app — the fetch itself is already RLS-authorized regardless,
+        // but an unscoped key would let this one cache entry be the sole
+        // exception across account switches on a shared device.
+        queryKey: ['sadhana-report', 'date-by-id', userId, reportId],
         queryFn: () => supabaseSadhanaReportRepository.getReportDateById(reportId),
       })
       if (reportDate) {

@@ -119,4 +119,21 @@ describe('sadhanaReportSchema', () => {
     )
     expect(result.success).toBe(true)
   })
+
+  it('accepts the smallint maximum (32767) for a numeric field', () => {
+    const result = sadhanaReportSchema.safeParse(
+      validInput({ totalRounds: '32767' }),
+    )
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects one over the smallint maximum for a numeric field', () => {
+    const result = sadhanaReportSchema.safeParse(
+      validInput({ totalRounds: '32768' }),
+    )
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0]?.path).toContain('totalRounds')
+    }
+  })
 })

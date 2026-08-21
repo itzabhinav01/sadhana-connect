@@ -7,6 +7,7 @@ import { useSignOut } from '@/application/auth/use-sign-out'
 import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
+import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 
@@ -204,5 +205,32 @@ describe('useSignOut', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(queryClient.getQueryData(announcementsKey)).toBeUndefined()
+  })
+
+  it("removes cached notification queries on sign-out, so a devotee's notifications never survive into a different account's session", async () => {
+    signOutMock.mockResolvedValue(undefined)
+
+    const queryClient = new QueryClient()
+    const listKey = notificationQueryKeys.list('user-1')
+    const unreadCountKey = notificationQueryKeys.unreadCount('user-1')
+    queryClient.setQueryData(listKey, { notifications: [{ id: 'n1' }], nextCursor: null })
+    queryClient.setQueryData(unreadCountKey, 3)
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      )
+    }
+
+    const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(queryClient.getQueryData(listKey)).toBeUndefined()
+    expect(queryClient.getQueryData(unreadCountKey)).toBeUndefined()
   })
 })

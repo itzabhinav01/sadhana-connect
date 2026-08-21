@@ -4,6 +4,7 @@ import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
+import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import { supabaseAuthRepository } from '@/infrastructure/supabase/auth-repository'
@@ -26,6 +27,7 @@ export function useSignOut() {
       queryClient.removeQueries({ queryKey: commentQueryKeys.all })
       queryClient.removeQueries({ queryKey: announcementQueryKeys.all })
       queryClient.removeQueries({ queryKey: adminQueryKeys.all })
+      queryClient.removeQueries({ queryKey: notificationQueryKeys.all })
     },
   })
 }

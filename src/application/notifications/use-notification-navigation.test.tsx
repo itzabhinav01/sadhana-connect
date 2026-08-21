@@ -7,9 +7,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useNotificationNavigation } from '@/application/notifications/use-notification-navigation'
 import type { SadhanaNotification } from '@/domain/entities/notification'
 
-const { navigateMock, getReportDateByIdMock } = vi.hoisted(() => ({
+const { navigateMock, getReportDateByIdMock, useAuthMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
   getReportDateByIdMock: vi.fn(),
+  useAuthMock: vi.fn(),
 }))
 
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -19,6 +20,10 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 vi.mock('@/infrastructure/supabase/sadhana-report-repository', () => ({
   supabaseSadhanaReportRepository: { getReportDateById: getReportDateByIdMock },
+}))
+
+vi.mock('@/application/auth/use-auth', () => ({
+  useAuth: useAuthMock,
 }))
 
 function baseNotification(
@@ -54,6 +59,11 @@ describe('useNotificationNavigation', () => {
   beforeEach(() => {
     navigateMock.mockReset()
     getReportDateByIdMock.mockReset()
+    useAuthMock.mockReset()
+    useAuthMock.mockReturnValue({
+      session: { userId: 'user-1', email: 'a@b.com', emailConfirmedAt: null },
+      isLoading: false,
+    })
   })
 
   it('resolves the report date and navigates to /sadhana?date=... for a mentor_comment notification', async () => {
@@ -66,6 +76,28 @@ describe('useNotificationNavigation', () => {
 
     expect(getReportDateByIdMock).toHaveBeenCalledWith('report-1')
     expect(navigateMock).toHaveBeenCalledWith('/sadhana?date=2026-01-10')
+  })
+
+  it('scopes the report-date cache lookup by the current userId', async () => {
+    getReportDateByIdMock.mockResolvedValue('2026-01-10')
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const fetchQuerySpy = vi.spyOn(queryClient, 'fetchQuery')
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>{children}</MemoryRouter>
+      </QueryClientProvider>
+    )
+    const { result } = renderHook(() => useNotificationNavigation(), { wrapper })
+
+    await result.current(
+      baseNotification({ type: 'mentor_comment', relatedReportId: 'report-1' }),
+    )
+
+    expect(fetchQuerySpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['sadhana-report', 'date-by-id', 'user-1', 'report-1'],
+      }),
+    )
   })
 
   it('navigates to /announcements/:id for an announcement notification', async () => {

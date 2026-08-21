@@ -85,6 +85,22 @@ const requestSchema = z.object({
   targetUserId: z.string().uuid(),
 })
 
+type Action = z.infer<typeof requestSchema>['action']
+
+// Phase 19 remediation round 2: per-admin, per-action limits over a
+// fixed 5-minute window, enforced via check_and_increment_admin_rate_limit()
+// (0010_admin_action_rate_limits) — one atomic Postgres UPSERT, durable
+// and correct across however many instances of this function are
+// running concurrently. generate_recovery_link is deliberately the
+// strictest: it mints a live, one-time credential-equivalent link per
+// call, unlike the other three actions.
+const ACTION_RATE_LIMITS: Record<Action, number> = {
+  ban: 20,
+  unban: 20,
+  get_user_email: 30,
+  generate_recovery_link: 5,
+}
+
 type ServiceClient = ReturnType<typeof createClient>
 
 function jsonResponse(body: unknown, status: number, corsHeaders: Headers): Response {
@@ -272,12 +288,49 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Constructed now — needed both for the rate-limit check immediately
+  // below and, if the limit isn't exceeded, for the requested action
+  // itself. Still never touches any public table directly: the rate
+  // limit is only ever reached through the narrow, service-role-only
+  // check_and_increment_admin_rate_limit() RPC (0010).
+  const serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_SECRET_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  // Every caller reaching this point has already passed authentication,
+  // super_admin authorization, self-target rejection, peer-admin
+  // rejection, and target-existence validation above — rate limiting is
+  // an additional gate on an already-authorized request, never a
+  // substitute for or bypass of any of those checks.
+  const { data: requestCount, error: rateLimitError } = await serviceClient.rpc(
+    'check_and_increment_admin_rate_limit',
+    { p_admin_id: callerId, p_action: action },
+  )
+
+  if (rateLimitError || typeof requestCount !== 'number') {
+    // Fail closed: if the rate-limit check itself cannot be evaluated,
+    // the action does not proceed — a broken rate limiter must never
+    // silently become an open gate. Generic response, same discipline
+    // as the action-failure catch block below: no raw DB error forwarded.
+    console.error('admin-account-actions: rate limit check failed', { action })
+    return jsonResponse(
+      { ok: false, error: 'The requested action could not be completed.' },
+      502,
+      corsHeaders,
+    )
+  }
+
+  if (requestCount > ACTION_RATE_LIMITS[action]) {
+    // Deliberately reveals nothing beyond "too many requests": not the
+    // current count, not the configured limit, not the window.
+    return jsonResponse(
+      { error: 'Too many requests. Please wait and try again.' },
+      429,
+      corsHeaders,
+    )
+  }
+
   try {
-    // Constructed only now, only for the Auth Admin call the requested
-    // action actually needs — never touches any public table.
-    const serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_SECRET_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
     const result = await ACTION_HANDLERS[action](serviceClient, targetUserId)
     return jsonResponse(result, 200, corsHeaders)
   } catch (error) {
