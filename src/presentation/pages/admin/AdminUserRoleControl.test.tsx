@@ -1,9 +1,21 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AdminUser } from '@/domain/entities/admin-user'
 import { AdminUserRoleControl } from '@/presentation/pages/admin/AdminUserRoleControl'
+
+// Radix's Select renders its popup in a portal with no native <select>
+// underneath, so userEvent.selectOptions doesn't apply — open the
+// trigger, then click the option by its visible text.
+async function selectOption(
+  user: ReturnType<typeof userEvent.setup>,
+  trigger: HTMLElement,
+  optionName: string,
+) {
+  await user.click(trigger)
+  await user.click(await screen.findByRole('option', { name: optionName }))
+}
 
 const { useMentorDevoteeCountMock, useChangeUserRoleMock } = vi.hoisted(() => ({
   useMentorDevoteeCountMock: vi.fn(),
@@ -25,8 +37,8 @@ const devotee: AdminUser = {
   fullName: 'Devotee One',
   role: 'devotee',
   isActive: true,
-  anonymizedAt: null,
   templeGroupId: null,
+  phoneNumber: null,
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
@@ -39,14 +51,45 @@ describe('AdminUserRoleControl', () => {
     useChangeUserRoleMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false })
   })
 
-  it('never offers super_admin as a selectable role', () => {
+  it('offers Devotee, Mentor, and Super Admin as selectable roles', async () => {
     useMentorDevoteeCountMock.mockReturnValue({ data: 0 })
+    const user = userEvent.setup()
     render(<AdminUserRoleControl user={devotee} />)
 
-    const select = screen.getByLabelText('Change role')
-    const options = within(select).getAllByRole('option')
-    expect(options.map((option) => option.textContent)).toEqual(['Devotee', 'Mentor'])
-    expect(screen.queryByText(/super admin/i)).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Change role'))
+    const options = await screen.findAllByRole('option')
+    expect(options.map((option) => option.textContent)).toEqual(['Devotee', 'Mentor', 'Super Admin'])
+  })
+
+  it('promotes a devotee straight to Super Admin', async () => {
+    useMentorDevoteeCountMock.mockReturnValue({ data: undefined })
+    const mutate = vi.fn()
+    useChangeUserRoleMock.mockReturnValue({ mutate, isPending: false, isError: false })
+    const user = userEvent.setup()
+    render(<AdminUserRoleControl user={devotee} />)
+
+    await selectOption(user, screen.getByLabelText('Change role'), 'Super Admin')
+    await user.click(screen.getByRole('button', { name: /save role/i }))
+
+    expect(mutate).toHaveBeenCalledWith(
+      { userId: 'devotee-1', currentRole: 'devotee', newRole: 'super_admin' },
+      expect.anything(),
+    )
+  })
+
+  it('blocks promoting a mentor straight to Super Admin while they have active devotees (same guard as demoting to Devotee)', async () => {
+    useMentorDevoteeCountMock.mockReturnValue({ data: 3 })
+    const user = userEvent.setup()
+    render(<AdminUserRoleControl user={mentor} />)
+
+    await selectOption(user, screen.getByLabelText('Change role'), 'Super Admin')
+
+    expect(
+      screen.getByText(
+        "This mentor still has active devotees. Reassign or deactivate all active devotees before changing the mentor's role.",
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /save role/i })).toBeDisabled()
   })
 
   it('allows selecting Mentor for a devotee (promotion) with no active-assignment gate applied', () => {
@@ -67,7 +110,7 @@ describe('AdminUserRoleControl', () => {
     const user = userEvent.setup()
     render(<AdminUserRoleControl user={mentor} />)
 
-    await user.selectOptions(screen.getByLabelText('Change role'), 'devotee')
+    await selectOption(user, screen.getByLabelText('Change role'), 'Devotee')
 
     expect(
       screen.getByText(
@@ -84,7 +127,7 @@ describe('AdminUserRoleControl', () => {
     const user = userEvent.setup()
     render(<AdminUserRoleControl user={mentor} />)
 
-    await user.selectOptions(screen.getByLabelText('Change role'), 'devotee')
+    await selectOption(user, screen.getByLabelText('Change role'), 'Devotee')
     expect(screen.getByRole('button', { name: /save role/i })).not.toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: /save role/i }))

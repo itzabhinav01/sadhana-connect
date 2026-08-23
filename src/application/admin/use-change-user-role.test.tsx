@@ -43,6 +43,35 @@ describe('useChangeUserRole', () => {
     })
   })
 
+  it('promotes a devotee straight to super_admin without ever checking the active-assignment count', async () => {
+    changeUserRoleMock.mockResolvedValue(undefined)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { result } = renderHook(() => useChangeUserRole(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    result.current.mutate({ userId: 'devotee-1', currentRole: 'devotee', newRole: 'super_admin' })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(getMentorDevoteeCountMock).not.toHaveBeenCalled()
+    expect(changeUserRoleMock).toHaveBeenCalledWith('devotee-1', 'super_admin')
+  })
+
+  it('re-queries the active-assignment count and blocks promoting a mentor straight to super_admin when non-zero (same orphan risk as demoting to devotee)', async () => {
+    getMentorDevoteeCountMock.mockResolvedValue(2)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { result } = renderHook(() => useChangeUserRole(), {
+      wrapper: createWrapper(queryClient),
+    })
+
+    result.current.mutate({ userId: 'mentor-1', currentRole: 'mentor', newRole: 'super_admin' })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(getMentorDevoteeCountMock).toHaveBeenCalledWith('mentor-1')
+    expect(changeUserRoleMock).not.toHaveBeenCalled()
+    expect(result.current.error).toBeInstanceOf(MentorHasActiveDevoteesError)
+  })
+
   it('promotes a devotee to mentor without ever checking the active-assignment count', async () => {
     changeUserRoleMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })

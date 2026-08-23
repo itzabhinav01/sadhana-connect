@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  HISTORY_SELECT_COLUMNS,
   RANGE_SUMMARY_SELECT_COLUMNS,
   SADHANA_REPORT_SELECT_COLUMNS,
 } from '@/infrastructure/supabase/sadhana-report-repository'
@@ -84,6 +85,39 @@ describe('RANGE_SUMMARY_SELECT_COLUMNS (listReportsInRange — weekly dashboard 
       'rounds_till_7am',
     ]) {
       expect(rangeColumns).not.toContain(column)
+    }
+  })
+})
+
+describe('HISTORY_SELECT_COLUMNS (listReportHistory — Phase 20B devotee oversight)', () => {
+  const historyColumns = HISTORY_SELECT_COLUMNS.split(',').map((c) => c.trim())
+
+  it('selects exactly the fields MentorDevoteeReportRow reads, including id for the comments toggle', () => {
+    expect(historyColumns.sort()).toEqual(
+      ['id', 'report_date', 'total_rounds', 'reading_minutes', 'hearing_minutes'].sort(),
+    )
+  })
+
+  it('excludes every field the history row/comments toggle does not read', () => {
+    for (const column of [
+      'profile_id',
+      'book_name',
+      'speaker_name',
+      'notes',
+      'signature_text',
+      'last_round_time',
+      'sleep_time',
+      'wake_time',
+      'office_going_time',
+      'office_return_time',
+      'created_at',
+      'updated_at',
+      'rounds_before_4_30am',
+      'rounds_till_7am',
+      'day_rest_minutes',
+      'total_rest_minutes',
+    ]) {
+      expect(historyColumns).not.toContain(column)
     }
   })
 })

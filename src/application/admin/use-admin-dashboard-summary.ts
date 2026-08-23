@@ -30,7 +30,7 @@ async function fetchDashboardSummary(): Promise<AdminDashboardSummary> {
     disabledCount,
     anonymizedCount,
     totalTempleGroups,
-    devoteesWithActiveMentor,
+    activeMentorAssignmentDevoteeIds,
     devoteesTotal,
     reportsSubmittedToday,
   ] = await Promise.all([
@@ -47,10 +47,11 @@ async function fetchDashboardSummary(): Promise<AdminDashboardSummary> {
       .select('id', { count: 'exact', head: true })
       .not('anonymized_at', 'is', null),
     supabase.from('temple_groups').select('id', { count: 'exact', head: true }),
-    supabase
-      .from('mentor_assignments')
-      .select('devotee_id', { count: 'exact', head: true })
-      .eq('is_active', true),
+    // Not a head/count query: a devotee can now have up to 3 active
+    // mentors (approved cap, 0015), so counting matching ROWS would
+    // count that devotee up to 3 times. The actual devotee_id values are
+    // fetched instead and deduped below.
+    supabase.from('mentor_assignments').select('devotee_id').eq('is_active', true),
     supabase
       .from('profiles')
       .select('id', { count: 'exact', head: true })
@@ -69,15 +70,19 @@ async function fetchDashboardSummary(): Promise<AdminDashboardSummary> {
     disabledCount,
     anonymizedCount,
     totalTempleGroups,
-    devoteesWithActiveMentor,
+    activeMentorAssignmentDevoteeIds,
     devoteesTotal,
     reportsSubmittedToday,
   ]) {
     if (result.error) throw result.error
   }
 
+  const distinctDevoteesWithActiveMentor = new Set(
+    (activeMentorAssignmentDevoteeIds.data ?? []).map((row) => row.devotee_id),
+  ).size
+
   const withoutActiveMentor = Math.max(
-    (devoteesTotal.count ?? 0) - (devoteesWithActiveMentor.count ?? 0),
+    (devoteesTotal.count ?? 0) - distinctDevoteesWithActiveMentor,
     0,
   )
 

@@ -1,9 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Announcement } from '@/domain/entities/announcement'
 import { MentorAnnouncementList } from '@/presentation/pages/mentor/MentorAnnouncementList'
+
+function renderList(announcements: Announcement[]) {
+  return render(
+    <MemoryRouter>
+      <MentorAnnouncementList announcements={announcements} />
+    </MemoryRouter>,
+  )
+}
 
 const { useAuthMock, useUpdateAnnouncementMock, useDeleteAnnouncementMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -73,7 +82,7 @@ describe('MentorAnnouncementList', () => {
   })
 
   it('renders each announcement title and content', () => {
-    render(<MentorAnnouncementList announcements={[ownAnnouncement, otherAnnouncement]} />)
+    renderList([ownAnnouncement, otherAnnouncement])
 
     expect(screen.getByText('My Notice')).toBeInTheDocument()
     expect(screen.getByText('Body text')).toBeInTheDocument()
@@ -81,14 +90,14 @@ describe('MentorAnnouncementList', () => {
   })
 
   it('shows Edit/Delete only for the current mentor\'s own announcement', () => {
-    render(<MentorAnnouncementList announcements={[ownAnnouncement, otherAnnouncement]} />)
+    renderList([ownAnnouncement, otherAnnouncement])
 
     expect(screen.getAllByRole('button', { name: 'Edit' })).toHaveLength(1)
     expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1)
   })
 
   it('marks an unpublished own announcement as a Draft', () => {
-    render(<MentorAnnouncementList announcements={[draftAnnouncement]} />)
+    renderList([draftAnnouncement])
 
     expect(screen.getByText('Draft')).toBeInTheDocument()
   })
@@ -98,7 +107,7 @@ describe('MentorAnnouncementList', () => {
     useDeleteAnnouncementMock.mockReturnValue({ mutate, isPending: false })
     const user = userEvent.setup()
 
-    render(<MentorAnnouncementList announcements={[ownAnnouncement]} />)
+    renderList([ownAnnouncement])
 
     await user.click(screen.getByRole('button', { name: 'Delete' }))
     expect(mutate).not.toHaveBeenCalled()
@@ -115,7 +124,7 @@ describe('MentorAnnouncementList', () => {
     useUpdateAnnouncementMock.mockReturnValue({ mutate, isPending: false })
     const user = userEvent.setup()
 
-    render(<MentorAnnouncementList announcements={[ownAnnouncement]} />)
+    renderList([ownAnnouncement])
 
     await user.click(screen.getByRole('button', { name: 'Edit' }))
     const titleInput = screen.getByLabelText('Edit title')
@@ -138,7 +147,7 @@ describe('MentorAnnouncementList', () => {
 
   it('shows "Permanent" for a null expiresAt and "Expires <date>" for a set one', () => {
     const expiring: Announcement = { ...ownAnnouncement, id: 'a4', expiresAt: '2026-02-01T00:00:00.000Z' }
-    render(<MentorAnnouncementList announcements={[ownAnnouncement, expiring]} />)
+    renderList([ownAnnouncement, expiring])
 
     expect(screen.getByText('Permanent')).toBeInTheDocument()
     expect(screen.getByText(/Expires/)).toBeInTheDocument()
@@ -149,7 +158,7 @@ describe('MentorAnnouncementList', () => {
     useUpdateAnnouncementMock.mockReturnValue({ mutate, isPending: false })
     const user = userEvent.setup()
 
-    render(<MentorAnnouncementList announcements={[ownAnnouncement]} />)
+    renderList([ownAnnouncement])
 
     expect(screen.queryByText('Pinned')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Pin' }))
@@ -166,9 +175,18 @@ describe('MentorAnnouncementList', () => {
 
   it('renders a "Pinned" badge and an Unpin button for an already-pinned announcement', () => {
     const pinned: Announcement = { ...ownAnnouncement, isPinned: true }
-    render(<MentorAnnouncementList announcements={[pinned]} />)
+    renderList([pinned])
 
     expect(screen.getByText('Pinned')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Unpin' })).toBeInTheDocument()
+  })
+
+  it('links every announcement (own or not) to its comment thread at /announcements/:id', () => {
+    renderList([ownAnnouncement, otherAnnouncement])
+
+    const links = screen.getAllByRole('link', { name: 'View comments' })
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute('href', '/announcements/a1')
+    expect(links[1]).toHaveAttribute('href', '/announcements/a2')
   })
 })

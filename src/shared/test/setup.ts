@@ -30,6 +30,23 @@ if (!window.ResizeObserver) {
   }
 }
 
+// jsdom does not implement the Pointer Events capture API or
+// scrollIntoView. Radix's Select (select.tsx) calls these internally
+// when its trigger is clicked — without them, opening the dropdown in a
+// test throws (a well-documented jsdom/Radix gap, not app behavior).
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false
+}
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {}
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {}
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}
+
 afterEach(() => {
   cleanup()
 })

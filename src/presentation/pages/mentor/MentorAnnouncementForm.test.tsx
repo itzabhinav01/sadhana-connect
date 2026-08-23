@@ -4,6 +4,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { MentorAnnouncementForm } from '@/presentation/pages/mentor/MentorAnnouncementForm'
 
+// Radix's Select renders its popup in a portal with no native <select>
+// underneath, so userEvent.selectOptions doesn't apply — open the
+// trigger, then click the option by its visible text.
+async function selectOption(
+  user: ReturnType<typeof userEvent.setup>,
+  trigger: HTMLElement,
+  optionName: string,
+) {
+  await user.click(trigger)
+  await user.click(await screen.findByRole('option', { name: optionName }))
+}
+
 const { useCreateMentorAnnouncementMock } = vi.hoisted(() => ({
   useCreateMentorAnnouncementMock: vi.fn(),
 }))
@@ -85,7 +97,7 @@ describe('MentorAnnouncementForm', () => {
     render(<MentorAnnouncementForm />)
     await user.type(screen.getByLabelText('Title'), 'Weekly Notice')
     await user.type(screen.getByLabelText('Content'), 'Expires in a week.')
-    await user.selectOptions(screen.getByLabelText('Expiration'), '7d')
+    await selectOption(user, screen.getByLabelText('Expiration'), '7 days')
     await user.click(screen.getByRole('button', { name: /post announcement/i }))
 
     expect(mutate).toHaveBeenCalledTimes(1)
@@ -104,7 +116,7 @@ describe('MentorAnnouncementForm', () => {
     render(<MentorAnnouncementForm />)
     await user.type(screen.getByLabelText('Title'), 'Custom Expiry Notice')
     await user.type(screen.getByLabelText('Content'), 'Body.')
-    await user.selectOptions(screen.getByLabelText('Expiration'), 'custom')
+    await selectOption(user, screen.getByLabelText('Expiration'), 'Custom date')
     await user.click(screen.getByRole('button', { name: /post announcement/i }))
 
     expect(mutate).not.toHaveBeenCalled()

@@ -37,6 +37,7 @@ describe('signUpSchema', () => {
   const valid = {
     fullName: 'Umang Singadiya',
     email: 'devotee@example.com',
+    phoneNumber: '+919876543210',
     password: 'password123',
     confirmPassword: 'password123',
   }

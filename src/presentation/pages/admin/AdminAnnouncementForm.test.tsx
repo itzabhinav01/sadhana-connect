@@ -4,6 +4,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AdminAnnouncementForm } from '@/presentation/pages/admin/AdminAnnouncementForm'
 
+// Radix's Select renders its popup in a portal with no native <select>
+// underneath, so userEvent.selectOptions doesn't apply — open the
+// trigger, then click the option by its visible text.
+async function selectOption(
+  user: ReturnType<typeof userEvent.setup>,
+  trigger: HTMLElement,
+  optionName: string,
+) {
+  await user.click(trigger)
+  await user.click(await screen.findByRole('option', { name: optionName }))
+}
+
 const { useCreateAdminAnnouncementMock, useAdminTempleGroupsMock } = vi.hoisted(() => ({
   useCreateAdminAnnouncementMock: vi.fn(),
   useAdminTempleGroupsMock: vi.fn(),
@@ -54,7 +66,7 @@ describe('AdminAnnouncementForm', () => {
     render(<AdminAnnouncementForm />)
     await user.type(screen.getByLabelText('Title'), 'Group Notice')
     await user.type(screen.getByLabelText('Content'), 'Body.')
-    await user.selectOptions(screen.getByLabelText('Audience'), 'A specific temple group')
+    await selectOption(user, screen.getByLabelText('Audience'), 'A specific temple group')
     await user.click(screen.getByRole('button', { name: /post announcement/i }))
 
     expect(mutate).not.toHaveBeenCalled()
@@ -69,7 +81,7 @@ describe('AdminAnnouncementForm', () => {
     render(<AdminAnnouncementForm />)
     await user.type(screen.getByLabelText('Title'), 'Short Notice')
     await user.type(screen.getByLabelText('Content'), 'Expires soon.')
-    await user.selectOptions(screen.getByLabelText('Expiration'), '3d')
+    await selectOption(user, screen.getByLabelText('Expiration'), '3 days')
     await user.click(screen.getByRole('button', { name: /post announcement/i }))
 
     expect(mutate).toHaveBeenCalledTimes(1)

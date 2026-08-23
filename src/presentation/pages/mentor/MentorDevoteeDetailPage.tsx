@@ -2,7 +2,6 @@ import { useParams } from 'react-router-dom'
 
 import { useDevoteeAssignedSince } from '@/application/mentor/use-devotee-assigned-since'
 import { useDevoteeProfile } from '@/application/mentor/use-devotee-profile'
-import { useDevoteeRecentReports } from '@/application/mentor/use-devotee-recent-reports'
 import { useDevoteeTodayReport } from '@/application/mentor/use-devotee-today-report'
 import {
   Card,
@@ -10,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/presentation/components/ui/card'
+import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
 
 function formatDisplayDate(iso: string) {
@@ -29,7 +29,6 @@ export function MentorDevoteeDetailPage() {
 
   const profileQuery = useDevoteeProfile(devoteeId)
   const todayReportQuery = useDevoteeTodayReport(devoteeId)
-  const recentReportsQuery = useDevoteeRecentReports(devoteeId)
   const assignedSinceQuery = useDevoteeAssignedSince(devoteeId)
 
   return (
@@ -64,6 +63,9 @@ export function MentorDevoteeDetailPage() {
                 {formatDisplayDate(assignedSinceQuery.data.slice(0, 10))}
               </p>
             ) : null}
+            <p className="text-muted-foreground">
+              Phone: {profileQuery.data.phoneNumber ?? 'Not provided'}
+            </p>
           </div>
 
           <Card>
@@ -92,37 +94,7 @@ export function MentorDevoteeDetailPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <h2>Recent Reports</h2>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {recentReportsQuery.isPending ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
-              ) : null}
-              {recentReportsQuery.isError ? (
-                <p className="text-sm text-destructive">
-                  Something went wrong loading recent reports.
-                </p>
-              ) : null}
-              {recentReportsQuery.data && recentReportsQuery.data.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No reports yet.
-                </p>
-              ) : null}
-              {recentReportsQuery.data && recentReportsQuery.data.length > 0 ? (
-                <ul className="flex flex-col divide-y divide-border">
-                  {recentReportsQuery.data.map((report) => (
-                    <li key={report.id}>
-                      <MentorDevoteeReportRow report={report} />
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </CardContent>
-          </Card>
+          <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
         </>
       ) : null}
     </div>

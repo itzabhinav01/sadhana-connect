@@ -109,4 +109,15 @@ export const supabaseNotificationRepository: NotificationRepository = {
 
     if (error) throw error
   },
+
+  async sendReminderNotification(devoteeId, message) {
+    const { data, error } = await supabase.rpc('send_reminder_notification', {
+      p_devotee_id: devoteeId,
+      p_message: message,
+    })
+
+    if (error) throw error
+
+    return mapRow(data as NotificationRow)
+  },
 }

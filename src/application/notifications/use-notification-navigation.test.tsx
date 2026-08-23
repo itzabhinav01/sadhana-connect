@@ -126,6 +126,21 @@ describe('useNotificationNavigation', () => {
     expect(navigateMock).toHaveBeenCalledWith('/notifications')
   })
 
+  it('navigates to /sadhana for a sadhana_reminder notification (no single related row to deep-link to)', async () => {
+    const { result } = renderNavigationHook()
+
+    await result.current(
+      baseNotification({
+        type: 'sadhana_reminder',
+        relatedReportId: null,
+        relatedAnnouncementId: null,
+      }),
+    )
+
+    expect(navigateMock).toHaveBeenCalledWith('/sadhana')
+    expect(getReportDateByIdMock).not.toHaveBeenCalled()
+  })
+
   it('falls back to /notifications for a notification with no related id', async () => {
     const { result } = renderNavigationHook()
 

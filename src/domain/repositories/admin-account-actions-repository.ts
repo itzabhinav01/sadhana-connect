@@ -1,3 +1,9 @@
+export type HardDeleteStage = 'profile-deleted' | 'complete'
+
+export interface HardDeleteResult {
+  stage: HardDeleteStage
+}
+
 // Client-side boundary for the trusted admin-account-actions Edge
 // Function — the ONLY place service-role-backed Auth Admin operations are
 // reachable from. Every method here is a thin network call; all real
@@ -16,4 +22,13 @@ export interface AdminAccountActionsRepository {
   // expose it to mentors under existing row-level profiles RLS), never
   // fetched as part of any list.
   getUserEmail(targetUserId: string): Promise<string>
+
+  // Phase 20C: true hard delete — permanently removes the profile (and
+  // everything that cascades from it per 0013) and the underlying
+  // Supabase Auth account. Irreversible. 'profile-deleted' means the
+  // data is gone but the Auth account's removal could not be confirmed
+  // (rare; see the Edge Function's own doc comment) — there is no retry
+  // for this stage, since the profile this caller was looking at is
+  // already gone.
+  hardDeleteUser(targetUserId: string): Promise<HardDeleteResult>
 }

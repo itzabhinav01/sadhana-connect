@@ -1,5 +1,6 @@
 import type {
   SadhanaReport,
+  SadhanaReportHistoryEntry,
   SadhanaReportRangeSummary,
 } from '@/domain/entities/sadhana-report'
 
@@ -91,4 +92,16 @@ export interface SadhanaReportRepository {
     profileId: string,
     options: ListSadhanaReportsOptions,
   ): Promise<ListSadhanaReportsResult>
+
+  // Inclusive date range, ordered by report_date ascending — backs
+  // DevoteeSadhanaHistorySection (Phase 20B: mentor/admin devotee
+  // oversight). RLS (sadhana_reports_select's is_mentor_of()/
+  // is_super_admin() branches) is what actually authorizes a
+  // mentor/admin caller to read another profile's reports; profileId is
+  // passed as-is, same convention as every other method here.
+  listReportHistory(
+    profileId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<SadhanaReportHistoryEntry[]>
 }

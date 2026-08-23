@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { phoneNumberField } from '@/application/profile/phone-number-schema'
+
 const emailField = z
   .string()
   .trim()
@@ -20,6 +22,7 @@ export const signUpSchema = z
   .object({
     fullName: z.string().trim().min(1, 'Full name is required'),
     email: emailField,
+    phoneNumber: phoneNumberField,
     password: passwordField,
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })

@@ -1,5 +1,6 @@
 import type {
   SadhanaReport,
+  SadhanaReportHistoryEntry,
   SadhanaReportRangeSummary,
 } from '@/domain/entities/sadhana-report'
 import type {
@@ -70,6 +71,32 @@ function mapRangeSummaryRow(
     hearingMinutes: row.hearing_minutes,
     dayRestMinutes: row.day_rest_minutes,
     totalRestMinutes: row.total_rest_minutes,
+  }
+}
+
+// listReportHistory's shape (Phase 20B) — backs DevoteeSadhanaHistorySection.
+// Own narrow selection rather than reusing RANGE_SUMMARY_SELECT_COLUMNS:
+// this view needs `id` (to key the per-report comments toggle), which
+// that selection's own traced consumers (weekly chart, Analytics) never
+// read and deliberately omit.
+export const HISTORY_SELECT_COLUMNS =
+  'id, report_date, total_rounds, reading_minutes, hearing_minutes'
+
+interface SadhanaReportHistoryRow {
+  id: string
+  report_date: string
+  total_rounds: number
+  reading_minutes: number
+  hearing_minutes: number
+}
+
+function mapHistoryRow(row: SadhanaReportHistoryRow): SadhanaReportHistoryEntry {
+  return {
+    id: row.id,
+    reportDate: row.report_date,
+    totalRounds: row.total_rounds,
+    readingMinutes: row.reading_minutes,
+    hearingMinutes: row.hearing_minutes,
   }
 }
 
@@ -229,5 +256,19 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
       : null
 
     return { reports, nextCursor }
+  },
+
+  async listReportHistory(profileId, startDate, endDate) {
+    const { data, error } = await supabase
+      .from('sadhana_reports')
+      .select(HISTORY_SELECT_COLUMNS)
+      .eq('profile_id', profileId)
+      .gte('report_date', startDate)
+      .lte('report_date', endDate)
+      .order('report_date', { ascending: true })
+
+    if (error) throw error
+
+    return (data as SadhanaReportHistoryRow[]).map(mapHistoryRow)
   },
 }

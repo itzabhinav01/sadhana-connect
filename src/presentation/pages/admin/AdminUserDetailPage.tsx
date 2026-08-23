@@ -1,9 +1,11 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { useAdminAssignments } from '@/application/admin/use-admin-assignments'
 import { useAdminUserDetail } from '@/application/admin/use-admin-user-detail'
+import { useDeactivateAssignment } from '@/application/admin/use-deactivate-assignment'
 import { useMentorDevoteeCount } from '@/application/admin/use-mentor-devotee-count'
-import { deriveAdminUserStatus } from '@/domain/entities/admin-user'
+import { Button } from '@/presentation/components/ui/button'
+import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
 import { AdminUserEmailReveal } from '@/presentation/pages/admin/AdminUserEmailReveal'
 import { AdminUserLifecycleControls } from '@/presentation/pages/admin/AdminUserLifecycleControls'
 import { AdminUserPasswordReset } from '@/presentation/pages/admin/AdminUserPasswordReset'
@@ -16,6 +18,7 @@ function formatDate(iso: string) {
 
 export function AdminUserDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const userQuery = useAdminUserDetail(id ?? '')
 
   if (userQuery.isPending) {
@@ -33,7 +36,7 @@ export function AdminUserDetailPage() {
       <div>
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold text-foreground">{user.fullName}</h1>
-          <AdminUserStatusBadge isActive={user.isActive} anonymizedAt={user.anonymizedAt} />
+          <AdminUserStatusBadge isActive={user.isActive} />
         </div>
         <p className="text-muted-foreground">Joined {formatDate(user.createdAt)}</p>
       </div>
@@ -43,22 +46,21 @@ export function AdminUserDetailPage() {
         <AdminUserEmailReveal targetUserId={user.id} />
       </div>
 
+      <div className="rounded-md border p-3">
+        <span className="text-sm font-medium text-foreground">Phone number</span>
+        <p className="text-sm text-muted-foreground">{user.phoneNumber ?? 'Not provided'}</p>
+      </div>
+
       {user.role === 'mentor' ? <MentorInfoPanel mentorId={user.id} /> : null}
       {user.role === 'devotee' ? <DevoteeInfoPanel devoteeId={user.id} /> : null}
 
-      {/* Anonymized/deleted accounts never get a role control — status
-          (shown above via AdminUserStatusBadge as "Deleted") is the only
-          thing shown in its place. This is a durable terminal state; role
-          mutation on it is never offered, matching the same reasoning as
-          AdminUserLifecycleControls never offering "Enable" here. RLS/the
-          protect_profile_restricted_columns trigger are unchanged — this
-          is a presentation-layer guard only. */}
-      {user.role !== 'super_admin' &&
-      deriveAdminUserStatus(user.isActive, user.anonymizedAt) !== 'anonymized' ? (
-        <AdminUserRoleControl user={user} />
-      ) : null}
+      {/* Phase 20C: there is no durable "anonymized" state to guard
+          against anymore — a deleted account is a genuinely deleted row,
+          not a row you could navigate back to. The only remaining guard
+          is the existing super_admin exclusion. */}
+      {user.role !== 'super_admin' ? <AdminUserRoleControl user={user} /> : null}
 
-      <AdminUserLifecycleControls user={user} />
+      <AdminUserLifecycleControls user={user} onDeleted={() => navigate('/admin/users')} />
 
       <AdminUserPasswordReset targetUserId={user.id} />
     </div>
@@ -78,18 +80,48 @@ function MentorInfoPanel({ mentorId }: { mentorId: string }) {
   )
 }
 
+// A devotee may have up to 3 active mentors at once (approved cap,
+// 0015) — this lists every one of them with its own Remove action,
+// rather than assuming a single "the" mentor. Adding a mentor happens
+// on the Assignments page (AdminAssignmentForm), which already searches
+// across every devotee/mentor, not just this one.
 function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
   const assignmentsQuery = useAdminAssignments({ devoteeId })
-  const activeAssignment = assignmentsQuery.data?.find((assignment) => assignment.isActive)
+  const activeAssignments = assignmentsQuery.data?.filter((assignment) => assignment.isActive) ?? []
+  const deactivate = useDeactivateAssignment()
 
   return (
-    <div className="rounded-md border p-3">
-      <span className="text-sm font-medium text-foreground">Current mentor</span>
-      <p className="text-sm text-muted-foreground">
-        {assignmentsQuery.isPending
-          ? 'Loading…'
-          : (activeAssignment?.mentorName ?? 'No mentor assigned')}
-      </p>
+    <div className="flex flex-col gap-4">
+      <div className="rounded-md border p-3">
+        <span className="text-sm font-medium text-foreground">Current mentors</span>
+        {assignmentsQuery.isPending ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : activeAssignments.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No mentor assigned</p>
+        ) : (
+          <ul className="flex flex-col gap-2 pt-1">
+            {activeAssignments.map((assignment) => (
+              <li
+                key={assignment.id}
+                className="flex items-center justify-between gap-2 text-sm text-muted-foreground"
+              >
+                <span>{assignment.mentorName}</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => deactivate.mutate(assignment.id)}
+                  disabled={deactivate.isPending}
+                >
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
     </div>
   )
 }

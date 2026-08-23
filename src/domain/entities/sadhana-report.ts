@@ -51,3 +51,17 @@ export interface MentorDevoteeReportSummary {
   reportDate: string
   totalRounds: number
 }
+
+// listReportHistory's shape (Phase 20B) — backs DevoteeSadhanaHistorySection,
+// used by both the Mentor devotee-detail page and the Admin devotee-detail
+// view. Deliberately its own narrow projection rather than reusing
+// SadhanaReportRangeSummary: that type's own selection is specifically
+// traced/documented for the dashboard chart + Analytics page and omits
+// `id`, which this view needs (to key the per-report comments toggle).
+export interface SadhanaReportHistoryEntry {
+  id: string
+  reportDate: string
+  totalRounds: number
+  readingMinutes: number
+  hearingMinutes: number
+}

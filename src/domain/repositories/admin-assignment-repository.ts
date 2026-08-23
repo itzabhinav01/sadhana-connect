@@ -13,11 +13,11 @@ export interface MentorDevoteeCount {
 export interface AdminAssignmentRepository {
   listAssignments(filters: AdminAssignmentFilters): Promise<AdminMentorAssignment[]>
 
-  // Wraps public.reassign_devotee(uuid, uuid) via RPC — SECURITY INVOKER,
-  // atomic deactivate-old + insert-new, relies entirely on the caller's
-  // own RLS privileges (see migration 0005). This repository method adds
-  // no authorization logic of its own.
-  reassignDevotee(devoteeId: string, newMentorId: string): Promise<AdminMentorAssignment>
+  // Wraps public.assign_devotee_to_mentor(uuid, uuid) via RPC — SECURITY
+  // INVOKER, additive only (never deactivates any other assignment),
+  // relies entirely on the caller's own RLS privileges (see migration
+  // 0015). This repository method adds no authorization logic of its own.
+  assignMentor(devoteeId: string, mentorId: string): Promise<AdminMentorAssignment>
 
   deactivateAssignment(assignmentId: string): Promise<void>
 

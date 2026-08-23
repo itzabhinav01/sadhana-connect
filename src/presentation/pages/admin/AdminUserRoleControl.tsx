@@ -9,35 +9,51 @@ import { useMentorDevoteeCount } from '@/application/admin/use-mentor-devotee-co
 import type { AdminUser } from '@/domain/entities/admin-user'
 import type { AppRole } from '@/domain/entities/profile'
 import { Button } from '@/presentation/components/ui/button'
-import { Select } from '@/presentation/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/presentation/components/ui/select'
 
 interface AdminUserRoleControlProps {
   user: AdminUser
 }
 
-// super_admin is never a selectable value here — the option simply does
-// not exist in this control, matching the approved design. Devotee <->
-// Mentor only.
-const SELECTABLE_ROLES: Extract<AppRole, 'devotee' | 'mentor'>[] = ['devotee', 'mentor']
+// A Super Admin may promote a Devotee/Mentor straight to Super Admin
+// from here (approved). Note this control only ever renders for a
+// devotee/mentor target in the first place — AdminUserDetailPage hides
+// it entirely once a user already IS super_admin, so demoting an
+// existing Super Admin is still never offered through this control.
+const SELECTABLE_ROLES: AppRole[] = ['devotee', 'mentor', 'super_admin']
+
+const ROLE_LABEL: Record<AppRole, string> = {
+  devotee: 'Devotee',
+  mentor: 'Mentor',
+  super_admin: 'Super Admin',
+}
 
 export function AdminUserRoleControl({ user }: AdminUserRoleControlProps) {
   // super_admin accounts never get this control at all — the detail page
   // only renders it for devotee/mentor users.
-  const [selectedRole, setSelectedRole] = useState<Extract<AppRole, 'devotee' | 'mentor'>>(
+  const [selectedRole, setSelectedRole] = useState<AppRole>(
     user.role === 'mentor' ? 'mentor' : 'devotee',
   )
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null)
 
-  // Presentation-time gate: disable the Mentor -> Devotee transition
-  // outright when this mentor currently has active devotees. Devotee ->
-  // Mentor is never gated (fetch is skipped entirely when the user is
-  // already a mentor, since the count doesn't apply to that direction).
+  // Presentation-time gate: disable any transition AWAY from Mentor
+  // (to Devotee or straight to Super Admin) when this mentor currently
+  // has active devotees — both destinations leave the same orphaned
+  // mentor_assignments risk. Devotee -> anything is never gated (fetch
+  // is skipped entirely when the user is already a mentor, since the
+  // count doesn't apply to that direction).
   const mentorDevoteeCount = useMentorDevoteeCount(user.role === 'mentor' ? user.id : null)
   const changeRole = useChangeUserRole()
 
-  const wouldDemoteMentor = user.role === 'mentor' && selectedRole === 'devotee'
+  const wouldLeaveMentorRole = user.role === 'mentor' && selectedRole !== 'mentor'
   const hasActiveDevotees = (mentorDevoteeCount.data ?? 0) > 0
-  const demoteBlockedByActiveDevotees = wouldDemoteMentor && hasActiveDevotees
+  const demoteBlockedByActiveDevotees = wouldLeaveMentorRole && hasActiveDevotees
 
   function handleSubmit() {
     setBlockedMessage(null)
@@ -61,18 +77,21 @@ export function AdminUserRoleControl({ user }: AdminUserRoleControlProps) {
       <div className="flex flex-wrap items-center gap-2">
         <Select
           value={selectedRole}
-          onChange={(event) => {
+          onValueChange={(value) => {
             setBlockedMessage(null)
-            setSelectedRole(event.target.value as Extract<AppRole, 'devotee' | 'mentor'>)
+            setSelectedRole(value as AppRole)
           }}
-          aria-label="Change role"
-          className="w-auto"
         >
-          {SELECTABLE_ROLES.map((role) => (
-            <option key={role} value={role}>
-              {role === 'devotee' ? 'Devotee' : 'Mentor'}
-            </option>
-          ))}
+          <SelectTrigger aria-label="Change role" className="w-auto">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SELECTABLE_ROLES.map((role) => (
+              <SelectItem key={role} value={role}>
+                {ROLE_LABEL[role]}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         <Button
           type="button"

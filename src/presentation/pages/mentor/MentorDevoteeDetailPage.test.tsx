@@ -7,13 +7,15 @@ import { MentorDevoteeDetailPage } from '@/presentation/pages/mentor/MentorDevot
 const {
   useDevoteeProfileMock,
   useDevoteeTodayReportMock,
-  useDevoteeRecentReportsMock,
+  useDevoteeReportHistoryMock,
   useDevoteeAssignedSinceMock,
+  useSendReminderMock,
 } = vi.hoisted(() => ({
   useDevoteeProfileMock: vi.fn(),
   useDevoteeTodayReportMock: vi.fn(),
-  useDevoteeRecentReportsMock: vi.fn(),
+  useDevoteeReportHistoryMock: vi.fn(),
   useDevoteeAssignedSinceMock: vi.fn(),
+  useSendReminderMock: vi.fn(),
 }))
 
 vi.mock('@/application/mentor/use-devotee-profile', () => ({
@@ -22,12 +24,18 @@ vi.mock('@/application/mentor/use-devotee-profile', () => ({
 vi.mock('@/application/mentor/use-devotee-today-report', () => ({
   useDevoteeTodayReport: useDevoteeTodayReportMock,
 }))
-vi.mock('@/application/mentor/use-devotee-recent-reports', () => ({
-  useDevoteeRecentReports: useDevoteeRecentReportsMock,
+vi.mock('@/application/sadhana/use-devotee-report-history', () => ({
+  useDevoteeReportHistory: useDevoteeReportHistoryMock,
 }))
 vi.mock('@/application/mentor/use-devotee-assigned-since', () => ({
   useDevoteeAssignedSince: useDevoteeAssignedSinceMock,
 }))
+vi.mock('@/application/notifications/use-send-reminder', async () => {
+  const actual = await vi.importActual<
+    typeof import('@/application/notifications/use-send-reminder')
+  >('@/application/notifications/use-send-reminder')
+  return { ...actual, useSendReminder: useSendReminderMock }
+})
 
 function renderAt(path: string) {
   return render(
@@ -47,11 +55,13 @@ describe('MentorDevoteeDetailPage', () => {
   beforeEach(() => {
     useDevoteeProfileMock.mockReset()
     useDevoteeTodayReportMock.mockReset()
-    useDevoteeRecentReportsMock.mockReset()
+    useDevoteeReportHistoryMock.mockReset()
     useDevoteeAssignedSinceMock.mockReset()
+    useSendReminderMock.mockReset()
     useDevoteeTodayReportMock.mockReturnValue(idleSuccessEmpty)
-    useDevoteeRecentReportsMock.mockReturnValue(idleSuccessList)
+    useDevoteeReportHistoryMock.mockReturnValue(idleSuccessList)
     useDevoteeAssignedSinceMock.mockReturnValue({ ...idleSuccessEmpty, data: null })
+    useSendReminderMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false, isSuccess: false })
   })
 
   it('shows a loading state while the profile is pending', () => {
@@ -124,7 +134,7 @@ describe('MentorDevoteeDetailPage', () => {
       isSuccess: true,
       data: null,
     })
-    useDevoteeRecentReportsMock.mockReturnValue({
+    useDevoteeReportHistoryMock.mockReturnValue({
       isPending: false,
       isError: false,
       isSuccess: true,

@@ -28,6 +28,7 @@ export function RegisterPage() {
     defaultValues: {
       fullName: '',
       email: '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
     },
@@ -41,6 +42,7 @@ export function RegisterPage() {
         email: values.email,
         password: values.password,
         fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
       },
       {
         onSuccess: ({ session }) => {
@@ -98,6 +100,25 @@ export function RegisterPage() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input type="email" autoComplete="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone number</FormLabel>
+                <FormControl>
+                  <Input
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder="+919876543210"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

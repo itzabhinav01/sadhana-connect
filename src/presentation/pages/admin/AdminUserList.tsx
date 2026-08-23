@@ -22,7 +22,7 @@ export function AdminUserList({ users }: AdminUserListProps) {
           >
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">{user.fullName}</span>
-              <AdminUserStatusBadge isActive={user.isActive} anonymizedAt={user.anonymizedAt} />
+              <AdminUserStatusBadge isActive={user.isActive} />
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span className="capitalize">{user.role.replace('_', ' ')}</span>

@@ -1,9 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Announcement } from '@/domain/entities/announcement'
 import { AdminAnnouncementList } from '@/presentation/pages/admin/AdminAnnouncementList'
+
+function renderList(announcements: Announcement[]) {
+  return render(
+    <MemoryRouter>
+      <AdminAnnouncementList announcements={announcements} />
+    </MemoryRouter>,
+  )
+}
 
 const { useUpdateAnnouncementMock, useDeleteAnnouncementMock } = vi.hoisted(() => ({
   useUpdateAnnouncementMock: vi.fn(),
@@ -43,7 +52,7 @@ describe('AdminAnnouncementList — publish/unpublish toggle', () => {
     useUpdateAnnouncementMock.mockReturnValue({ mutate, isPending: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementList announcements={[publishedAnnouncement]} />)
+    renderList([publishedAnnouncement])
     await user.click(screen.getByRole('button', { name: /unpublish/i }))
 
     expect(mutate).toHaveBeenCalledWith({
@@ -62,7 +71,7 @@ describe('AdminAnnouncementList — publish/unpublish toggle', () => {
     const user = userEvent.setup()
     const draft: Announcement = { ...publishedAnnouncement, isPublished: false, publishedAt: null }
 
-    render(<AdminAnnouncementList announcements={[draft]} />)
+    renderList([draft])
     await user.click(screen.getByRole('button', { name: /^publish$/i }))
 
     expect(mutate).toHaveBeenCalledWith({
@@ -88,7 +97,7 @@ describe('AdminAnnouncementList — pin toggle and delete confirmation', () => {
     useDeleteAnnouncementMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementList announcements={[publishedAnnouncement]} />)
+    renderList([publishedAnnouncement])
     await user.click(screen.getByRole('button', { name: 'Pin' }))
 
     expect(mutate).toHaveBeenCalledWith({
@@ -107,7 +116,7 @@ describe('AdminAnnouncementList — pin toggle and delete confirmation', () => {
     useDeleteAnnouncementMock.mockReturnValue({ mutate, isPending: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementList announcements={[publishedAnnouncement]} />)
+    renderList([publishedAnnouncement])
     await user.click(screen.getByRole('button', { name: 'Delete' }))
 
     expect(mutate).not.toHaveBeenCalled()
@@ -117,5 +126,17 @@ describe('AdminAnnouncementList — pin toggle and delete confirmation', () => {
 
     await user.click(screen.getByRole('button', { name: 'Confirm delete' }))
     expect(mutate).toHaveBeenCalledWith('a1')
+  })
+
+  it('links the announcement to its comment thread at /announcements/:id', () => {
+    useUpdateAnnouncementMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    useDeleteAnnouncementMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
+
+    renderList([publishedAnnouncement])
+
+    expect(screen.getByRole('link', { name: 'View comments' })).toHaveAttribute(
+      'href',
+      '/announcements/a1',
+    )
   })
 })

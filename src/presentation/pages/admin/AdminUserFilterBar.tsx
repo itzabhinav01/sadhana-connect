@@ -1,12 +1,25 @@
 import type { AppRole } from '@/domain/entities/profile'
 import type { AdminUserFilters } from '@/domain/repositories/admin-user-repository'
 import { Input } from '@/presentation/components/ui/input'
-import { Select } from '@/presentation/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/presentation/components/ui/select'
 
 interface AdminUserFilterBarProps {
   filters: AdminUserFilters
   onChange: (filters: AdminUserFilters) => void
 }
+
+// "all" is a sentinel, not a real AppRole/status value — Radix's Select
+// disallows an item with an empty-string value (that's reserved
+// internally for "no selection"), so the reset-to-unfiltered option
+// needs its own non-empty value, translated back to undefined here.
+const ROLE_ALL = 'all'
+const STATUS_ALL = 'all'
 
 export function AdminUserFilterBar({ filters, onChange }: AdminUserFilterBarProps) {
   return (
@@ -28,19 +41,23 @@ export function AdminUserFilterBar({ filters, onChange }: AdminUserFilterBarProp
           Role
         </label>
         <Select
-          id="admin-user-role"
-          value={filters.role ?? ''}
-          onChange={(event) =>
+          value={filters.role ?? ROLE_ALL}
+          onValueChange={(value) =>
             onChange({
               ...filters,
-              role: (event.target.value || undefined) as AppRole | undefined,
+              role: value === ROLE_ALL ? undefined : (value as AppRole),
             })
           }
         >
-          <option value="">All roles</option>
-          <option value="devotee">Devotee</option>
-          <option value="mentor">Mentor</option>
-          <option value="super_admin">Super Admin</option>
+          <SelectTrigger id="admin-user-role">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ROLE_ALL}>All roles</SelectItem>
+            <SelectItem value="devotee">Devotee</SelectItem>
+            <SelectItem value="mentor">Mentor</SelectItem>
+            <SelectItem value="super_admin">Super Admin</SelectItem>
+          </SelectContent>
         </Select>
       </div>
 
@@ -49,19 +66,22 @@ export function AdminUserFilterBar({ filters, onChange }: AdminUserFilterBarProp
           Status
         </label>
         <Select
-          id="admin-user-status"
-          value={filters.status ?? ''}
-          onChange={(event) =>
+          value={filters.status ?? STATUS_ALL}
+          onValueChange={(value) =>
             onChange({
               ...filters,
-              status: (event.target.value || undefined) as AdminUserFilters['status'],
+              status: value === STATUS_ALL ? undefined : (value as AdminUserFilters['status']),
             })
           }
         >
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="disabled">Disabled</option>
-          <option value="anonymized">Deleted</option>
+          <SelectTrigger id="admin-user-status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={STATUS_ALL}>All statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="disabled">Disabled</SelectItem>
+          </SelectContent>
         </Select>
       </div>
     </div>

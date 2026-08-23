@@ -54,13 +54,13 @@ export const supabaseAdminAssignmentRepository: AdminAssignmentRepository = {
     return (data as unknown as AssignmentRow[]).map(mapRow)
   },
 
-  async reassignDevotee(devoteeId, newMentorId) {
-    // RPC to public.reassign_devotee(uuid, uuid) — SECURITY INVOKER,
-    // atomic, relies entirely on the caller's own RLS privileges (see
-    // migration 0005). No authorization logic here.
-    const { data, error } = await supabase.rpc('reassign_devotee', {
+  async assignMentor(devoteeId, mentorId) {
+    // RPC to public.assign_devotee_to_mentor(uuid, uuid) — SECURITY
+    // INVOKER, additive only, relies entirely on the caller's own RLS
+    // privileges (see migration 0015). No authorization logic here.
+    const { data, error } = await supabase.rpc('assign_devotee_to_mentor', {
       p_devotee_id: devoteeId,
-      p_new_mentor_id: newMentorId,
+      p_mentor_id: mentorId,
     })
 
     if (error) throw error

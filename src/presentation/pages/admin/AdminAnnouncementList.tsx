@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import {
   ANNOUNCEMENT_EXPIRATION_PRESETS,
@@ -15,7 +16,13 @@ import type { Announcement } from '@/domain/entities/announcement'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
-import { Select } from '@/presentation/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/presentation/components/ui/select'
 import { Textarea } from '@/presentation/components/ui/textarea'
 
 function formatDisplayDate(iso: string) {
@@ -153,17 +160,21 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
               aria-label="Edit content"
             />
             <Select
-              aria-label="Edit expiration"
               value={expirationPreset}
-              onChange={(event) =>
-                setExpirationPreset(event.target.value as AnnouncementExpirationPreset)
+              onValueChange={(value) =>
+                setExpirationPreset(value as AnnouncementExpirationPreset)
               }
             >
-              {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
-                <option key={preset} value={preset}>
-                  {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
-                </option>
-              ))}
+              <SelectTrigger aria-label="Edit expiration">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
+                  <SelectItem key={preset} value={preset}>
+                    {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
             {expirationPreset === 'custom' ? (
               <Input
@@ -195,6 +206,12 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
                 ? `Published ${formatDisplayDate(announcement.publishedAt)}`
                 : `Created ${formatDisplayDate(announcement.createdAt)}`}
             </p>
+            <Link
+              to={`/announcements/${announcement.id}`}
+              className="self-start text-xs font-medium text-primary hover:underline"
+            >
+              View comments
+            </Link>
           </>
         )}
 

@@ -12,13 +12,13 @@ interface AdminUserRow {
   full_name: string
   role: AppRole
   is_active: boolean
-  anonymized_at: string | null
   temple_group_id: string | null
+  phone_number: string | null
   created_at: string
 }
 
 const SELECT_COLUMNS =
-  'id, full_name, role, is_active, anonymized_at, temple_group_id, created_at'
+  'id, full_name, role, is_active, temple_group_id, phone_number, created_at'
 
 function mapRow(row: AdminUserRow): AdminUser {
   return {
@@ -26,8 +26,8 @@ function mapRow(row: AdminUserRow): AdminUser {
     fullName: row.full_name,
     role: row.role,
     isActive: row.is_active,
-    anonymizedAt: row.anonymized_at,
     templeGroupId: row.temple_group_id,
+    phoneNumber: row.phone_number,
     createdAt: row.created_at,
   }
 }
@@ -53,9 +53,7 @@ export const supabaseAdminUserRepository: AdminUserRepository = {
     if (params.status === 'active') {
       query = query.eq('is_active', true)
     } else if (params.status === 'disabled') {
-      query = query.eq('is_active', false).is('anonymized_at', null)
-    } else if (params.status === 'anonymized') {
-      query = query.not('anonymized_at', 'is', null)
+      query = query.eq('is_active', false)
     }
     if (params.cursor) {
       query = query.lt('created_at', params.cursor)
@@ -89,9 +87,7 @@ export const supabaseAdminUserRepository: AdminUserRepository = {
     // RLS (profiles_update, is_super_admin() branch) + the
     // protect_profile_restricted_columns trigger are what actually
     // enforce that only a super admin can change this column — this call
-    // relies on both, adds no elevated logic of its own. `role` is typed
-    // to devotee|mentor only; super_admin can never reach this call from
-    // the normal UI.
+    // relies on both, adds no elevated logic of its own.
     const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
 
     if (error) throw error
@@ -104,22 +100,5 @@ export const supabaseAdminUserRepository: AdminUserRepository = {
       .eq('id', id)
 
     if (error) throw error
-  },
-
-  async anonymizeUser(id) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({ is_active: false, full_name: 'Deleted User', anonymized_at: new Date().toISOString() })
-      .eq('id', id)
-
-    if (profileError) throw profileError
-
-    const { error: assignmentsError } = await supabase
-      .from('mentor_assignments')
-      .update({ is_active: false, unassigned_at: new Date().toISOString() })
-      .or(`mentor_id.eq.${id},devotee_id.eq.${id}`)
-      .eq('is_active', true)
-
-    if (assignmentsError) throw assignmentsError
   },
 }

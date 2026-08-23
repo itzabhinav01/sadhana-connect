@@ -19,7 +19,13 @@ import type { AnnouncementScope } from '@/domain/entities/announcement'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
-import { Select } from '@/presentation/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/presentation/components/ui/select'
 import { Textarea } from '@/presentation/components/ui/textarea'
 
 // Unlike the mentor form, a Super Admin genuinely chooses scope — RLS
@@ -114,15 +120,16 @@ export function AdminAnnouncementForm() {
             <label htmlFor="admin-announcement-scope" className="text-sm font-medium text-foreground">
               Audience
             </label>
-            <Select
-              id="admin-announcement-scope"
-              value={scope}
-              onChange={(event) => setScope(event.target.value as AnnouncementScope)}
-            >
-              <option value="all">Everyone</option>
-              <option value="mentors">Mentors only</option>
-              <option value="devotees">Devotees only</option>
-              <option value="temple_group">A specific temple group</option>
+            <Select value={scope} onValueChange={(value) => setScope(value as AnnouncementScope)}>
+              <SelectTrigger id="admin-announcement-scope">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Everyone</SelectItem>
+                <SelectItem value="mentors">Mentors only</SelectItem>
+                <SelectItem value="devotees">Devotees only</SelectItem>
+                <SelectItem value="temple_group">A specific temple group</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 
@@ -131,17 +138,17 @@ export function AdminAnnouncementForm() {
               <label htmlFor="admin-announcement-temple-group" className="text-sm font-medium text-foreground">
                 Temple group
               </label>
-              <Select
-                id="admin-announcement-temple-group"
-                value={templeGroupId}
-                onChange={(event) => setTempleGroupId(event.target.value)}
-              >
-                <option value="">Select a temple group…</option>
-                {templeGroupsQuery.data?.map((group) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
+              <Select value={templeGroupId || undefined} onValueChange={setTempleGroupId}>
+                <SelectTrigger id="admin-announcement-temple-group">
+                  <SelectValue placeholder="Select a temple group…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templeGroupsQuery.data?.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
               {scopeError ? <p className="text-xs text-destructive">{scopeError}</p> : null}
             </div>
@@ -152,17 +159,21 @@ export function AdminAnnouncementForm() {
               Expiration
             </label>
             <Select
-              id="admin-announcement-expiration"
               value={expirationPreset}
-              onChange={(event) =>
-                setExpirationPreset(event.target.value as AnnouncementExpirationPreset)
+              onValueChange={(value) =>
+                setExpirationPreset(value as AnnouncementExpirationPreset)
               }
             >
-              {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
-                <option key={preset} value={preset}>
-                  {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
-                </option>
-              ))}
+              <SelectTrigger id="admin-announcement-expiration">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ANNOUNCEMENT_EXPIRATION_PRESETS.map((preset) => (
+                  <SelectItem key={preset} value={preset}>
+                    {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[preset]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
             {expirationPreset === 'custom' ? (
               <Input

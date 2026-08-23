@@ -1,13 +1,23 @@
-import type { AdminAccountActionsRepository } from '@/domain/repositories/admin-account-actions-repository'
+import type {
+  AdminAccountActionsRepository,
+  HardDeleteResult,
+  HardDeleteStage,
+} from '@/domain/repositories/admin-account-actions-repository'
 import { supabase } from '@/infrastructure/supabase/client'
 
-type AdminAccountAction = 'ban' | 'unban' | 'generate_recovery_link' | 'get_user_email'
+type AdminAccountAction =
+  | 'ban'
+  | 'unban'
+  | 'generate_recovery_link'
+  | 'get_user_email'
+  | 'hard_delete'
 
 interface AdminAccountActionResponse {
   ok: boolean
   error?: string
   actionLink?: string
   email?: string
+  stage?: string
 }
 
 // supabase.functions.invoke() automatically attaches the current session's
@@ -54,5 +64,11 @@ export const supabaseAdminAccountActionsRepository: AdminAccountActionsRepositor
       throw new Error('No email was returned.')
     }
     return result.email
+  },
+
+  async hardDeleteUser(targetUserId): Promise<HardDeleteResult> {
+    const result = await invoke('hard_delete', targetUserId)
+    const stage: HardDeleteStage = result.stage === 'profile-deleted' ? 'profile-deleted' : 'complete'
+    return { stage }
   },
 }

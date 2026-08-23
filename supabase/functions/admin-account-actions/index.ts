@@ -1,15 +1,16 @@
 // Sadhana Connect — Phase 14: Super Admin trusted backend
+// Updated Phase 20C: added hard_delete (see its own section below).
 //
 // The ONLY place in this application that ever holds a Supabase secret
-// (service-role-equivalent) API key. It exposes exactly four Auth Admin
-// operations — ban, unban, generate_recovery_link, get_user_email — and
-// the secret-keyed client is used for nothing else: every public-table
-// read this function needs (caller's own profile, target's profile) goes
-// through the CALLER's own RLS-scoped client instead, never service-role.
-// Every other Super Admin operation (disable, anonymize, role change,
-// temple groups, announcements, reassignment) goes through the normal
-// authenticated client under existing RLS entirely outside this function;
-// this function is deliberately narrow.
+// (service-role-equivalent) API key. It exposes exactly five Auth Admin
+// operations — ban, unban, generate_recovery_link, get_user_email,
+// hard_delete — and the secret-keyed client is used for nothing else:
+// every public-table read this function needs (caller's own profile,
+// target's profile) goes through the CALLER's own RLS-scoped client
+// instead, never service-role. Every other Super Admin operation
+// (disable, role change, temple groups, announcements, reassignment)
+// goes through the normal authenticated client under existing RLS
+// entirely outside this function; this function is deliberately narrow.
 //
 // get_user_email exists because profiles.email was deliberately NOT added
 // to the schema (it would be exposed to a devotee's assigned mentor under
@@ -77,11 +78,13 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SERVICE_ROLE_SECRET_KEY || !APP_ORIG
 
 // Indefinite ban, matching the approved account-lifecycle design: Supabase
 // has no literal "forever" duration, so ~100 years is the idiomatic
-// stand-in. Never auth.admin.deleteUser() anywhere in this file.
+// stand-in. Used by `ban` (the reversible disable path) — hard_delete
+// below is the separate, deliberately irreversible removal path and
+// calls auth.admin.deleteUser() directly instead.
 const INDEFINITE_BAN_DURATION = '876000h'
 
 const requestSchema = z.object({
-  action: z.enum(['ban', 'unban', 'generate_recovery_link', 'get_user_email']),
+  action: z.enum(['ban', 'unban', 'generate_recovery_link', 'get_user_email', 'hard_delete']),
   targetUserId: z.string().uuid(),
 })
 
@@ -91,14 +94,15 @@ type Action = z.infer<typeof requestSchema>['action']
 // fixed 5-minute window, enforced via check_and_increment_admin_rate_limit()
 // (0010_admin_action_rate_limits) — one atomic Postgres UPSERT, durable
 // and correct across however many instances of this function are
-// running concurrently. generate_recovery_link is deliberately the
-// strictest: it mints a live, one-time credential-equivalent link per
-// call, unlike the other three actions.
+// running concurrently. hard_delete (Phase 20C) is the strictest of all
+// five — it is irreversible and destroys data, unlike generate_recovery_link
+// which only mints a link.
 const ACTION_RATE_LIMITS: Record<Action, number> = {
   ban: 20,
   unban: 20,
   get_user_email: 30,
   generate_recovery_link: 5,
+  hard_delete: 5,
 }
 
 type ServiceClient = ReturnType<typeof createClient>
@@ -172,17 +176,63 @@ async function handleGetUserEmail(serviceClient: ServiceClient, targetUserId: st
   return { ok: true as const, email: targetUser.user.email }
 }
 
+// Phase 20C — true hard delete, approved reversal of the Phase 5/14
+// anonymize-and-preserve design. Two steps, in this exact order (order
+// matters: profiles.id -> auth.users.id is ON DELETE RESTRICT, so the
+// profiles row must be gone before auth.users deletion can succeed):
+//
+//   1. public.hard_delete_profile(uuid) RPC (0016) — a narrow SECURITY
+//      DEFINER function, EXECUTE-granted only to service_role. NOT a
+//      direct `.from('profiles').delete()`: service_role is
+//      deliberately given zero direct table grants project-wide (see
+//      0010's own rate-limit table for the same pattern) — a live
+//      verification bug (42501 insufficient_privilege) confirmed
+//      service_role genuinely has no SELECT/DELETE on profiles at the
+//      Postgres level, so this RPC is the only path that can do this at
+//      all. Cascades sadhana_reports, mentor_assignments (either side),
+//      sadhana_report_comments, and announcement_comments per the widened
+//      FKs in 0013 — irreversible, exactly as approved.
+//   2. auth.admin.deleteUser() — permanently removes the Supabase Auth
+//      account. Unlike `ban`, there is no "un-delete": this account can
+//      never sign in again, and re-registering with the same email
+//      creates a brand-new, unrelated account.
+//
+// If step 2 fails after step 1 already succeeded, there is deliberately
+// no retry mechanism: the profiles row (and the admin's page for it) is
+// already gone, so there is nowhere left for a "retry" affordance to
+// live. This is logged server-side for manual follow-up and reported to
+// the caller as a distinct, terminal partial state rather than a plain
+// failure — never silently claimed as full success.
+async function handleHardDelete(serviceClient: ServiceClient, targetUserId: string) {
+  const { error: profileDeleteError } = await serviceClient.rpc('hard_delete_profile', {
+    p_profile_id: targetUserId,
+  })
+  if (profileDeleteError) throw profileDeleteError
+
+  const { error: authDeleteError } = await serviceClient.auth.admin.deleteUser(targetUserId)
+  if (authDeleteError) {
+    console.error('admin-account-actions: profile deleted but auth removal failed', {
+      targetUserId,
+      message: authDeleteError.message,
+    })
+    return { ok: true as const, stage: 'profile-deleted' as const }
+  }
+
+  return { ok: true as const, stage: 'complete' as const }
+}
+
 const ACTION_HANDLERS: Record<
   z.infer<typeof requestSchema>['action'],
   (
     serviceClient: ServiceClient,
     targetUserId: string,
-  ) => Promise<{ ok: true; actionLink?: string; email?: string }>
+  ) => Promise<{ ok: true; actionLink?: string; email?: string; stage?: string }>
 > = {
   ban: handleBan,
   unban: handleUnban,
   generate_recovery_link: handleGenerateRecoveryLink,
   get_user_email: handleGetUserEmail,
+  hard_delete: handleHardDelete,
 }
 
 Deno.serve(async (req) => {

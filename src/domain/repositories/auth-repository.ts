@@ -5,6 +5,12 @@ export interface SignUpParams {
   email: string
   password: string
   fullName: string
+  // E.164-formatted ('+' + country code + number) — compulsory at
+  // registration (approved). Passed through as signup metadata; the
+  // profiles.phone_number column stays nullable at the database level
+  // (see 0014's own note), so this is enforced by the registration
+  // form's Zod schema, not by the DB rejecting a missing value here.
+  phoneNumber: string
 }
 
 export interface SignInParams {

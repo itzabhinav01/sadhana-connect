@@ -40,6 +40,15 @@ export function useNotificationNavigation() {
       return
     }
 
+    // sadhana_reminder (Phase 20B) has no single related row to deep-link
+    // to — it's about a range of missed days, not one date — so it opens
+    // the devotee's own Sadhana form directly, same as any other
+    // unresolvable-target fallback below, just explicit about why.
+    if (notification.type === 'sadhana_reminder') {
+      navigate('/sadhana')
+      return
+    }
+
     // Fallback for a notification whose target no longer resolves (e.g.
     // the linked report/announcement was deleted) — stay on the
     // notification center rather than navigating nowhere or erroring.

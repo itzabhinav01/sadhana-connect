@@ -23,15 +23,20 @@ export class MentorHasActiveDevoteesError extends Error {
 interface ChangeUserRoleInput {
   userId: string
   currentRole: AppRole
-  newRole: Extract<AppRole, 'devotee' | 'mentor'>
+  newRole: AppRole
 }
 
-// Devotee -> Mentor: always allowed by the application, no gate.
+// Devotee -> Mentor, Devotee -> Super Admin: always allowed by the
+// application, no gate.
 //
-// Mentor -> Devotee: protected by two application-layer checks —
-// (1) the presentation-time gate in AdminUserRoleControl, which disables
-// the option using useMentorDevoteeCount, and (2) this mutation's own
-// pre-submit re-check, immediately before issuing the profiles UPDATE.
+// Mentor -> anything else (Devotee or Super Admin): protected by two
+// application-layer checks — (1) the presentation-time gate in
+// AdminUserRoleControl, which disables every non-mentor option using
+// useMentorDevoteeCount, and (2) this mutation's own pre-submit
+// re-check, immediately before issuing the profiles UPDATE. Both
+// destinations carry the identical risk (an active mentor_assignments
+// row pointing at a profile that is no longer role='mentor'), so both
+// are gated the same way — not just the original Mentor -> Devotee path.
 //
 // KNOWN RACE, DELIBERATELY NOT CLOSED IN THIS PHASE: both checks are plain
 // read-then-write application logic, not an atomic database invariant —
@@ -56,7 +61,7 @@ export function useChangeUserRole() {
 
   return useMutation({
     mutationFn: async ({ userId, currentRole, newRole }: ChangeUserRoleInput) => {
-      if (currentRole === 'mentor' && newRole === 'devotee') {
+      if (currentRole === 'mentor' && newRole !== 'mentor') {
         const activeCount = await supabaseAdminAssignmentRepository.getMentorDevoteeCount(userId)
         if (activeCount > 0) {
           throw new MentorHasActiveDevoteesError()

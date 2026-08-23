@@ -27,6 +27,7 @@ async function fillAndSubmit() {
   const user = userEvent.setup()
   await user.type(screen.getByLabelText(/full name/i), 'Test Devotee')
   await user.type(screen.getByLabelText(/^email$/i), 'devotee@example.com')
+  await user.type(screen.getByLabelText(/phone number/i), '+919876543210')
   await user.type(screen.getByLabelText(/^password$/i), 'password123')
   await user.type(screen.getByLabelText(/confirm password/i), 'password123')
   await user.click(screen.getByRole('button', { name: /create account/i }))

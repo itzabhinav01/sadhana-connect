@@ -29,4 +29,17 @@ export const sadhanaQueryKeys = {
     fromDate: string | undefined,
     toDate: string | undefined,
   ) => ['sadhana-report', 'history', userId, fromDate ?? null, toDate ?? null] as const,
+  // Devotee oversight (Phase 20B) — a mentor or admin VIEWER looking at a
+  // TARGET devotee's report history over a range. Scoped by both the
+  // viewer's own userId and the target devoteeId (mirrors
+  // mentorQueryKeys.devoteeRecent's own reasoning) plus the exact range,
+  // so switching viewer account, target devotee, or range never serves
+  // stale data.
+  devoteeHistoryAll: ['sadhana-report', 'devotee-history'] as const,
+  devoteeHistory: (
+    viewerUserId: string | null,
+    devoteeId: string,
+    startDate: string,
+    endDate: string,
+  ) => ['sadhana-report', 'devotee-history', viewerUserId, devoteeId, startDate, endDate] as const,
 }

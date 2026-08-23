@@ -4,7 +4,8 @@ import type { AdminUser } from '@/domain/entities/admin-user'
 export interface AdminUserFilters {
   search?: string
   role?: AppRole
-  status?: 'active' | 'disabled' | 'anonymized'
+  // Phase 20C: 'anonymized' removed — see AdminUserStatus's own note.
+  status?: 'active' | 'disabled'
 }
 
 export interface AdminUserListPage {
@@ -25,18 +26,19 @@ export interface AdminUserRepository {
 
   getUserById(id: string): Promise<AdminUser | null>
 
-  // devotee <-> mentor only — super_admin is never a valid value here.
-  // Enforced by the type itself; RLS + protect_profile_restricted_columns
-  // is what actually enforces "super admin only" server-side regardless.
-  changeUserRole(id: string, role: Extract<AppRole, 'devotee' | 'mentor'>): Promise<void>
+  // Any AppRole, including super_admin (approved: promoting straight to
+  // Super Admin is now offered in the Admin UI). RLS +
+  // protect_profile_restricted_columns is what actually enforces "super
+  // admin only" server-side regardless of what this layer allows.
+  changeUserRole(id: string, role: AppRole): Promise<void>
 
   setUserActive(id: string, isActive: boolean): Promise<void>
 
-  // The DB-side half of the approved split anonymize/delete workflow:
-  // profiles.is_active=false, full_name='Deleted User', anonymized_at=now(),
-  // and deactivation of every active mentor_assignments row involving this
-  // profile (either side). Does NOT touch Supabase Auth — that's the
-  // separate, Edge-Function-only ban step performed by the application use
-  // case that calls this.
-  anonymizeUser(id: string): Promise<void>
+  // Phase 20C: the anonymize half of the old split delete workflow is
+  // gone — deletion is now the trusted admin-account-actions Edge
+  // Function's hard_delete action (see useHardDeleteUser), which
+  // performs the real DELETE FROM profiles (service-role, bypassing
+  // RLS — profiles has no client-facing DELETE policy) followed by
+  // permanent Supabase Auth removal. Nothing in this repository
+  // performs deletion.
 }

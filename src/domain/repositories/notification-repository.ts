@@ -35,4 +35,17 @@ export interface NotificationRepository {
   markRead(notificationId: string): Promise<void>
 
   markAllRead(recipientId: string): Promise<void>
+
+  // Calls the public.send_reminder_notification() RPC (Phase 20B) — a
+  // mentor may only target their own currently-assigned devotee, a
+  // super_admin any devotee; both the authorization check and the
+  // 2-per-24h rate limit are enforced entirely inside that
+  // SECURITY DEFINER function, not by this layer (a mentor caller has no
+  // RLS read access to another profile's notifications at all, so there
+  // is no client-side precheck this layer could even perform). message
+  // null/blank means "use the generic reminder text."
+  sendReminderNotification(
+    devoteeId: string,
+    message: string | null,
+  ): Promise<SadhanaNotification>
 }

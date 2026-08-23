@@ -34,12 +34,12 @@ export const supabaseAuthRepository: AuthRepository = {
     return () => data.subscription.unsubscribe()
   },
 
-  async signUp({ email, password, fullName }: SignUpParams) {
+  async signUp({ email, password, fullName, phoneNumber }: SignUpParams) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, phone_number: phoneNumber },
         emailRedirectTo: `${window.location.origin}/auth/confirm`,
       },
     })

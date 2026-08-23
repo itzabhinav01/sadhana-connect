@@ -26,7 +26,7 @@ export function AdminMentorList({ mentors, counts }: AdminMentorListProps) {
           >
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">{mentor.fullName}</span>
-              <AdminUserStatusBadge isActive={mentor.isActive} anonymizedAt={mentor.anonymizedAt} />
+              <AdminUserStatusBadge isActive={mentor.isActive} />
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span>{countByMentorId.get(mentor.id) ?? 0} active devotees</span>

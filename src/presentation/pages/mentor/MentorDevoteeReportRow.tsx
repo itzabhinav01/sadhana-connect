@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReportHistoryEntry } from '@/domain/entities/sadhana-report'
 import { MentorReportCommentSection } from '@/presentation/pages/mentor/MentorReportCommentSection'
 
 function formatDisplayDate(iso: string) {
@@ -9,7 +9,13 @@ function formatDisplayDate(iso: string) {
 }
 
 interface MentorDevoteeReportRowProps {
-  report: SadhanaReport
+  // Narrowed (Phase 20B) to exactly the fields this row reads — it never
+  // used anything beyond these five even when the prop was typed as the
+  // full SadhanaReport, so this is a strictly honest narrowing, not a
+  // behavior change. A full SadhanaReport still satisfies this
+  // structurally, so every existing caller (today's report, recent
+  // reports) is unaffected.
+  report: SadhanaReportHistoryEntry
 }
 
 // The report content itself is deliberately not a link — SadhanaReportSummaryRow
