@@ -11,7 +11,7 @@ export default defineConfig([
   // browser/vite-node target, just like it's excluded from tsconfig.app.json
   // and tsconfig.node.json's `include`. Linting it against globals.browser
   // would flag every Deno global as undefined.
-  globalIgnores(['dist', 'supabase/functions/**']),
+  globalIgnores(['dist', 'coverage', 'supabase/functions/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

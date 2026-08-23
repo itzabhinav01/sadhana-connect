@@ -75,5 +75,20 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/shared/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/shared/test/**',
+        // Vendored shadcn/ui primitives — not app business logic.
+        'src/presentation/components/ui/**',
+        // Type-only / composition-root files with no branching logic.
+        'src/main.tsx',
+        'src/app/**',
+        'src/**/*.d.ts',
+      ],
+    },
   },
 })
