@@ -15,7 +15,7 @@ const { useAuthMock, assignMentorMock } = vi.hoisted(() => ({
 }))
 
 vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@/infrastructure/supabase/admin-assignment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/admin-assignment-repository', () => ({
   supabaseAdminAssignmentRepository: { assignMentor: assignMentorMock },
 }))
 

@@ -14,7 +14,7 @@ const { useAuthMock, updateAnnouncementMock } = vi.hoisted(() => ({
 vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/infrastructure/supabase/announcement-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/announcement-repository', () => ({
   supabaseAnnouncementRepository: { updateAnnouncement: updateAnnouncementMock },
 }))
 

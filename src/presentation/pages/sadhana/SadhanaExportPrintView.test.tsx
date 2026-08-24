@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { SadhanaExportPrintView } from '@/presentation/pages/sadhana/SadhanaExportPrintView'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {

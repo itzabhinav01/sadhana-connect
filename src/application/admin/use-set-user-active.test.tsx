@@ -12,7 +12,7 @@ const { useAuthMock, setUserActiveMock } = vi.hoisted(() => ({
 }))
 
 vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@/infrastructure/supabase/admin-user-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/admin-user-repository', () => ({
   supabaseAdminUserRepository: { setUserActive: setUserActiveMock },
 }))
 

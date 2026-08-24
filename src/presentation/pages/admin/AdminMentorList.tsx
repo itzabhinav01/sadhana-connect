@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
-import type { AdminUser } from '@/domain/entities/admin-user'
-import type { MentorDevoteeCount } from '@/domain/repositories/admin-assignment-repository'
+import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { MentorDevoteeCount } from '@sadhana-connect/domain/repositories/admin-assignment-repository'
 import { AdminUserStatusBadge } from '@/presentation/pages/admin/AdminUserStatusBadge'
 
 function formatDate(iso: string) {

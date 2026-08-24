@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { AuthContext } from '@/application/auth/auth-context'
-import type { AuthSession } from '@/domain/entities/auth-session'
-import { supabaseAuthRepository } from '@/infrastructure/supabase/auth-repository'
+import type { AuthSession } from '@sadhana-connect/domain/entities/auth-session'
+import { supabaseAuthRepository } from '@sadhana-connect/infra-supabase/auth-repository'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null)

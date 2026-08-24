@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseAdminTempleGroupRepository } from '@/infrastructure/supabase/admin-temple-group-repository'
+import { supabaseAdminTempleGroupRepository } from '@sadhana-connect/infra-supabase/admin-temple-group-repository'
 
 export function useCreateTempleGroup() {
   const { session } = useAuth()

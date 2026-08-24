@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { AdminUser } from '@/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
 import { AdminUserRoleControl } from '@/presentation/pages/admin/AdminUserRoleControl'
 
 // Radix's Select renders its popup in a portal with no native <select>

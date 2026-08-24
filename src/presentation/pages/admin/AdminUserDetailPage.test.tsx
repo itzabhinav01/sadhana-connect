@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { AdminUser } from '@/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
 import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailPage'
 
 const {

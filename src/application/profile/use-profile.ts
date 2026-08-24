@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseProfileRepository } from '@/infrastructure/supabase/profile-repository'
+import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase/profile-repository'
 
 // UX/navigation data only. Every table this profile's role/is_active
 // might gate is independently enforced by RLS — this hook never doubles

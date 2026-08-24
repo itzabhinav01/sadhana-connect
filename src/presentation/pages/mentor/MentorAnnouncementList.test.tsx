@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { Announcement } from '@/domain/entities/announcement'
+import type { Announcement } from '@sadhana-connect/domain/entities/announcement'
 import { MentorAnnouncementList } from '@/presentation/pages/mentor/MentorAnnouncementList'
 
 function renderList(announcements: Announcement[]) {

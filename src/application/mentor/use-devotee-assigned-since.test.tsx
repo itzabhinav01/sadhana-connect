@@ -14,7 +14,7 @@ vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@/infrastructure/supabase/mentor-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/mentor-repository', () => ({
   supabaseMentorRepository: { getAssignedSince: getAssignedSinceMock },
 }))
 

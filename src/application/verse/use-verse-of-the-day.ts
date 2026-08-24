@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { selectVerseForDate } from '@/application/verse/select-verse-for-date'
 import { verseQueryKeys } from '@/application/verse/verse-query-keys'
-import { supabaseVerseRepository } from '@/infrastructure/supabase/verse-repository'
+import { supabaseVerseRepository } from '@sadhana-connect/infra-supabase/verse-repository'
 import { getLocalDateIso } from '@/shared/utils/date'
 
 const STALE_TIME_MS = 24 * 60 * 60 * 1000

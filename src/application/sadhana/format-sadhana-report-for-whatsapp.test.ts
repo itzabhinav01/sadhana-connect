@@ -4,7 +4,7 @@ import {
   buildWhatsAppShareUrl,
   formatSadhanaReportForWhatsApp,
 } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { WHATSAPP_RECIPIENT_NUMBER } from '@/shared/constants/whatsapp'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {

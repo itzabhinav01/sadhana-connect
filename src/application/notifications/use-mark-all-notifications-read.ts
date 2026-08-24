@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { supabaseNotificationRepository } from '@/infrastructure/supabase/notification-repository'
+import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
 
 export function useMarkAllNotificationsRead() {
   const { session } = useAuth()

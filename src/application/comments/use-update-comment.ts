@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
-import { supabaseSadhanaReportCommentRepository } from '@/infrastructure/supabase/sadhana-report-comment-repository'
+import { supabaseSadhanaReportCommentRepository } from '@sadhana-connect/infra-supabase/sadhana-report-comment-repository'
 
 interface UpdateCommentInput {
   commentId: string

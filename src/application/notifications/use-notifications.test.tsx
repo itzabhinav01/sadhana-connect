@@ -14,7 +14,7 @@ const { useAuthMock, listNotificationsMock } = vi.hoisted(() => ({
 vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/infrastructure/supabase/notification-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
   supabaseNotificationRepository: { listNotifications: listNotificationsMock },
 }))
 

@@ -1,0 +1,10 @@
+{
+  "name": "@sadhana-connect/infra-supabase",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@sadhana-connect/domain": "*",
+    "@supabase/supabase-js": "^2.112.3"
+  }
+}

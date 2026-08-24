@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { supabaseAdminAccountActionsRepository } from '@/infrastructure/supabase/admin-account-actions-repository'
+import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase/admin-account-actions-repository'
 
 // On-demand only, mirrors useGenerateRecoveryLink's mutation shape — not a
 // disabled useQuery + manual refetch(). That earlier shape failed to

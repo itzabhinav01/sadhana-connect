@@ -1,4 +1,4 @@
-import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
 import { daysSinceEpoch } from '@/shared/utils/date'
 
 // Deterministic date -> verse selection, identical for every user (no

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { supabaseAuthRepository } from '@/infrastructure/supabase/auth-repository'
+import { supabaseAuthRepository } from '@sadhana-connect/infra-supabase/auth-repository'
 
 export function useRequestPasswordReset() {
   return useMutation({

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { SadhanaReportHistoryEntry } from '@/domain/entities/sadhana-report'
+import type { SadhanaReportHistoryEntry } from '@sadhana-connect/domain/entities/sadhana-report'
 import { MentorReportCommentSection } from '@/presentation/pages/mentor/MentorReportCommentSection'
 
 function formatDisplayDate(iso: string) {

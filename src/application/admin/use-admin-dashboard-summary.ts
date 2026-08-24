@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabase } from '@/infrastructure/supabase/client'
+import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
 import { getLocalDateIso } from '@/shared/utils/date'
 
 export interface AdminDashboardSummary {
@@ -21,6 +21,7 @@ export interface AdminDashboardSummary {
 // a single aggregate view: these are simple, independent counts, not
 // worth a new migration object for.
 async function fetchDashboardSummary(): Promise<AdminDashboardSummary> {
+  const supabase = getSupabaseClient()
   const today = getLocalDateIso()
 
   const [
@@ -78,7 +79,9 @@ async function fetchDashboardSummary(): Promise<AdminDashboardSummary> {
   }
 
   const distinctDevoteesWithActiveMentor = new Set(
-    (activeMentorAssignmentDevoteeIds.data ?? []).map((row) => row.devotee_id),
+    (activeMentorAssignmentDevoteeIds.data ?? []).map(
+      (row: { devotee_id: string }) => row.devotee_id,
+    ),
   ).size
 
   const withoutActiveMentor = Math.max(

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
-import { supabaseSadhanaReportCommentRepository } from '@/infrastructure/supabase/sadhana-report-comment-repository'
+import { supabaseSadhanaReportCommentRepository } from '@sadhana-connect/infra-supabase/sadhana-report-comment-repository'
 
 // `enabled` is caller-supplied and required (not defaulted to true) so a
 // report row's comment thread is only ever fetched once the mentor or

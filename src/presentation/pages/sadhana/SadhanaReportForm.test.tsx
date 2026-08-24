@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { SadhanaReportForm } from '@/presentation/pages/sadhana/SadhanaReportForm'
 
 const { mutateMock, useUpsertSadhanaReportMock } = vi.hoisted(() => ({

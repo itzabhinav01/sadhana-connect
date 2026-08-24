@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseAdminAssignmentRepository } from '@/infrastructure/supabase/admin-assignment-repository'
+import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase/admin-assignment-repository'
 
 export function useAdminAssignments(filters: { mentorId?: string; devoteeId?: string } = {}) {
   const { session } = useAuth()

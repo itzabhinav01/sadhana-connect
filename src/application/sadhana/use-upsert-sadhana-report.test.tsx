@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import { useUpsertSadhanaReport } from '@/application/sadhana/use-upsert-sadhana-report'
-import type { UpsertSadhanaReportParams } from '@/domain/repositories/sadhana-report-repository'
+import type { UpsertSadhanaReportParams } from '@sadhana-connect/domain/repositories/sadhana-report-repository'
 
 const { useAuthMock, upsertReportMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@/infrastructure/supabase/sadhana-report-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
   supabaseSadhanaReportRepository: { upsertReport: upsertReportMock },
 }))
 

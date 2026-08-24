@@ -15,7 +15,7 @@ import {
   announcementSchema,
   type AnnouncementFormValues,
 } from '@/application/announcements/announcement-schema'
-import type { AnnouncementScope } from '@/domain/entities/announcement'
+import type { AnnouncementScope } from '@sadhana-connect/domain/entities/announcement'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'

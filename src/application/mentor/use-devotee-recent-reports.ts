@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 
 export const DEVOTEE_RECENT_REPORTS_LIMIT = 5
 

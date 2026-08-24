@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
-import { supabaseMentorRepository } from '@/infrastructure/supabase/mentor-repository'
+import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase/mentor-repository'
 
 // Fetched fresh rather than reused from the dashboard list's row data, so
 // the devotee detail page works correctly on a direct URL visit, not only

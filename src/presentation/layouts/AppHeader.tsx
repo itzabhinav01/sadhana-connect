@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom'
 
-import type { Profile } from '@/domain/entities/profile'
+import type { Profile } from '@sadhana-connect/domain/entities/profile'
 import type { NavItem } from '@/presentation/navigation/nav-config'
 import { AccountMenu } from '@/presentation/layouts/AccountMenu'
 import { MobileNav } from '@/presentation/layouts/MobileNav'

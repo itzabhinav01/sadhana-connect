@@ -7,7 +7,7 @@ import {
   useRenameTempleGroup,
 } from '@/application/admin/use-temple-group-mutations'
 import { templeGroupNameSchema } from '@/application/admin/admin-user-schema'
-import type { TempleGroup } from '@/domain/entities/temple-group'
+import type { TempleGroup } from '@sadhana-connect/domain/entities/temple-group'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 

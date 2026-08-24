@@ -6,8 +6,8 @@ import {
   useChangeUserRole,
 } from '@/application/admin/use-change-user-role'
 import { useMentorDevoteeCount } from '@/application/admin/use-mentor-devotee-count'
-import type { AdminUser } from '@/domain/entities/admin-user'
-import type { AppRole } from '@/domain/entities/profile'
+import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Select,

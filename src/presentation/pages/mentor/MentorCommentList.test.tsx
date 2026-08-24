@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SadhanaReportComment } from '@/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
 import { MentorCommentList } from '@/presentation/pages/mentor/MentorCommentList'
 
 const { useAuthMock, useUpdateCommentMock, useDeleteCommentMock } = vi.hoisted(() => ({

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SadhanaNotification } from '@/domain/entities/notification'
+import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
 import { NotificationItem } from '@/presentation/pages/notifications/NotificationItem'
 
 const { markReadMutateMock, navigateToNotificationMock } = vi.hoisted(() => ({

@@ -2,8 +2,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '@/application/auth/use-auth'
-import type { SadhanaNotification } from '@/domain/entities/notification'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 
 // Resolves a notification's deep link and navigates there. The report
 // date lookup is cached under the query client (a repeat click on the

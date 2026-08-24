@@ -2,7 +2,7 @@ import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
-import type { AppRole } from '@/domain/entities/profile'
+import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import {
   Avatar,
   AvatarFallback,

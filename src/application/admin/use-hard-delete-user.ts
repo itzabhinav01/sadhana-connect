@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseAdminAccountActionsRepository } from '@/infrastructure/supabase/admin-account-actions-repository'
+import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase/admin-account-actions-repository'
 
 // Phase 20C — true hard delete, approved reversal of the Phase 5/14
 // anonymize-and-preserve design. A single trusted Edge Function call

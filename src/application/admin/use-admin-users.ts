@@ -2,8 +2,8 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import type { AdminUserFilters } from '@/domain/repositories/admin-user-repository'
-import { supabaseAdminUserRepository } from '@/infrastructure/supabase/admin-user-repository'
+import type { AdminUserFilters } from '@sadhana-connect/domain/repositories/admin-user-repository'
+import { supabaseAdminUserRepository } from '@sadhana-connect/infra-supabase/admin-user-repository'
 
 export const ADMIN_USERS_PAGE_SIZE = 20
 

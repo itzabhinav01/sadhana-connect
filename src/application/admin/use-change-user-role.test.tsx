@@ -19,10 +19,10 @@ const { useAuthMock, getMentorDevoteeCountMock, changeUserRoleMock } = vi.hoiste
 vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/infrastructure/supabase/admin-assignment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/admin-assignment-repository', () => ({
   supabaseAdminAssignmentRepository: { getMentorDevoteeCount: getMentorDevoteeCountMock },
 }))
-vi.mock('@/infrastructure/supabase/admin-user-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/admin-user-repository', () => ({
   supabaseAdminUserRepository: { changeUserRole: changeUserRoleMock },
 }))
 

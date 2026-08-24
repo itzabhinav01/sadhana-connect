@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import type { AppRole } from '@/domain/entities/profile'
+import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 
 export interface NavItem {
   label: string

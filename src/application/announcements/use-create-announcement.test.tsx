@@ -18,7 +18,7 @@ vi.mock('@/application/auth/use-auth', () => ({
 vi.mock('@/application/profile/use-profile', () => ({
   useProfile: useProfileMock,
 }))
-vi.mock('@/infrastructure/supabase/announcement-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/announcement-repository', () => ({
   supabaseAnnouncementRepository: { createAnnouncement: createAnnouncementMock },
 }))
 

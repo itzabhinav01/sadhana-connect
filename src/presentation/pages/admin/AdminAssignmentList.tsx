@@ -1,5 +1,5 @@
 import { useDeactivateAssignment } from '@/application/admin/use-deactivate-assignment'
-import type { AdminMentorAssignment } from '@/domain/entities/mentor-assignment'
+import type { AdminMentorAssignment } from '@sadhana-connect/domain/entities/mentor-assignment'
 import { Button } from '@/presentation/components/ui/button'
 
 function formatDate(iso: string) {

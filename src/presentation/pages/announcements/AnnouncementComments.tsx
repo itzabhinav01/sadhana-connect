@@ -12,7 +12,7 @@ import { useDeleteAnnouncementComment } from '@/application/announcements/use-de
 import { useUpdateAnnouncementComment } from '@/application/announcements/use-update-announcement-comment'
 import { useAuth } from '@/application/auth/use-auth'
 import { useProfile } from '@/application/profile/use-profile'
-import type { AnnouncementComment } from '@/domain/entities/announcement-comment'
+import type { AnnouncementComment } from '@sadhana-connect/domain/entities/announcement-comment'
 import { Button } from '@/presentation/components/ui/button'
 import { Textarea } from '@/presentation/components/ui/textarea'
 

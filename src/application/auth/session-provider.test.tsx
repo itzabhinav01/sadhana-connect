@@ -9,7 +9,7 @@ const { getSessionMock, onAuthStateChangeMock } = vi.hoisted(() => ({
   onAuthStateChangeMock: vi.fn(),
 }))
 
-vi.mock('@/infrastructure/supabase/auth-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/auth-repository', () => ({
   supabaseAuthRepository: {
     getSession: getSessionMock,
     onAuthStateChange: onAuthStateChangeMock,

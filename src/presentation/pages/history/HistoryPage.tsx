@@ -10,8 +10,8 @@ import {
   type DateRangeValidationResult,
 } from '@/application/sadhana/sadhana-date-range'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 import { downloadTextFile } from '@/shared/utils/download-text-file'
 import { getLocalDateIso } from '@/shared/utils/date'
 import { Button } from '@/presentation/components/ui/button'

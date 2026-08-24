@@ -1,5 +1,5 @@
-import type { AppRole } from '@/domain/entities/profile'
-import type { AdminUserFilters } from '@/domain/repositories/admin-user-repository'
+import type { AppRole } from '@sadhana-connect/domain/entities/profile'
+import type { AdminUserFilters } from '@sadhana-connect/domain/repositories/admin-user-repository'
 import { Input } from '@/presentation/components/ui/input'
 import {
   Select,

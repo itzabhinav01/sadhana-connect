@@ -31,11 +31,11 @@ const {
 
 vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
 vi.mock('@/application/profile/use-profile', () => ({ useProfile: useProfileMock }))
-vi.mock('@/infrastructure/supabase/client', () => ({
-  supabase: {
+vi.mock('@sadhana-connect/infra-supabase/client', () => ({
+  getSupabaseClient: () => ({
     channel: channelFactoryMock,
     removeChannel: removeChannelMock,
-  },
+  }),
 }))
 
 function createWrapper(queryClient: QueryClient) {

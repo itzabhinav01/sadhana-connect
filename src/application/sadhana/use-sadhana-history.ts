@@ -2,7 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 import { getLocalDateIso } from '@/shared/utils/date'
 
 export const HISTORY_PAGE_SIZE = 20

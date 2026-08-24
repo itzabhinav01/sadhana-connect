@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-import type { AuthSession } from '@/domain/entities/auth-session'
+import type { AuthSession } from '@sadhana-connect/domain/entities/auth-session'
 
 export interface AuthContextValue {
   session: AuthSession | null

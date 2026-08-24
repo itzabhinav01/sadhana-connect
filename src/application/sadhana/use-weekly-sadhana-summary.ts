@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/application/auth/use-auth'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import { calculateWeeklySummary } from '@/application/sadhana/sadhana-weekly-summary'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
 
 // Trailing 7 days ending today (approved product decision, Phase 7) —

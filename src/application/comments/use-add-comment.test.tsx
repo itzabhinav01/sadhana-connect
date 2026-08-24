@@ -18,7 +18,7 @@ vi.mock('@/application/auth/use-auth', () => ({
 vi.mock('@/application/profile/use-profile', () => ({
   useProfile: useProfileMock,
 }))
-vi.mock('@/infrastructure/supabase/sadhana-report-comment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/sadhana-report-comment-repository', () => ({
   supabaseSadhanaReportCommentRepository: { createComment: createCommentMock },
 }))
 

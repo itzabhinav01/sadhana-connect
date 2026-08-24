@@ -13,7 +13,7 @@ import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 
 const { signOutMock } = vi.hoisted(() => ({ signOutMock: vi.fn() }))
 
-vi.mock('@/infrastructure/supabase/auth-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/auth-repository', () => ({
   supabaseAuthRepository: { signOut: signOutMock },
 }))
 

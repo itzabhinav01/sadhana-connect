@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/application/auth/use-auth'
 import { calculateMentorDevoteeSummaries } from '@/application/mentor/mentor-devotee-summary'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
-import { supabaseMentorRepository } from '@/infrastructure/supabase/mentor-repository'
+import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase/mentor-repository'
 import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
 
 // Used for recent activity, today's rounds/submission, and dashboard

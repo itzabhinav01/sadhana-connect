@@ -1,4 +1,4 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { WHATSAPP_RECIPIENT_NUMBER } from '@/shared/constants/whatsapp'
 import { formatIsoDateAsDdMmYyyy } from '@/shared/utils/date'
 import { formatTime12Hour } from '@/shared/utils/format-time-12-hour'

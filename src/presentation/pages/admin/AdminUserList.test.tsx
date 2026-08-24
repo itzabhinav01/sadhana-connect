@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
-import type { AdminUser } from '@/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
 import { AdminUserList } from '@/presentation/pages/admin/AdminUserList'
 
 const users: AdminUser[] = [

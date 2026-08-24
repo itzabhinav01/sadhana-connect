@@ -14,7 +14,7 @@ vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@/infrastructure/supabase/profile-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/profile-repository', () => ({
   supabaseProfileRepository: { getProfile: getProfileMock },
 }))
 

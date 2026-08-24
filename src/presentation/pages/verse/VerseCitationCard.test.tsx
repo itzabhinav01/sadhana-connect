@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
 import { VerseCitationCard } from '@/presentation/pages/verse/VerseCitationCard'
-import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
 
 const verse: VerseOfTheDay = {
   id: 'v1',

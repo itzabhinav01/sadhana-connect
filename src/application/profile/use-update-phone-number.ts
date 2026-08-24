@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseProfileRepository } from '@/infrastructure/supabase/profile-repository'
+import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase/profile-repository'
 
 // Own-row only — enforced by RLS (profiles_update); no new policy was
 // needed since phone_number isn't one of the columns

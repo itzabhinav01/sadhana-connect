@@ -7,7 +7,7 @@ import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { profileQueryKeys } from '@/application/profile/profile-query-keys'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
-import { supabaseAuthRepository } from '@/infrastructure/supabase/auth-repository'
+import { supabaseAuthRepository } from '@sadhana-connect/infra-supabase/auth-repository'
 
 export function useSignOut() {
   const queryClient = useQueryClient()

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/application/auth/use-auth'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 
 // Bounded lookback shared by the "recent reports" list and the streak
 // calculation (see useSadhanaStreak) — both read this exact query (same

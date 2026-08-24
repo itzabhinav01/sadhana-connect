@@ -5,7 +5,7 @@ import {
   formValuesToUpsertParams,
   reportToFormValues,
 } from '@/application/sadhana/sadhana-form-mapping'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 
 const report: SadhanaReport = {
   id: 'report-1',

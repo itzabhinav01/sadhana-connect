@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { AppRole } from '@/domain/entities/profile'
+import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { RequireRole } from '@/presentation/routing/RequireRole'
 
 const { useProfileMock } = vi.hoisted(() => ({ useProfileMock: vi.fn() }))

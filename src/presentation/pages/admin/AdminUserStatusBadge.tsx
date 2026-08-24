@@ -1,4 +1,4 @@
-import { deriveAdminUserStatus } from '@/domain/entities/admin-user'
+import { deriveAdminUserStatus } from '@sadhana-connect/domain/entities/admin-user'
 
 interface AdminUserStatusBadgeProps {
   isActive: boolean

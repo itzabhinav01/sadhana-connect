@@ -11,8 +11,8 @@ const { useAuthMock, fromMock } = vi.hoisted(() => ({
 }))
 
 vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@/infrastructure/supabase/client', () => ({
-  supabase: { from: fromMock },
+vi.mock('@sadhana-connect/infra-supabase/client', () => ({
+  getSupabaseClient: () => ({ from: fromMock }),
 }))
 
 interface ChainResult {

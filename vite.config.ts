@@ -70,6 +70,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
+      '@sadhana-connect/domain': path.resolve(import.meta.dirname, './packages/domain/src'),
+      '@sadhana-connect/infra-supabase': path.resolve(import.meta.dirname, './packages/infra-supabase/src'),
     },
   },
   test: {
@@ -78,9 +80,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
+      include: ['src/**/*.{ts,tsx}', 'packages/*/src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.test.{ts,tsx}',
+        'packages/*/src/**/*.test.{ts,tsx}',
         'src/shared/test/**',
         // Vendored shadcn/ui primitives — not app business logic.
         'src/presentation/components/ui/**',

@@ -16,7 +16,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@sadhana-connect/domain/*": ["./packages/domain/src/*"],
+      "@sadhana-connect/infra-supabase/*": ["./packages/infra-supabase/src/*"]
     },
 
     /* Linting */
@@ -25,5 +27,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "packages/domain/src", "packages/infra-supabase/src"]
 }

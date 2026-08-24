@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { announcementCommentQueryKeys } from '@/application/announcements/announcement-comment-query-keys'
 import { useAuth } from '@/application/auth/use-auth'
-import { supabaseAnnouncementCommentRepository } from '@/infrastructure/supabase/announcement-comment-repository'
+import { supabaseAnnouncementCommentRepository } from '@sadhana-connect/infra-supabase/announcement-comment-repository'
 
 // Hard delete. RLS (announcement_comments_delete) allows: the comment's
 // own author, the announcement's own author moderating their thread, or

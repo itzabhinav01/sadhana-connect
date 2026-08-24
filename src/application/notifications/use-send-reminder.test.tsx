@@ -12,7 +12,7 @@ const { sendReminderNotificationMock } = vi.hoisted(() => ({
   sendReminderNotificationMock: vi.fn(),
 }))
 
-vi.mock('@/infrastructure/supabase/notification-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
   supabaseNotificationRepository: { sendReminderNotification: sendReminderNotificationMock },
 }))
 

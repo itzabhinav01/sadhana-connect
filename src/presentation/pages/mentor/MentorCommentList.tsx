@@ -4,7 +4,7 @@ import { commentSchema } from '@/application/comments/comment-schema'
 import { useAuth } from '@/application/auth/use-auth'
 import { useDeleteComment } from '@/application/comments/use-delete-comment'
 import { useUpdateComment } from '@/application/comments/use-update-comment'
-import type { SadhanaReportComment } from '@/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
 import { Button } from '@/presentation/components/ui/button'
 import { Textarea } from '@/presentation/components/ui/textarea'
 

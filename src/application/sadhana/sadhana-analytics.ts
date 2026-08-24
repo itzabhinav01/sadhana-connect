@@ -1,4 +1,4 @@
-import type { SadhanaReportRangeSummary } from '@/domain/entities/sadhana-report'
+import type { SadhanaReportRangeSummary } from '@sadhana-connect/domain/entities/sadhana-report'
 import { buildDateRangeList } from '@/shared/utils/date'
 
 export interface RoundsChartPoint {

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/application/auth/use-auth'
 import { calculateSadhanaAnalytics } from '@/application/sadhana/sadhana-analytics'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
-import { supabaseSadhanaReportRepository } from '@/infrastructure/supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 
 // Reuses the exact same range/rangeAll query keys and listReportsInRange
 // repository method Phase 7's weekly summary already uses — this is a

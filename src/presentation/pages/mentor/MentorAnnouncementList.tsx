@@ -13,7 +13,7 @@ import { announcementSchema } from '@/application/announcements/announcement-sch
 import { useAuth } from '@/application/auth/use-auth'
 import { useDeleteAnnouncement } from '@/application/announcements/use-delete-announcement'
 import { useUpdateAnnouncement } from '@/application/announcements/use-update-announcement'
-import type { Announcement } from '@/domain/entities/announcement'
+import type { Announcement } from '@sadhana-connect/domain/entities/announcement'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'

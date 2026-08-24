@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useAuth } from '@/application/auth/use-auth'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { useProfile } from '@/application/profile/use-profile'
-import { supabase } from '@/infrastructure/supabase/client'
+import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
 
 // Live in-app updates only, while this app is open — NOT push. If the
 // tab is closed, nothing is delivered; the devotee simply sees the
@@ -31,6 +31,7 @@ export function useNotificationsRealtime() {
   useEffect(() => {
     if (!userId || !isDevotee) return
 
+    const supabase = getSupabaseClient()
     const channel = supabase
       .channel(`notifications:${userId}`)
       .on(

@@ -5,7 +5,7 @@ import {
   formatVerseCitation,
   formatVerseCitationForCopy,
 } from '@/application/verse/format-verse-citation'
-import type { VerseOfTheDay } from '@/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent } from '@/presentation/components/ui/card'
 

@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useNotificationNavigation } from '@/application/notifications/use-notification-navigation'
-import type { SadhanaNotification } from '@/domain/entities/notification'
+import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
 
 const { navigateMock, getReportDateByIdMock, useAuthMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...actual, useNavigate: () => navigateMock }
 })
 
-vi.mock('@/infrastructure/supabase/sadhana-report-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
   supabaseSadhanaReportRepository: { getReportDateById: getReportDateByIdMock },
 }))
 

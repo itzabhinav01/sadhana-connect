@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { useMarkNotificationRead } from '@/application/notifications/use-mark-notification-read'
 import { useNotificationNavigation } from '@/application/notifications/use-notification-navigation'
-import type { SadhanaNotification } from '@/domain/entities/notification'
+import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
 import { cn } from '@/shared/utils/cn'
 
 function formatNotificationDate(iso: string) {

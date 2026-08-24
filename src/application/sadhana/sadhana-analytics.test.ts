@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { calculateSadhanaAnalytics } from '@/application/sadhana/sadhana-analytics'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 
 function makeReport(overrides: Partial<SadhanaReport>): SadhanaReport {
   return {

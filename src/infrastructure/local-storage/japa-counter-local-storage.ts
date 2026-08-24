@@ -1,7 +1,7 @@
 import type {
   JapaCounterStorage,
   JapaDailyState,
-} from '@/domain/repositories/japa-counter-storage'
+} from '@sadhana-connect/domain/repositories/japa-counter-storage'
 import { DEFAULT_TARGET_ROUNDS } from '@/shared/constants/japa'
 
 const STORAGE_PREFIX = 'sadhana-connect:japa'

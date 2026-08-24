@@ -14,7 +14,7 @@ const { useAuthMock, hardDeleteUserMock } = vi.hoisted(() => ({
 vi.mock('@/application/auth/use-auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/infrastructure/supabase/admin-account-actions-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/admin-account-actions-repository', () => ({
   supabaseAdminAccountActionsRepository: { hardDeleteUser: hardDeleteUserMock },
 }))
 

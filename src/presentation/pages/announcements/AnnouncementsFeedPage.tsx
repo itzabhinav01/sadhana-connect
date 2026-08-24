@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { useAnnouncements } from '@/application/announcements/use-announcements'
-import type { Announcement } from '@/domain/entities/announcement'
+import type { Announcement } from '@sadhana-connect/domain/entities/announcement'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 
 function formatDisplayDate(iso: string) {

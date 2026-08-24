@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { supabaseAuthRepository } from '@/infrastructure/supabase/auth-repository'
+import { supabaseAuthRepository } from '@sadhana-connect/infra-supabase/auth-repository'
 
 // Dedicated listener for the PASSWORD_RECOVERY event, scoped to the
 // reset-password page only. A recovery session looks like a normal

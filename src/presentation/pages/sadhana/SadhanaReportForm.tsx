@@ -12,7 +12,7 @@ import {
   sadhanaReportSchema,
 } from '@/application/sadhana/sadhana-report-schema'
 import { useUpsertSadhanaReport } from '@/application/sadhana/use-upsert-sadhana-report'
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { getLocalDateIso } from '@/shared/utils/date'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'

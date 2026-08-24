@@ -11,7 +11,7 @@ const { listPublishedVersesMock } = vi.hoisted(() => ({
   listPublishedVersesMock: vi.fn(),
 }))
 
-vi.mock('@/infrastructure/supabase/verse-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase/verse-repository', () => ({
   supabaseVerseRepository: { listPublishedVerses: listPublishedVersesMock },
 }))
 

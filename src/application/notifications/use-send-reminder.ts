@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { supabaseNotificationRepository } from '@/infrastructure/supabase/notification-repository'
+import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
 
 // Exact required copy — the RPC (public.send_reminder_notification, 0012)
 // raises a message prefixed "RATE_LIMITED:" specifically so this hook can

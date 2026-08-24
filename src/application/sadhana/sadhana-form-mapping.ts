@@ -1,5 +1,5 @@
-import type { SadhanaReport } from '@/domain/entities/sadhana-report'
-import type { UpsertSadhanaReportParams } from '@/domain/repositories/sadhana-report-repository'
+import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { UpsertSadhanaReportParams } from '@sadhana-connect/domain/repositories/sadhana-report-repository'
 import type { SadhanaReportFormInput } from '@/application/sadhana/sadhana-report-schema'
 
 function toInt(value: string): number {
