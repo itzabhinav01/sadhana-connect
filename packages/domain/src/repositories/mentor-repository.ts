@@ -1,5 +1,5 @@
-import type { MentorAssignedDevotee } from '@sadhana-connect/domain/entities/mentor-devotee'
-import type { MentorDevoteeReportSummary } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { MentorAssignedDevotee } from '../entities/mentor-devotee'
+import type { MentorDevoteeReportSummary } from '../entities/sadhana-report'
 
 export interface DevoteeLastReportDate {
   devoteeId: string

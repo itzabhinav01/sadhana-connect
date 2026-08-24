@@ -1,5 +1,5 @@
-import type { AppRole } from '@sadhana-connect/domain/entities/profile'
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AppRole } from '../entities/profile'
+import type { AdminUser } from '../entities/admin-user'
 
 export interface AdminUserFilters {
   search?: string

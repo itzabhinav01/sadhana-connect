@@ -1,4 +1,4 @@
-import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
+import type { VerseOfTheDay } from '../entities/verse-of-the-day'
 
 export interface VerseRepository {
   // Published citations, each joined with its local content when

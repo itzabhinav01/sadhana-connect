@@ -1,9 +1,9 @@
-/// <reference types="vitest/config" />
 import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { configDefaults } from 'vitest/config'
 
 import { pwaManifest } from './src/shared/config/pwa-manifest.ts'
 import {
@@ -77,6 +77,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/shared/test/setup.ts'],
+    // apps/mobile is a separate Expo/React Native workspace with its own
+    // jest-expo test runner (npm test --workspace=apps/mobile) — its RN
+    // source (Flow types, native module shims) isn't valid for Vite/Rolldown
+    // to parse, so vitest's default test-file discovery must exclude it.
+    exclude: [...configDefaults.exclude, 'apps/mobile/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

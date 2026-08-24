@@ -1,4 +1,4 @@
-import type { Announcement, AnnouncementScope } from '@sadhana-connect/domain/entities/announcement'
+import type { Announcement, AnnouncementScope } from '../entities/announcement'
 
 export interface CreateAnnouncementParams {
   authorId: string

@@ -4,7 +4,7 @@ import {
   HISTORY_SELECT_COLUMNS,
   RANGE_SUMMARY_SELECT_COLUMNS,
   SADHANA_REPORT_SELECT_COLUMNS,
-} from '@sadhana-connect/infra-supabase/sadhana-report-repository'
+} from './sadhana-report-repository'
 
 // Phase 20 performance: verifies the exact column strings sent to
 // PostgREST for each query shape, since that string is what actually

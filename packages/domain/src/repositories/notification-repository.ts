@@ -1,4 +1,4 @@
-import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
+import type { SadhanaNotification } from '../entities/notification'
 
 // Compound keyset cursor — a single set-based announcement fan-out
 // inserts many rows sharing the exact same created_at (one `now()` per

@@ -2,14 +2,14 @@ import type {
   SadhanaReport,
   SadhanaReportHistoryEntry,
   SadhanaReportRangeSummary,
-} from '@sadhana-connect/domain/entities/sadhana-report'
+} from '@sadhana-connect/domain'
 import type {
   ListSadhanaReportsOptions,
   ListSadhanaReportsResult,
   SadhanaReportRepository,
   UpsertSadhanaReportParams,
-} from '@sadhana-connect/domain/repositories/sadhana-report-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 export interface SadhanaReportRow {
   id: string

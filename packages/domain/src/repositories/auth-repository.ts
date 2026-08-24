@@ -1,5 +1,5 @@
-import type { AuthEvent } from '@sadhana-connect/domain/entities/auth-event'
-import type { AuthSession } from '@sadhana-connect/domain/entities/auth-session'
+import type { AuthEvent } from '../entities/auth-event'
+import type { AuthSession } from '../entities/auth-session'
 
 export interface SignUpParams {
   email: string

@@ -1,9 +1,9 @@
-import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '@sadhana-connect/domain'
 import type {
   CreateCommentParams,
   SadhanaReportCommentRepository,
-} from '@sadhana-connect/domain/repositories/sadhana-report-comment-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface CommentRow {
   id: string

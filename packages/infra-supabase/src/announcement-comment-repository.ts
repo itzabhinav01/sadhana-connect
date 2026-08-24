@@ -1,9 +1,9 @@
-import type { AnnouncementComment } from '@sadhana-connect/domain/entities/announcement-comment'
+import type { AnnouncementComment } from '@sadhana-connect/domain'
 import type {
   AnnouncementCommentRepository,
   CreateAnnouncementCommentParams,
-} from '@sadhana-connect/domain/repositories/announcement-comment-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface AnnouncementCommentRow {
   id: string

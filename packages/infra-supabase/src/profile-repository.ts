@@ -1,6 +1,6 @@
-import type { Profile } from '@sadhana-connect/domain/entities/profile'
-import type { ProfileRepository } from '@sadhana-connect/domain/repositories/profile-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+import type { Profile } from '@sadhana-connect/domain'
+import type { ProfileRepository } from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface ProfileRow {
   id: string

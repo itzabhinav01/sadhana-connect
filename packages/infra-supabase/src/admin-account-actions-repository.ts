@@ -2,8 +2,8 @@ import type {
   AdminAccountActionsRepository,
   HardDeleteResult,
   HardDeleteStage,
-} from '@sadhana-connect/domain/repositories/admin-account-actions-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 type AdminAccountAction =
   | 'ban'

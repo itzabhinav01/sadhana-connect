@@ -1,4 +1,4 @@
-import type { AnnouncementComment } from '@sadhana-connect/domain/entities/announcement-comment'
+import type { AnnouncementComment } from '../entities/announcement-comment'
 
 export interface CreateAnnouncementCommentParams {
   announcementId: string

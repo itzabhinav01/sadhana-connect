@@ -1,6 +1,6 @@
-import type { TempleGroup } from '@sadhana-connect/domain/entities/temple-group'
-import type { AdminTempleGroupRepository } from '@sadhana-connect/domain/repositories/admin-temple-group-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+import type { TempleGroup } from '@sadhana-connect/domain'
+import type { AdminTempleGroupRepository } from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface TempleGroupRow {
   id: string

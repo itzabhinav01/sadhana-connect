@@ -1,11 +1,11 @@
-import type { AppRole } from '@sadhana-connect/domain/entities/profile'
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AppRole } from '@sadhana-connect/domain'
+import type { AdminUser } from '@sadhana-connect/domain'
 import type {
   AdminUserListParams,
   AdminUserListPage,
   AdminUserRepository,
-} from '@sadhana-connect/domain/repositories/admin-user-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface AdminUserRow {
   id: string

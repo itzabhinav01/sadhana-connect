@@ -1,6 +1,6 @@
-import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
-import type { VerseRepository } from '@sadhana-connect/domain/repositories/verse-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+import type { VerseOfTheDay } from '@sadhana-connect/domain'
+import type { VerseRepository } from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface VerseRow {
   id: string

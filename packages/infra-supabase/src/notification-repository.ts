@@ -1,13 +1,13 @@
 import type {
   NotificationType,
   SadhanaNotification,
-} from '@sadhana-connect/domain/entities/notification'
+} from '@sadhana-connect/domain'
 import type {
   ListNotificationsOptions,
   ListNotificationsResult,
   NotificationRepository,
-} from '@sadhana-connect/domain/repositories/notification-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface NotificationRow {
   id: string

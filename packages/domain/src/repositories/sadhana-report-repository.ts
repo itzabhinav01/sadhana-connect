@@ -2,7 +2,7 @@ import type {
   SadhanaReport,
   SadhanaReportHistoryEntry,
   SadhanaReportRangeSummary,
-} from '@sadhana-connect/domain/entities/sadhana-report'
+} from '../entities/sadhana-report'
 
 export interface ListSadhanaReportsOptions {
   fromDate?: string

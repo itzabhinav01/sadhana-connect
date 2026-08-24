@@ -1,10 +1,10 @@
-import type { AdminMentorAssignment } from '@sadhana-connect/domain/entities/mentor-assignment'
+import type { AdminMentorAssignment } from '@sadhana-connect/domain'
 import type {
   AdminAssignmentFilters,
   AdminAssignmentRepository,
   MentorDevoteeCount,
-} from '@sadhana-connect/domain/repositories/admin-assignment-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface AssignmentRow {
   id: string

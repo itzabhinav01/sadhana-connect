@@ -1,10 +1,10 @@
-import type { MentorAssignedDevotee } from '@sadhana-connect/domain/entities/mentor-devotee'
-import type { MentorDevoteeReportSummary } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { MentorAssignedDevotee } from '@sadhana-connect/domain'
+import type { MentorDevoteeReportSummary } from '@sadhana-connect/domain'
 import type {
   DevoteeLastReportDate,
   MentorRepository,
-} from '@sadhana-connect/domain/repositories/mentor-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface AssignedDevoteeRow {
   devotee_id: string

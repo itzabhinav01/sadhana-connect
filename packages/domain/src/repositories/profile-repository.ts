@@ -1,4 +1,4 @@
-import type { Profile } from '@sadhana-connect/domain/entities/profile'
+import type { Profile } from '../entities/profile'
 
 export interface ProfileRepository {
   // Returns null if no profile row exists for this user id. Every

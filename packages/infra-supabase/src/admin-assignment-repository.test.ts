@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase/admin-assignment-repository'
+import { supabaseAdminAssignmentRepository } from './admin-assignment-repository'
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }))
 
-vi.mock('@sadhana-connect/infra-supabase/client', () => ({
+vi.mock('./client', () => ({
   getSupabaseClient: () => ({ from: fromMock }),
 }))
 

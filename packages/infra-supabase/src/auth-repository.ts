@@ -1,14 +1,14 @@
 import type { EmailOtpType, Session } from '@supabase/supabase-js'
 
-import type { AuthEvent } from '@sadhana-connect/domain/entities/auth-event'
-import type { AuthSession } from '@sadhana-connect/domain/entities/auth-session'
+import type { AuthEvent } from '@sadhana-connect/domain'
+import type { AuthSession } from '@sadhana-connect/domain'
 import type {
   AuthRepository,
   ConfirmEmailParams,
   SignInParams,
   SignUpParams,
-} from '@sadhana-connect/domain/repositories/auth-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 function mapSession(session: Session | null): AuthSession | null {
   if (!session) return null

@@ -11,7 +11,13 @@ export default defineConfig([
   // browser/vite-node target, just like it's excluded from tsconfig.app.json
   // and tsconfig.node.json's `include`. Linting it against globals.browser
   // would flag every Deno global as undefined.
-  globalIgnores(['dist', 'coverage', 'supabase/functions/**']),
+  // apps/mobile is a separate Expo/React Native workspace with its own
+  // eslint-config-expo setup (its own flat config, its own `npm run lint`
+  // via --workspace=apps/mobile) — this config's globals.browser and
+  // Vite-specific react-refresh rules don't apply there, and ESLint's flat
+  // config doesn't cascade across directories, so it must be excluded here
+  // rather than relying on apps/mobile/eslint.config.js being picked up.
+  globalIgnores(['dist', 'coverage', 'supabase/functions/**', 'apps/mobile/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

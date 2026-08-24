@@ -1,4 +1,4 @@
-import type { TempleGroup } from '@sadhana-connect/domain/entities/temple-group'
+import type { TempleGroup } from '../entities/temple-group'
 
 export interface AdminTempleGroupRepository {
   listTempleGroups(): Promise<TempleGroup[]>

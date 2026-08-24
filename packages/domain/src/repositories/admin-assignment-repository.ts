@@ -1,4 +1,4 @@
-import type { AdminMentorAssignment } from '@sadhana-connect/domain/entities/mentor-assignment'
+import type { AdminMentorAssignment } from '../entities/mentor-assignment'
 
 export interface AdminAssignmentFilters {
   mentorId?: string

@@ -1,4 +1,4 @@
-import type { AppRole } from '@sadhana-connect/domain/entities/profile'
+import type { AppRole } from './profile'
 
 // Phase 20C: 'anonymized' removed — deletion is now a true hard delete
 // (see admin-account-actions' hard_delete), so no row can ever end up in

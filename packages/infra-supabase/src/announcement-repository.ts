@@ -1,13 +1,13 @@
 import type {
   Announcement,
   AnnouncementScope,
-} from '@sadhana-connect/domain/entities/announcement'
+} from '@sadhana-connect/domain'
 import type {
   AnnouncementRepository,
   CreateAnnouncementParams,
   UpdateAnnouncementParams,
-} from '@sadhana-connect/domain/repositories/announcement-repository'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+} from '@sadhana-connect/domain'
+import { getSupabaseClient } from './client'
 
 interface AnnouncementRow {
   id: string

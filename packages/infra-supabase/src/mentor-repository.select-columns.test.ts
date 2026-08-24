@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { DEVOTEE_REPORT_SUMMARY_SELECT_COLUMNS } from '@sadhana-connect/infra-supabase/mentor-repository'
+import { DEVOTEE_REPORT_SUMMARY_SELECT_COLUMNS } from './mentor-repository'
 
 // Phase 20 performance: verifies the exact column string sent to
 // PostgREST for listReportsForDevotees, since that string is what

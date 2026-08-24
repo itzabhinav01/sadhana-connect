@@ -1,4 +1,4 @@
-import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '../entities/sadhana-report-comment'
 
 export interface CreateCommentParams {
   sadhanaReportId: string
