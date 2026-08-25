@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
+import { announcementQueryKeys } from '@sadhana-connect/announcements'
 import { useAuth } from '@sadhana-connect/auth'
-import type { AnnouncementScope } from '@sadhana-connect/domain/entities/announcement'
-import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase/announcement-repository'
+import type { AnnouncementScope } from '@sadhana-connect/domain'
+import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase'
 
 interface CreateAdminAnnouncementInput {
   title: string

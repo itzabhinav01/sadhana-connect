@@ -8,20 +8,18 @@ const { useProfileMock, useAnnouncementsMock } = vi.hoisted(() => ({
   useAnnouncementsMock: vi.fn(),
 }))
 
-vi.mock('@/application/announcements/use-announcements', () => ({
-  useAnnouncements: useAnnouncementsMock,
-}))
 // The form/list pull in react-hook-form + mutation hooks; stub them out
 // so this page-level test only exercises the page's own branching.
-vi.mock('@/application/announcements/use-create-announcement', () => ({
-  useCreateMentorAnnouncement: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
-}))
-vi.mock('@/application/announcements/use-update-announcement', () => ({
-  useUpdateAnnouncement: () => ({ mutate: vi.fn(), isPending: false }),
-}))
-vi.mock('@/application/announcements/use-delete-announcement', () => ({
-  useDeleteAnnouncement: () => ({ mutate: vi.fn(), isPending: false }),
-}))
+vi.mock('@sadhana-connect/announcements', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/announcements')>()
+  return {
+    ...actual,
+    useAnnouncements: useAnnouncementsMock,
+    useCreateMentorAnnouncement: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useUpdateAnnouncement: () => ({ mutate: vi.fn(), isPending: false }),
+    useDeleteAnnouncement: () => ({ mutate: vi.fn(), isPending: false }),
+  }
+})
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: () => ({ session: { userId: 'mentor-1', email: 'm@b.com', emailConfirmedAt: null }, isLoading: false }),
   useProfile: useProfileMock,

@@ -1,10 +1,8 @@
 import { useState } from 'react'
 
-import { commentSchema } from '@/application/comments/comment-schema'
+import { commentSchema, useDeleteComment, useUpdateComment } from '@sadhana-connect/comments'
 import { useAuth } from '@sadhana-connect/auth'
-import { useDeleteComment } from '@/application/comments/use-delete-comment'
-import { useUpdateComment } from '@/application/comments/use-update-comment'
-import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Textarea } from '@/presentation/components/ui/textarea'
 

@@ -2,14 +2,18 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { COMMENT_MAX_LENGTH } from '@/application/comments/comment-schema'
+import { COMMENT_MAX_LENGTH } from '@sadhana-connect/comments'
 import { MentorCommentForm } from '@/presentation/pages/mentor/MentorCommentForm'
 
 const { useAddCommentMock } = vi.hoisted(() => ({ useAddCommentMock: vi.fn() }))
 
-vi.mock('@/application/comments/use-add-comment', () => ({
-  useAddComment: useAddCommentMock,
-}))
+vi.mock('@sadhana-connect/comments', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/comments')>()
+  return {
+    ...actual,
+    useAddComment: useAddCommentMock,
+  }
+})
 
 describe('MentorCommentForm', () => {
   beforeEach(() => {

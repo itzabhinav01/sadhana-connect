@@ -3,19 +3,19 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { commentQueryKeys } from '@/application/comments/comment-query-keys'
-import { useUpdateComment } from '@/application/comments/use-update-comment'
+import { commentQueryKeys } from './comment-query-keys'
+import { useDeleteComment } from './use-delete-comment'
 
-const { useAuthMock, updateCommentMock } = vi.hoisted(() => ({
+const { useAuthMock, deleteCommentMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
-  updateCommentMock: vi.fn(),
+  deleteCommentMock: vi.fn(),
 }))
 
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/sadhana-report-comment-repository', () => ({
-  supabaseSadhanaReportCommentRepository: { updateComment: updateCommentMock },
+vi.mock('@sadhana-connect/infra-supabase', () => ({
+  supabaseSadhanaReportCommentRepository: { deleteComment: deleteCommentMock },
 }))
 
 function createWrapper(queryClient: QueryClient) {
@@ -28,36 +28,28 @@ function createWrapper(queryClient: QueryClient) {
   }
 }
 
-describe('useUpdateComment', () => {
+describe('useDeleteComment', () => {
   beforeEach(() => {
     useAuthMock.mockReset()
-    updateCommentMock.mockReset()
+    deleteCommentMock.mockReset()
     useAuthMock.mockReturnValue({
       session: { userId: 'mentor-1', email: 'm@b.com', emailConfirmedAt: null },
       isLoading: false,
     })
   })
 
-  it('updates the given comment id with new text and invalidates the list', async () => {
-    updateCommentMock.mockResolvedValue({
-      id: 'c1',
-      sadhanaReportId: 'report-1',
-      mentorId: 'mentor-1',
-      mentorName: 'Mentor One',
-      commentText: 'Edited',
-      createdAt: '2026-01-15T00:00:00.000Z',
-      updatedAt: '2026-01-16T00:00:00.000Z',
-    })
+  it('deletes the given comment id and invalidates the list', async () => {
+    deleteCommentMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-    const { result } = renderHook(() => useUpdateComment('report-1'), {
+    const { result } = renderHook(() => useDeleteComment('report-1'), {
       wrapper: createWrapper(queryClient),
     })
 
-    result.current.mutate({ commentId: 'c1', commentText: 'Edited' })
+    result.current.mutate('c1')
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(updateCommentMock).toHaveBeenCalledWith('c1', 'Edited')
+    expect(deleteCommentMock).toHaveBeenCalledWith('c1')
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: commentQueryKeys.list('mentor-1', 'report-1'),
     })

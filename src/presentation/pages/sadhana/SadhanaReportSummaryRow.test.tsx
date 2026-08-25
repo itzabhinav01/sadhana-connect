@@ -5,14 +5,14 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
 
 const { useSadhanaReportCommentsMock } = vi.hoisted(() => ({
   useSadhanaReportCommentsMock: vi.fn(),
 }))
 
-vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
+vi.mock('@sadhana-connect/comments', () => ({
   useSadhanaReportComments: useSadhanaReportCommentsMock,
 }))
 

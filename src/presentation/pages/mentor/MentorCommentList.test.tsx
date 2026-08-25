@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SadhanaReportComment } from '@sadhana-connect/domain/entities/sadhana-report-comment'
+import type { SadhanaReportComment } from '@sadhana-connect/domain'
 import { MentorCommentList } from '@/presentation/pages/mentor/MentorCommentList'
 
 const { useAuthMock, useUpdateCommentMock, useDeleteCommentMock } = vi.hoisted(() => ({
@@ -14,12 +14,14 @@ const { useAuthMock, useUpdateCommentMock, useDeleteCommentMock } = vi.hoisted((
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/application/comments/use-update-comment', () => ({
-  useUpdateComment: useUpdateCommentMock,
-}))
-vi.mock('@/application/comments/use-delete-comment', () => ({
-  useDeleteComment: useDeleteCommentMock,
-}))
+vi.mock('@sadhana-connect/comments', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/comments')>()
+  return {
+    ...actual,
+    useUpdateComment: useUpdateCommentMock,
+    useDeleteComment: useDeleteCommentMock,
+  }
+})
 
 const ownComment: SadhanaReportComment = {
   id: 'c1',

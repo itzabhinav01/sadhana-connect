@@ -8,7 +8,7 @@ const { useAnnouncementsMock } = vi.hoisted(() => ({
   useAnnouncementsMock: vi.fn(),
 }))
 
-vi.mock('@/application/announcements/use-announcements', () => ({
+vi.mock('@sadhana-connect/announcements', () => ({
   useAnnouncements: useAnnouncementsMock,
 }))
 // Comments have their own dedicated test coverage

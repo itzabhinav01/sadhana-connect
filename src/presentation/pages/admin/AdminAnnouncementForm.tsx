@@ -7,15 +7,13 @@ import { useCreateAdminAnnouncement } from '@/application/admin/use-create-admin
 import {
   ANNOUNCEMENT_EXPIRATION_PRESETS,
   ANNOUNCEMENT_EXPIRATION_PRESET_LABELS,
+  announcementSchema,
   resolveExpirationError,
   resolveExpiresAt,
   type AnnouncementExpirationPreset,
-} from '@/application/announcements/announcement-expiration'
-import {
-  announcementSchema,
   type AnnouncementFormValues,
-} from '@/application/announcements/announcement-schema'
-import type { AnnouncementScope } from '@sadhana-connect/domain/entities/announcement'
+} from '@sadhana-connect/announcements'
+import type { AnnouncementScope } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'

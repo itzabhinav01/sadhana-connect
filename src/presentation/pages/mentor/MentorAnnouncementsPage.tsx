@@ -1,4 +1,4 @@
-import { useAnnouncements } from '@/application/announcements/use-announcements'
+import { useAnnouncements } from '@sadhana-connect/announcements'
 import { useProfile } from '@sadhana-connect/auth'
 import { MentorAnnouncementForm } from '@/presentation/pages/mentor/MentorAnnouncementForm'
 import { MentorAnnouncementList } from '@/presentation/pages/mentor/MentorAnnouncementList'

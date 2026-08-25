@@ -17,8 +17,10 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
+import { CommentThread } from '../../../../src/presentation/components/CommentThread'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
+import { ReminderForm } from '../../../../src/presentation/components/ReminderForm'
 import { colors, fontSize, spacing } from '../../../../src/shared/theme'
 
 const PRESETS = [
@@ -33,6 +35,8 @@ function formatDisplayDate(iso: string) {
 }
 
 function ReadOnlyReportRow({ report }: { report: SadhanaReportHistoryEntry }) {
+  const [showComments, setShowComments] = useState(false)
+
   return (
     <View style={styles.reportRow}>
       <Text style={styles.reportDate}>{formatDisplayDate(report.reportDate)}</Text>
@@ -40,6 +44,12 @@ function ReadOnlyReportRow({ report }: { report: SadhanaReportHistoryEntry }) {
         {report.totalRounds} rounds · {report.readingMinutes}m reading ·{' '}
         {report.hearingMinutes}m hearing
       </Text>
+      <Button
+        title={showComments ? 'Hide comments' : 'Comments'}
+        variant="outline"
+        onPress={() => setShowComments((current) => !current)}
+      />
+      {showComments ? <CommentThread sadhanaReportId={report.id} /> : null}
     </View>
   )
 }
@@ -148,6 +158,8 @@ export default function MentorDevoteeDetailScreen() {
                 .map((report) => <ReadOnlyReportRow key={report.id} report={report} />)
             : null}
         </Card>
+
+        <ReminderForm devoteeId={devoteeId} />
       </ScrollView>
     </>
   )
@@ -184,7 +196,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    gap: 2,
+    gap: spacing.xs,
   },
   reportDate: {
     fontSize: fontSize.base,

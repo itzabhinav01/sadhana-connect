@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { commentQueryKeys } from '@/application/comments/comment-query-keys'
+import { commentQueryKeys } from './comment-query-keys'
 import { useProfile } from '@sadhana-connect/auth'
-import { supabaseSadhanaReportCommentRepository } from '@sadhana-connect/infra-supabase/sadhana-report-comment-repository'
+import { supabaseSadhanaReportCommentRepository } from '@sadhana-connect/infra-supabase'
 
 // mentorName is captured here, from the mentor's own live profile, at the
 // moment of posting — becoming the permanent snapshot stored on the row.

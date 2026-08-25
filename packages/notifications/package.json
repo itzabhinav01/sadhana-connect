@@ -1,0 +1,12 @@
+{
+  "name": "@sadhana-connect/notifications",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@sadhana-connect/domain": "*",
+    "@sadhana-connect/infra-supabase": "*",
+    "@tanstack/react-query": "^5.101.4"
+  }
+}

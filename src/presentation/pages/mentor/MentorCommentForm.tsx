@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-import { COMMENT_MAX_LENGTH, commentSchema } from '@/application/comments/comment-schema'
-import { useAddComment } from '@/application/comments/use-add-comment'
+import { COMMENT_MAX_LENGTH, commentSchema, useAddComment } from '@sadhana-connect/comments'
 import { Button } from '@/presentation/components/ui/button'
 import { Textarea } from '@/presentation/components/ui/textarea'
 

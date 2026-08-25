@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
 
 const { useAuthMock, useProfileMock, useSadhanaReportCommentsMock, useAddCommentMock } =
@@ -17,18 +17,16 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
   useProfile: useProfileMock,
 }))
-vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
-  useSadhanaReportComments: useSadhanaReportCommentsMock,
-}))
-vi.mock('@/application/comments/use-add-comment', () => ({
-  useAddComment: useAddCommentMock,
-}))
-vi.mock('@/application/comments/use-update-comment', () => ({
-  useUpdateComment: () => ({ mutate: vi.fn(), isPending: false }),
-}))
-vi.mock('@/application/comments/use-delete-comment', () => ({
-  useDeleteComment: () => ({ mutate: vi.fn(), isPending: false }),
-}))
+vi.mock('@sadhana-connect/comments', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/comments')>()
+  return {
+    ...actual,
+    useSadhanaReportComments: useSadhanaReportCommentsMock,
+    useAddComment: useAddCommentMock,
+    useUpdateComment: () => ({ mutate: vi.fn(), isPending: false }),
+    useDeleteComment: () => ({ mutate: vi.fn(), isPending: false }),
+  }
+})
 
 const report: SadhanaReport = {
   id: 'r1',

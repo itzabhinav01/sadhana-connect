@@ -6,13 +6,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   ReminderRateLimitedError,
   useSendReminder,
-} from '@/application/notifications/use-send-reminder'
+} from './use-send-reminder'
 
 const { sendReminderNotificationMock } = vi.hoisted(() => ({
   sendReminderNotificationMock: vi.fn(),
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseNotificationRepository: { sendReminderNotification: sendReminderNotificationMock },
 }))
 

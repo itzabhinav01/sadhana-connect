@@ -9,14 +9,16 @@ const { useSadhanaReportCommentsMock, useAuthMock, useAddCommentMock } = vi.hois
   useAddCommentMock: vi.fn(),
 }))
 
-vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
-  useSadhanaReportComments: useSadhanaReportCommentsMock,
-}))
+vi.mock('@sadhana-connect/comments', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/comments')>()
+  return {
+    ...actual,
+    useSadhanaReportComments: useSadhanaReportCommentsMock,
+    useAddComment: useAddCommentMock,
+  }
+})
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
-}))
-vi.mock('@/application/comments/use-add-comment', () => ({
-  useAddComment: useAddCommentMock,
 }))
 
 describe('MentorReportCommentSection', () => {

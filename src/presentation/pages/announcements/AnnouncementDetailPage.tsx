@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 
-import { useAnnouncements } from '@/application/announcements/use-announcements'
+import { useAnnouncements } from '@sadhana-connect/announcements'
 import { AnnouncementComments } from '@/presentation/pages/announcements/AnnouncementComments'
 
 // Devotee-facing announcement view — originally added in Phase 17 so an

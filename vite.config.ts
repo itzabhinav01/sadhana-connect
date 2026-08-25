@@ -77,6 +77,9 @@ export default defineConfig({
       '@sadhana-connect/sadhana': path.resolve(import.meta.dirname, './packages/sadhana/src'),
       '@sadhana-connect/verse': path.resolve(import.meta.dirname, './packages/verse/src'),
       '@sadhana-connect/mentor': path.resolve(import.meta.dirname, './packages/mentor/src'),
+      '@sadhana-connect/comments': path.resolve(import.meta.dirname, './packages/comments/src'),
+      '@sadhana-connect/notifications': path.resolve(import.meta.dirname, './packages/notifications/src'),
+      '@sadhana-connect/announcements': path.resolve(import.meta.dirname, './packages/announcements/src'),
     },
   },
   test: {

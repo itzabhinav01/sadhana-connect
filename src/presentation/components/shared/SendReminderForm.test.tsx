@@ -4,17 +4,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   ReminderRateLimitedError,
-} from '@/application/notifications/use-send-reminder'
+} from '@sadhana-connect/notifications'
 import { SendReminderForm } from '@/presentation/components/shared/SendReminderForm'
 
 const { useSendReminderMock } = vi.hoisted(() => ({
   useSendReminderMock: vi.fn(),
 }))
 
-vi.mock('@/application/notifications/use-send-reminder', async () => {
+vi.mock('@sadhana-connect/notifications', async () => {
   const actual = await vi.importActual<
-    typeof import('@/application/notifications/use-send-reminder')
-  >('@/application/notifications/use-send-reminder')
+    typeof import('@sadhana-connect/notifications')
+  >('@sadhana-connect/notifications')
   return { ...actual, useSendReminder: useSendReminderMock }
 })
 

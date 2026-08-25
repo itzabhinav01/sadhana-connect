@@ -4,7 +4,7 @@ import {
   ANNOUNCEMENT_CONTENT_MAX_LENGTH,
   ANNOUNCEMENT_TITLE_MAX_LENGTH,
   announcementSchema,
-} from '@/application/announcements/announcement-schema'
+} from './announcement-schema'
 
 describe('announcementSchema', () => {
   it('accepts a normal announcement', () => {

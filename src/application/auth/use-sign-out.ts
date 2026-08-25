@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
-import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
-import { commentQueryKeys } from '@/application/comments/comment-query-keys'
+import { announcementQueryKeys } from '@sadhana-connect/announcements'
+import { commentQueryKeys } from '@sadhana-connect/comments'
 import { mentorQueryKeys } from '@sadhana-connect/mentor'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { profileQueryKeys } from '@sadhana-connect/auth'

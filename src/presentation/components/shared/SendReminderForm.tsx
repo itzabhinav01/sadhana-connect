@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { ReminderRateLimitedError, useSendReminder } from '@/application/notifications/use-send-reminder'
+import { ReminderRateLimitedError, useSendReminder } from '@sadhana-connect/notifications'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
 import { Textarea } from '@/presentation/components/ui/textarea'

@@ -4,16 +4,16 @@ import { Link } from 'react-router-dom'
 import {
   ANNOUNCEMENT_EXPIRATION_PRESETS,
   ANNOUNCEMENT_EXPIRATION_PRESET_LABELS,
+  announcementSchema,
   resolveExpirationError,
   resolveExpiresAt,
   toExpirationFormValue,
+  useDeleteAnnouncement,
+  useUpdateAnnouncement,
   type AnnouncementExpirationPreset,
-} from '@/application/announcements/announcement-expiration'
-import { announcementSchema } from '@/application/announcements/announcement-schema'
+} from '@sadhana-connect/announcements'
 import { useAuth } from '@sadhana-connect/auth'
-import { useDeleteAnnouncement } from '@/application/announcements/use-delete-announcement'
-import { useUpdateAnnouncement } from '@/application/announcements/use-update-announcement'
-import type { Announcement } from '@sadhana-connect/domain/entities/announcement'
+import type { Announcement } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'

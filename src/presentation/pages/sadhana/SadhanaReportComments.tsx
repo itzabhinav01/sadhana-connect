@@ -1,4 +1,4 @@
-import { useSadhanaReportComments } from '@/application/comments/use-sadhana-report-comments'
+import { useSadhanaReportComments } from '@sadhana-connect/comments'
 
 function formatTimestamp(iso: string) {
   return new Date(iso).toLocaleString(undefined, {

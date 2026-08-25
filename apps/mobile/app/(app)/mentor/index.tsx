@@ -157,6 +157,12 @@ export default function MentorDashboardScreen() {
             )}
           </>
         ) : null}
+
+        <Button
+          title="Announcements"
+          variant="outline"
+          onPress={() => router.push('/mentor/announcements')}
+        />
       </ScrollView>
     </>
   )

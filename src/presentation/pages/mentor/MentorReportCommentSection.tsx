@@ -1,4 +1,4 @@
-import { useSadhanaReportComments } from '@/application/comments/use-sadhana-report-comments'
+import { useSadhanaReportComments } from '@sadhana-connect/comments'
 import { MentorCommentForm } from '@/presentation/pages/mentor/MentorCommentForm'
 import { MentorCommentList } from '@/presentation/pages/mentor/MentorCommentList'
 

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { Announcement } from '@sadhana-connect/domain/entities/announcement'
+import type { Announcement } from '@sadhana-connect/domain'
 import { MentorAnnouncementList } from '@/presentation/pages/mentor/MentorAnnouncementList'
 
 function renderList(announcements: Announcement[]) {
@@ -23,12 +23,14 @@ const { useAuthMock, useUpdateAnnouncementMock, useDeleteAnnouncementMock } = vi
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@/application/announcements/use-update-announcement', () => ({
-  useUpdateAnnouncement: useUpdateAnnouncementMock,
-}))
-vi.mock('@/application/announcements/use-delete-announcement', () => ({
-  useDeleteAnnouncement: useDeleteAnnouncementMock,
-}))
+vi.mock('@sadhana-connect/announcements', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/announcements')>()
+  return {
+    ...actual,
+    useUpdateAnnouncement: useUpdateAnnouncementMock,
+    useDeleteAnnouncement: useDeleteAnnouncementMock,
+  }
+})
 
 const ownAnnouncement: Announcement = {
   id: 'a1',

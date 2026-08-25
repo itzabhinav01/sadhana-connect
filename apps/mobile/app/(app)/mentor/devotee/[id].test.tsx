@@ -1,3 +1,10 @@
+jest.mock('../../../../../../packages/auth/src/use-auth', () => ({
+  useAuth: jest.fn(() => ({
+    session: { userId: 'mentor-1', email: 'm@b.com', emailConfirmedAt: null },
+    isLoading: false,
+  })),
+}))
+
 jest.mock('../../../../../../packages/mentor/src/use-devotee-profile', () => ({
   useDevoteeProfile: jest.fn(),
 }))
@@ -12,6 +19,19 @@ jest.mock('../../../../../../packages/mentor/src/use-devotee-assigned-since', ()
 
 jest.mock('../../../../../../packages/sadhana/src/use-devotee-report-history', () => ({
   useDevoteeReportHistory: jest.fn(),
+}))
+
+jest.mock('../../../../../../packages/comments/src/use-sadhana-report-comments', () => ({
+  useSadhanaReportComments: jest.fn(),
+}))
+
+jest.mock('../../../../../../packages/comments/src/use-add-comment', () => ({
+  useAddComment: jest.fn(),
+}))
+
+jest.mock('../../../../../../packages/notifications/src/use-send-reminder', () => ({
+  useSendReminder: jest.fn(),
+  ReminderRateLimitedError: class ReminderRateLimitedError extends Error {},
 }))
 
 jest.mock('expo-router', () => {
@@ -29,6 +49,8 @@ import {
   useDevoteeTodayReport,
 } from '@sadhana-connect/mentor'
 import { getLastNDaysRange, useDevoteeReportHistory } from '@sadhana-connect/sadhana'
+import { useAddComment, useSadhanaReportComments } from '@sadhana-connect/comments'
+import { useSendReminder } from '@sadhana-connect/notifications'
 
 import MentorDevoteeDetailScreen from './[id]'
 
@@ -36,6 +58,9 @@ const mockUseDevoteeProfile = useDevoteeProfile as jest.Mock
 const mockUseDevoteeTodayReport = useDevoteeTodayReport as jest.Mock
 const mockUseDevoteeAssignedSince = useDevoteeAssignedSince as jest.Mock
 const mockUseDevoteeReportHistory = useDevoteeReportHistory as jest.Mock
+const mockUseSadhanaReportComments = useSadhanaReportComments as jest.Mock
+const mockUseAddComment = useAddComment as jest.Mock
+const mockUseSendReminder = useSendReminder as jest.Mock
 
 const idlePending = { isPending: true, isError: false, isSuccess: false, data: undefined }
 const idleSuccessEmpty = { isPending: false, isError: false, isSuccess: true, data: null }
@@ -60,9 +85,20 @@ describe('MentorDevoteeDetailScreen', () => {
     mockUseDevoteeTodayReport.mockReset()
     mockUseDevoteeAssignedSince.mockReset()
     mockUseDevoteeReportHistory.mockReset()
+    mockUseSadhanaReportComments.mockReset()
+    mockUseAddComment.mockReset()
+    mockUseSendReminder.mockReset()
     mockUseDevoteeTodayReport.mockReturnValue(idleSuccessEmpty)
     mockUseDevoteeReportHistory.mockReturnValue(idleSuccessList)
     mockUseDevoteeAssignedSince.mockReturnValue({ ...idleSuccessEmpty, data: null })
+    mockUseAddComment.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
+    mockUseSendReminder.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      error: null,
+    })
   })
 
   it('shows a loading state while the profile is pending', async () => {
@@ -155,5 +191,45 @@ describe('MentorDevoteeDetailScreen', () => {
       expected.toDate,
       { enabled: true },
     )
+  })
+
+  it('shows the reminder form on the screen', async () => {
+    mockUseDevoteeProfile.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: activeProfile,
+    })
+
+    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    expect(getByText('Send a reminder')).toBeTruthy()
+  })
+
+  it('expands the comment thread on a report row when its Comments toggle is pressed', async () => {
+    mockUseDevoteeProfile.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: activeProfile,
+    })
+    mockUseDevoteeTodayReport.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: { id: 'r1', reportDate: '2026-01-15', totalRounds: 16, readingMinutes: 20, hearingMinutes: 10 },
+    })
+    mockUseSadhanaReportComments.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [],
+    })
+
+    const { getByRole, getByText } = await render(<MentorDevoteeDetailScreen />)
+
+    await fireEvent.press(getByRole('button', { name: 'Comments' }))
+
+    expect(getByText('No comments yet.')).toBeTruthy()
+    expect(getByRole('button', { name: 'Hide comments' })).toBeTruthy()
   })
 })

@@ -30,10 +30,10 @@ vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
     useDevoteeReportHistory: useDevoteeReportHistoryMock,
   }
 })
-vi.mock('@/application/notifications/use-send-reminder', async () => {
+vi.mock('@sadhana-connect/notifications', async () => {
   const actual = await vi.importActual<
-    typeof import('@/application/notifications/use-send-reminder')
-  >('@/application/notifications/use-send-reminder')
+    typeof import('@sadhana-connect/notifications')
+  >('@sadhana-connect/notifications')
   return { ...actual, useSendReminder: useSendReminderMock }
 })
 

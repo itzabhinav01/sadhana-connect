@@ -23,7 +23,10 @@
       "@sadhana-connect/shared": ["./packages/shared/src"],
       "@sadhana-connect/sadhana": ["./packages/sadhana/src"],
       "@sadhana-connect/verse": ["./packages/verse/src"],
-      "@sadhana-connect/mentor": ["./packages/mentor/src"]
+      "@sadhana-connect/mentor": ["./packages/mentor/src"],
+      "@sadhana-connect/comments": ["./packages/comments/src"],
+      "@sadhana-connect/notifications": ["./packages/notifications/src"],
+      "@sadhana-connect/announcements": ["./packages/announcements/src"]
     },
 
     /* Linting */

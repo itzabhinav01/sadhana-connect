@@ -20,9 +20,13 @@ const { useCreateMentorAnnouncementMock } = vi.hoisted(() => ({
   useCreateMentorAnnouncementMock: vi.fn(),
 }))
 
-vi.mock('@/application/announcements/use-create-announcement', () => ({
-  useCreateMentorAnnouncement: useCreateMentorAnnouncementMock,
-}))
+vi.mock('@sadhana-connect/announcements', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/announcements')>()
+  return {
+    ...actual,
+    useCreateMentorAnnouncement: useCreateMentorAnnouncementMock,
+  }
+})
 
 describe('MentorAnnouncementForm', () => {
   beforeEach(() => {

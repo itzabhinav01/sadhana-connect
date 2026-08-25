@@ -15,6 +15,7 @@ export default function MentorLayout() {
     <Stack>
       <Stack.Screen name="index" options={{ title: 'My Devotees' }} />
       <Stack.Screen name="devotee/[id]" options={{ title: 'Devotee' }} />
+      <Stack.Screen name="announcements" options={{ title: 'Announcements' }} />
     </Stack>
   )
 }

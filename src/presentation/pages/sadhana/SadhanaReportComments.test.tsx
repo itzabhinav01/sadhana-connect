@@ -7,7 +7,7 @@ const { useSadhanaReportCommentsMock } = vi.hoisted(() => ({
   useSadhanaReportCommentsMock: vi.fn(),
 }))
 
-vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
+vi.mock('@sadhana-connect/comments', () => ({
   useSadhanaReportComments: useSadhanaReportCommentsMock,
 }))
 

@@ -4,7 +4,7 @@ import {
   resolveExpirationError,
   resolveExpiresAt,
   toExpirationFormValue,
-} from '@/application/announcements/announcement-expiration'
+} from './announcement-expiration'
 
 describe('resolveExpiresAt', () => {
   beforeEach(() => {

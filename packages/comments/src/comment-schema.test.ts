@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { COMMENT_MAX_LENGTH, commentSchema } from '@/application/comments/comment-schema'
+import { COMMENT_MAX_LENGTH, commentSchema } from './comment-schema'
 
 describe('commentSchema', () => {
   it('accepts a normal comment', () => {

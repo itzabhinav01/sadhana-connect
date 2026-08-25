@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
+import { announcementQueryKeys } from './announcement-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
 import { useProfile } from '@sadhana-connect/auth'
-import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase/announcement-repository'
+import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase'
 
 interface CreateMentorAnnouncementInput {
   title: string
