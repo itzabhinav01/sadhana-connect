@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-import { filterMentorDevotees, type MentorDevoteeFilter } from '@/application/mentor/mentor-devotee-filter'
-import { useMentorDevotees } from '@/application/mentor/use-mentor-devotees'
+import { filterMentorDevotees, type MentorDevoteeFilter, useMentorDevotees } from '@sadhana-connect/mentor'
 import { MentorDevoteeFilterTabs } from '@/presentation/pages/mentor/MentorDevoteeFilterTabs'
 import { MentorDevoteeList } from '@/presentation/pages/mentor/MentorDevoteeList'
 import { MentorSummaryCards } from '@/presentation/pages/mentor/MentorSummaryCards'

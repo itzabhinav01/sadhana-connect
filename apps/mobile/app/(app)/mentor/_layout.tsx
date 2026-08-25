@@ -11,5 +11,10 @@ export default function MentorLayout() {
     return <Redirect href="/" />
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ title: 'My Devotees' }} />
+      <Stack.Screen name="devotee/[id]" options={{ title: 'Devotee' }} />
+    </Stack>
+  )
 }

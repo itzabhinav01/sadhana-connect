@@ -1,4 +1,4 @@
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import type { MentorDevoteeSummary } from './mentor-devotee-summary'
 
 export const MENTOR_DEVOTEE_FILTERS = ['all', 'submitted', 'pending'] as const
 export type MentorDevoteeFilter = (typeof MENTOR_DEVOTEE_FILTERS)[number]

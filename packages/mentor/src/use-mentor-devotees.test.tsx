@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useMentorDevotees } from '@/application/mentor/use-mentor-devotees'
+import { useMentorDevotees } from './use-mentor-devotees'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 
 const {
@@ -22,7 +22,7 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/mentor-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseMentorRepository: {
     listAssignedDevotees: listAssignedDevoteesMock,
     listReportsForDevotees: listReportsForDevoteesMock,

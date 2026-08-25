@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { calculateMentorDevoteeSummaries } from '@/application/mentor/mentor-devotee-summary'
-import type { MentorAssignedDevotee } from '@sadhana-connect/domain/entities/mentor-devotee'
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import { calculateMentorDevoteeSummaries } from './mentor-devotee-summary'
+import type { MentorAssignedDevotee } from '@sadhana-connect/domain'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 
 const TODAY = '2026-01-15'
 

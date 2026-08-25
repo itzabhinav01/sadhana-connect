@@ -1,0 +1,14 @@
+{
+  "name": "@sadhana-connect/mentor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@sadhana-connect/auth": "*",
+    "@sadhana-connect/domain": "*",
+    "@sadhana-connect/infra-supabase": "*",
+    "@sadhana-connect/shared": "*",
+    "@tanstack/react-query": "^5.101.4"
+  }
+}

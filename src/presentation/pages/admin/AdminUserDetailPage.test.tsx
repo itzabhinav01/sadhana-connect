@@ -62,9 +62,13 @@ vi.mock('@/application/admin/use-change-user-role', async () => {
   >('@/application/admin/use-change-user-role')
   return { ...actual, useChangeUserRole: useChangeUserRoleMock }
 })
-vi.mock('@/application/sadhana/use-devotee-report-history', () => ({
-  useDevoteeReportHistory: useDevoteeReportHistoryMock,
-}))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useDevoteeReportHistory: useDevoteeReportHistoryMock,
+  }
+})
 vi.mock('@/application/notifications/use-send-reminder', async () => {
   const actual = await vi.importActual<
     typeof import('@/application/notifications/use-send-reminder')

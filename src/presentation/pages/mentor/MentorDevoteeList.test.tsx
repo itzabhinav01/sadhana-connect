@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import type { MentorDevoteeSummary } from '@sadhana-connect/mentor'
 import { MentorDevoteeList } from '@/presentation/pages/mentor/MentorDevoteeList'
 
 const summaries: MentorDevoteeSummary[] = [

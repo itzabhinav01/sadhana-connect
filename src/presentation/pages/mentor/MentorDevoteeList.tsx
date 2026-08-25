@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import type { MentorDevoteeSummary } from '@sadhana-connect/mentor'
 import { Button } from '@/presentation/components/ui/button'
 
 function formatDisplayDate(iso: string) {

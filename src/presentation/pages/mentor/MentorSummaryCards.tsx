@@ -1,4 +1,4 @@
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import type { MentorDevoteeSummary } from '@sadhana-connect/mentor'
 import { Card, CardContent, CardHeader } from '@/presentation/components/ui/card'
 
 interface MentorSummaryCardsProps {

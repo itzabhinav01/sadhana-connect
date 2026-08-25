@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import type { MentorDevoteeSummary } from '@sadhana-connect/mentor'
 import { MentorSummaryCards } from '@/presentation/pages/mentor/MentorSummaryCards'
 
 function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSummary {

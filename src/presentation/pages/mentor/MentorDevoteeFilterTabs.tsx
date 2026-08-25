@@ -1,7 +1,7 @@
 import {
   MENTOR_DEVOTEE_FILTERS,
   type MentorDevoteeFilter,
-} from '@/application/mentor/mentor-devotee-filter'
+} from '@sadhana-connect/mentor'
 import { Button } from '@/presentation/components/ui/button'
 
 const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {

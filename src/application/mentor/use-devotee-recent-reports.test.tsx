@@ -14,7 +14,7 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseSadhanaReportRepository: { listRecentReports: listRecentReportsMock },
 }))
 

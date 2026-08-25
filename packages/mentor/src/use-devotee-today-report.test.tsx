@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useDevoteeTodayReport } from '@/application/mentor/use-devotee-today-report'
+import { useDevoteeTodayReport } from './use-devotee-today-report'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 
 const { useAuthMock, getReportByDateMock } = vi.hoisted(() => ({
@@ -15,7 +15,7 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseSadhanaReportRepository: { getReportByDate: getReportByDateMock },
 }))
 

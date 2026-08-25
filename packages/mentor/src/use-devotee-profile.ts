@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
-import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase/profile-repository'
+import { mentorQueryKeys } from './mentor-query-keys'
+import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase'
 
 // Reuses the existing, unmodified profile repository — getProfile has no
 // special-casing for "own profile" vs. "someone else's," so calling it

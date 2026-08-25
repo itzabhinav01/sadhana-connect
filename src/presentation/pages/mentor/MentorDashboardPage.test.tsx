@@ -9,9 +9,13 @@ const { useMentorDevoteesMock } = vi.hoisted(() => ({
   useMentorDevoteesMock: vi.fn(),
 }))
 
-vi.mock('@/application/mentor/use-mentor-devotees', () => ({
-  useMentorDevotees: useMentorDevoteesMock,
-}))
+vi.mock('@sadhana-connect/mentor', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/mentor')>()
+  return {
+    ...actual,
+    useMentorDevotees: useMentorDevoteesMock,
+  }
+})
 
 function renderPage() {
   return render(

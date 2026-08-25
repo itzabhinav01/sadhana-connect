@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { calculateMentorDevoteeSummaries } from '@/application/mentor/mentor-devotee-summary'
-import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
-import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase/mentor-repository'
+import { calculateMentorDevoteeSummaries } from './mentor-devotee-summary'
+import { mentorQueryKeys } from './mentor-query-keys'
+import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase'
 import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 // Used for recent activity, today's rounds/submission, and dashboard

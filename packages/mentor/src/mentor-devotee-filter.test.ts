@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterMentorDevotees } from '@/application/mentor/mentor-devotee-filter'
-import type { MentorDevoteeSummary } from '@/application/mentor/mentor-devotee-summary'
+import { filterMentorDevotees } from './mentor-devotee-filter'
+import type { MentorDevoteeSummary } from './mentor-devotee-summary'
 
 function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSummary {
   return {

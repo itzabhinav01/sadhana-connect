@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useDevoteeReportHistory } from '@/application/sadhana/use-devotee-report-history'
+import { useDevoteeReportHistory } from './use-devotee-report-history'
 
 const { useAuthMock, listReportHistoryMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -13,7 +13,7 @@ const { useAuthMock, listReportHistoryMock } = vi.hoisted(() => ({
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseSadhanaReportRepository: { listReportHistory: listReportHistoryMock },
 }))
 

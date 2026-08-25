@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom'
 
-import { useDevoteeAssignedSince } from '@/application/mentor/use-devotee-assigned-since'
-import { useDevoteeProfile } from '@/application/mentor/use-devotee-profile'
-import { useDevoteeTodayReport } from '@/application/mentor/use-devotee-today-report'
+import { useDevoteeAssignedSince } from '@sadhana-connect/mentor'
+import { useDevoteeProfile } from '@sadhana-connect/mentor'
+import { useDevoteeTodayReport } from '@sadhana-connect/mentor'
 import {
   Card,
   CardContent,

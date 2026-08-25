@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useDevoteeProfile } from '@/application/mentor/use-devotee-profile'
+import { useDevoteeProfile } from './use-devotee-profile'
 
 const { useAuthMock, getProfileMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/profile-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseProfileRepository: { getProfile: getProfileMock },
 }))
 

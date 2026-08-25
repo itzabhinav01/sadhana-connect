@@ -18,18 +18,18 @@ const {
   useSendReminderMock: vi.fn(),
 }))
 
-vi.mock('@/application/mentor/use-devotee-profile', () => ({
+vi.mock('@sadhana-connect/mentor', () => ({
   useDevoteeProfile: useDevoteeProfileMock,
-}))
-vi.mock('@/application/mentor/use-devotee-today-report', () => ({
   useDevoteeTodayReport: useDevoteeTodayReportMock,
-}))
-vi.mock('@/application/sadhana/use-devotee-report-history', () => ({
-  useDevoteeReportHistory: useDevoteeReportHistoryMock,
-}))
-vi.mock('@/application/mentor/use-devotee-assigned-since', () => ({
   useDevoteeAssignedSince: useDevoteeAssignedSinceMock,
 }))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useDevoteeReportHistory: useDevoteeReportHistoryMock,
+  }
+})
 vi.mock('@/application/notifications/use-send-reminder', async () => {
   const actual = await vi.importActual<
     typeof import('@/application/notifications/use-send-reminder')

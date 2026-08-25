@@ -22,7 +22,8 @@
       "@sadhana-connect/auth": ["./packages/auth/src"],
       "@sadhana-connect/shared": ["./packages/shared/src"],
       "@sadhana-connect/sadhana": ["./packages/sadhana/src"],
-      "@sadhana-connect/verse": ["./packages/verse/src"]
+      "@sadhana-connect/verse": ["./packages/verse/src"],
+      "@sadhana-connect/mentor": ["./packages/mentor/src"]
     },
 
     /* Linting */

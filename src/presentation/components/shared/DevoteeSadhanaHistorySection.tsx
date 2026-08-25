@@ -5,7 +5,7 @@ import {
   validateDateRange,
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
-import { useDevoteeReportHistory } from '@/application/sadhana/use-devotee-report-history'
+import { useDevoteeReportHistory } from '@sadhana-connect/sadhana'
 import { buildDateRangeList } from '@sadhana-connect/shared'
 import {
   Card,

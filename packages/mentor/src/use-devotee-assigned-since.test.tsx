@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useDevoteeAssignedSince } from '@/application/mentor/use-devotee-assigned-since'
+import { useDevoteeAssignedSince } from './use-devotee-assigned-since'
 
 const { useAuthMock, getAssignedSinceMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/mentor-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseMentorRepository: { getAssignedSince: getAssignedSinceMock },
 }))
 
