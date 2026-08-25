@@ -156,6 +156,12 @@ export default function DashboardScreen() {
           onPress={() => router.push('/devotee/analytics')}
           variant="outline"
         />
+
+        <Button
+          title="Profile"
+          onPress={() => router.push('/devotee/profile')}
+          variant="outline"
+        />
       </ScrollView>
     </>
   )

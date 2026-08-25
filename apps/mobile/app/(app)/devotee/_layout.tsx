@@ -18,6 +18,7 @@ export default function DevoteeLayout() {
       <Stack.Screen name="history" options={{ title: 'History' }} />
       <Stack.Screen name="verse" options={{ title: 'Verse of the Day' }} />
       <Stack.Screen name="analytics" options={{ title: 'Analytics' }} />
+      <Stack.Screen name="profile" options={{ title: 'Profile' }} />
     </Stack>
   )
 }
