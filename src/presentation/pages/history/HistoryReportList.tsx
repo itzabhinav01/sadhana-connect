@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { formatSadhanaReportForText } from '@/application/sadhana/format-sadhana-report-for-text'
 import { buildSadhanaSingleExportFilename } from '@/application/sadhana/sadhana-export-filename'
-import { useSadhanaHistory } from '@/application/sadhana/use-sadhana-history'
+import { useSadhanaHistory } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { downloadTextFile } from '@/shared/utils/download-text-file'
 import { Button } from '@/presentation/components/ui/button'

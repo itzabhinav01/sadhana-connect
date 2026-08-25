@@ -11,5 +11,13 @@ export default function DevoteeLayout() {
     return <Redirect href="/" />
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ title: 'Dashboard' }} />
+      <Stack.Screen name="sadhana" options={{ title: 'Daily Sadhana' }} />
+      <Stack.Screen name="history" options={{ title: 'History' }} />
+      <Stack.Screen name="verse" options={{ title: 'Verse of the Day' }} />
+      <Stack.Screen name="analytics" options={{ title: 'Analytics' }} />
+    </Stack>
+  )
 }

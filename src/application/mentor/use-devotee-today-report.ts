@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@sadhana-connect/auth'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 // Reuses the existing, unmodified SadhanaReportRepository — getReportByDate
 // already takes an explicit profileId, so passing the devotee's id works

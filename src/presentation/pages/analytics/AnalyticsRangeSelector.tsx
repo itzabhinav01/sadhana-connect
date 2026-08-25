@@ -1,4 +1,4 @@
-import type { SadhanaDateRange } from '@/application/sadhana/sadhana-date-range'
+import type { SadhanaDateRange } from '@sadhana-connect/sadhana'
 import { Button } from '@/presentation/components/ui/button'
 import { DateRangeInputs } from '@/presentation/components/shared/DateRangeInputs'
 

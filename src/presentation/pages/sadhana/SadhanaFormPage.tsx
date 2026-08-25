@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 
-import { useSadhanaReport } from '@/application/sadhana/use-sadhana-report'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { useSadhanaReport } from '@sadhana-connect/sadhana'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 import { SadhanaReportForm } from '@/presentation/pages/sadhana/SadhanaReportForm'
 
 function isValidDateParam(value: string | null): value is string {

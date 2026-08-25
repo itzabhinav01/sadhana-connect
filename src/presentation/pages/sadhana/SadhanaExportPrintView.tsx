@@ -1,6 +1,6 @@
 import { buildSadhanaReportExportSections } from '@/application/sadhana/sadhana-export-fields'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
-import { formatIsoDateAsDdMmYyyy } from '@/shared/utils/date'
+import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 
 type SadhanaExportPrintViewProps =
   | { mode: 'single'; report: SadhanaReport }

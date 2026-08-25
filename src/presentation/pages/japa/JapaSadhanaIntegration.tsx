@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '@/presentation/components/ui/button'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 interface JapaSadhanaIntegrationProps {
   completedRounds: number

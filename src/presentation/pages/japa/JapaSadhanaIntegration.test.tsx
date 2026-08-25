@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { JapaSadhanaIntegration } from '@/presentation/pages/japa/JapaSadhanaIntegration'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 const { navigateMock } = vi.hoisted(() => ({ navigateMock: vi.fn() }))
 

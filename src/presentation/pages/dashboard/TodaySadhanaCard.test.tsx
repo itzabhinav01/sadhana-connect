@@ -35,11 +35,8 @@ const { useSadhanaReportMock, useSadhanaStreakMock } = vi.hoisted(() => ({
   useSadhanaStreakMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-report', () => ({
+vi.mock('@sadhana-connect/sadhana', () => ({
   useSadhanaReport: useSadhanaReportMock,
-}))
-
-vi.mock('@/application/sadhana/use-sadhana-streak', () => ({
   useSadhanaStreak: useSadhanaStreakMock,
 }))
 

@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HistoryPage } from '@/presentation/pages/history/HistoryPage'
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 const {
   useSadhanaHistoryMock,
@@ -19,9 +19,13 @@ const {
   downloadTextFileMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-history', () => ({
-  useSadhanaHistory: useSadhanaHistoryMock,
-}))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useSadhanaHistory: useSadhanaHistoryMock,
+  }
+})
 
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,

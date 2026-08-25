@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { HistoryFilterBar } from '@/presentation/pages/history/HistoryFilterBar'
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 describe('HistoryFilterBar', () => {
   it('renders the current from/to values', () => {

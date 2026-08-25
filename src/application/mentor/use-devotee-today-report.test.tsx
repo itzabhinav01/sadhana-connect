@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDevoteeTodayReport } from '@/application/mentor/use-devotee-today-report'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 const { useAuthMock, getReportByDateMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),

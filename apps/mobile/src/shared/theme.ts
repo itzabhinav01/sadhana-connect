@@ -10,6 +10,7 @@ export const colors = {
   destructiveBackground: '#fee2e2',
   destructiveForeground: '#7f1d1d',
   link: '#4f46e5',
+  card: '#ffffff',
 }
 
 export const spacing = {

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 
 import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
-import { useSadhanaReport } from '@/application/sadhana/use-sadhana-report'
-import { useSadhanaStreak } from '@/application/sadhana/use-sadhana-streak'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { useSadhanaReport } from '@sadhana-connect/sadhana'
+import { useSadhanaStreak } from '@sadhana-connect/sadhana'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Card,

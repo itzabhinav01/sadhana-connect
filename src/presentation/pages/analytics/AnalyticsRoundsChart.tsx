@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 
-import type { RoundsChartPoint } from '@/application/sadhana/sadhana-analytics'
+import type { RoundsChartPoint } from '@sadhana-connect/sadhana'
 import {
   Card,
   CardContent,

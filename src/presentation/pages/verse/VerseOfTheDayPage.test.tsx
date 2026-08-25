@@ -7,9 +7,13 @@ const { useVerseOfTheDayMock } = vi.hoisted(() => ({
   useVerseOfTheDayMock: vi.fn(),
 }))
 
-vi.mock('@/application/verse/use-verse-of-the-day', () => ({
-  useVerseOfTheDay: useVerseOfTheDayMock,
-}))
+vi.mock('@sadhana-connect/verse', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/verse')>()
+  return {
+    ...actual,
+    useVerseOfTheDay: useVerseOfTheDayMock,
+  }
+})
 
 describe('VerseOfTheDayPage', () => {
   beforeEach(() => {

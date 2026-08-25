@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useJapaCounter } from '@/application/japa/use-japa-counter'
 import { japaCounterLocalStorage } from '@/infrastructure/local-storage/japa-counter-local-storage'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 const { useAuthMock } = vi.hoisted(() => ({ useAuthMock: vi.fn() }))
 

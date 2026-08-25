@@ -4,7 +4,7 @@ import {
   AUTHOR_NAME,
   formatVerseCitation,
   formatVerseCitationForCopy,
-} from '@/application/verse/format-verse-citation'
+} from '@sadhana-connect/verse'
 import type { VerseOfTheDay } from '@sadhana-connect/domain/entities/verse-of-the-day'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent } from '@/presentation/components/ui/card'

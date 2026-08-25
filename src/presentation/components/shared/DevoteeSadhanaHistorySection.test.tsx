@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLastNDaysRange } from '@/application/sadhana/sadhana-date-range'
-import { buildDateRangeList } from '@/shared/utils/date'
+import { getLastNDaysRange } from '@sadhana-connect/sadhana'
+import { buildDateRangeList } from '@sadhana-connect/shared'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
 
 const { useDevoteeReportHistoryMock, useSendReminderMock } = vi.hoisted(() => ({

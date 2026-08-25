@@ -1,7 +1,7 @@
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { WHATSAPP_RECIPIENT_NUMBER } from '@/shared/constants/whatsapp'
-import { formatIsoDateAsDdMmYyyy } from '@/shared/utils/date'
-import { formatTime12Hour } from '@/shared/utils/format-time-12-hour'
+import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
+import { formatTime12Hour } from '@sadhana-connect/shared'
 
 // Placeholder for any unset nullable field (approved product decision,
 // Phase 15) — the WhatsApp template's line structure must stay identical

@@ -1,6 +1,6 @@
 import { Button } from '@/presentation/components/ui/button'
 import { DateRangeInputs } from '@/presentation/components/shared/DateRangeInputs'
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 export interface HistoryDateFilters {
   fromDate: string

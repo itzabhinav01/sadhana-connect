@@ -4,7 +4,7 @@ import { useAuth } from '@sadhana-connect/auth'
 import { calculateMentorDevoteeSummaries } from '@/application/mentor/mentor-devotee-summary'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase/mentor-repository'
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 // Used for recent activity, today's rounds/submission, and dashboard
 // monitoring generally (approved Phase 12 decision #3).

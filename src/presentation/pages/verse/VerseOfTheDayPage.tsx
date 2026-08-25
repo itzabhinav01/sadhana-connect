@@ -1,4 +1,4 @@
-import { useVerseOfTheDay } from '@/application/verse/use-verse-of-the-day'
+import { useVerseOfTheDay } from '@sadhana-connect/verse'
 import { VerseCitationCard } from '@/presentation/pages/verse/VerseCitationCard'
 
 export function VerseOfTheDayPage() {

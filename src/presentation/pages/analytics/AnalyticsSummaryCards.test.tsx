@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import type { SadhanaAnalyticsSummary } from '@/application/sadhana/sadhana-analytics'
+import type { SadhanaAnalyticsSummary } from '@sadhana-connect/sadhana'
 import { AnalyticsSummaryCards } from '@/presentation/pages/analytics/AnalyticsSummaryCards'
 
 function makeSummary(

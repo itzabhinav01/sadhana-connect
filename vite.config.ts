@@ -73,6 +73,9 @@ export default defineConfig({
       '@sadhana-connect/domain': path.resolve(import.meta.dirname, './packages/domain/src'),
       '@sadhana-connect/infra-supabase': path.resolve(import.meta.dirname, './packages/infra-supabase/src'),
       '@sadhana-connect/auth': path.resolve(import.meta.dirname, './packages/auth/src'),
+      '@sadhana-connect/shared': path.resolve(import.meta.dirname, './packages/shared/src'),
+      '@sadhana-connect/sadhana': path.resolve(import.meta.dirname, './packages/sadhana/src'),
+      '@sadhana-connect/verse': path.resolve(import.meta.dirname, './packages/verse/src'),
     },
   },
   test: {

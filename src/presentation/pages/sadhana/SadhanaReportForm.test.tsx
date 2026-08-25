@@ -10,9 +10,13 @@ const { mutateMock, useUpsertSadhanaReportMock } = vi.hoisted(() => ({
   useUpsertSadhanaReportMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-upsert-sadhana-report', () => ({
-  useUpsertSadhanaReport: useUpsertSadhanaReportMock,
-}))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useUpsertSadhanaReport: useUpsertSadhanaReportMock,
+  }
+})
 
 const existingReport: SadhanaReport = {
   id: 'report-1',

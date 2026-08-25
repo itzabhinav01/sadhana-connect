@@ -4,7 +4,7 @@ import { useAuth } from '@sadhana-connect/auth'
 import { calculateJapaProgress } from '@/application/japa/japa-progress'
 import { japaCounterLocalStorage } from '@/infrastructure/local-storage/japa-counter-local-storage'
 import { DEFAULT_TARGET_ROUNDS } from '@/shared/constants/japa'
-import { addDaysIso, getLocalDateIso } from '@/shared/utils/date'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 const RETENTION_DAYS = 30
 const TAP_DEBOUNCE_MS = 150

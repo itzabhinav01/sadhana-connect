@@ -19,7 +19,10 @@
       "@/*": ["./src/*"],
       "@sadhana-connect/domain/*": ["./packages/domain/src/*"],
       "@sadhana-connect/infra-supabase/*": ["./packages/infra-supabase/src/*"],
-      "@sadhana-connect/auth": ["./packages/auth/src"]
+      "@sadhana-connect/auth": ["./packages/auth/src"],
+      "@sadhana-connect/shared": ["./packages/shared/src"],
+      "@sadhana-connect/sadhana": ["./packages/sadhana/src"],
+      "@sadhana-connect/verse": ["./packages/verse/src"]
     },
 
     /* Linting */
@@ -28,5 +31,13 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "packages/domain/src", "packages/infra-supabase/src", "packages/auth/src"]
+  "include": [
+    "src",
+    "packages/domain/src",
+    "packages/infra-supabase/src",
+    "packages/auth/src",
+    "packages/shared/src",
+    "packages/sadhana/src",
+    "packages/verse/src"
+  ]
 }

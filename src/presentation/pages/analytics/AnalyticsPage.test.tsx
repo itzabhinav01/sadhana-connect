@@ -4,15 +4,19 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AnalyticsPage } from '@/presentation/pages/analytics/AnalyticsPage'
-import { getLastNDaysRange } from '@/application/sadhana/sadhana-date-range'
+import { getLastNDaysRange } from '@sadhana-connect/sadhana'
 
 const { useSadhanaAnalyticsMock } = vi.hoisted(() => ({
   useSadhanaAnalyticsMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-analytics', () => ({
-  useSadhanaAnalytics: useSadhanaAnalyticsMock,
-}))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useSadhanaAnalytics: useSadhanaAnalyticsMock,
+  }
+})
 
 function makeSummary(overrides: Partial<Record<string, unknown>> = {}) {
   return {

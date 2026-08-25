@@ -5,8 +5,8 @@ import {
   getLastNDaysRange,
   validateDateRange,
   type SadhanaDateRange,
-} from '@/application/sadhana/sadhana-date-range'
-import { useSadhanaAnalytics } from '@/application/sadhana/use-sadhana-analytics'
+} from '@sadhana-connect/sadhana'
+import { useSadhanaAnalytics } from '@sadhana-connect/sadhana'
 import { ChartSkeleton } from '@/presentation/components/ChartSkeleton'
 import { Button } from '@/presentation/components/ui/button'
 import {

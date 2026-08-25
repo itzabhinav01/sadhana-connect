@@ -4,9 +4,9 @@ import {
   getLastNDaysRange,
   validateDateRange,
   type SadhanaDateRange,
-} from '@/application/sadhana/sadhana-date-range'
+} from '@sadhana-connect/sadhana'
 import { useDevoteeReportHistory } from '@/application/sadhana/use-devotee-report-history'
-import { buildDateRangeList } from '@/shared/utils/date'
+import { buildDateRangeList } from '@sadhana-connect/shared'
 import {
   Card,
   CardContent,

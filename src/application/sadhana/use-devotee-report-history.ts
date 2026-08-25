@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
+import { sadhanaQueryKeys } from '@sadhana-connect/sadhana'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
 
 // Devotee oversight (Phase 20B) — used by both MentorDevoteeDetailPage

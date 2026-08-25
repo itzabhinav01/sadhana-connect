@@ -1,4 +1,4 @@
-import { useRecentSadhanaReports } from '@/application/sadhana/use-recent-sadhana-reports'
+import { useRecentSadhanaReports } from '@sadhana-connect/sadhana'
 import {
   Card,
   CardContent,

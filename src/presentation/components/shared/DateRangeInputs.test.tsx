@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { DateRangeInputs } from '@/presentation/components/shared/DateRangeInputs'
-import { getLocalDateIso } from '@/shared/utils/date'
+import { getLocalDateIso } from '@sadhana-connect/shared'
 
 describe('DateRangeInputs', () => {
   it('renders the given from/to values', () => {

@@ -8,18 +8,19 @@ const { useSadhanaReportMock } = vi.hoisted(() => ({
   useSadhanaReportMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-report', () => ({
-  useSadhanaReport: useSadhanaReportMock,
-}))
-
-vi.mock('@/application/sadhana/use-upsert-sadhana-report', () => ({
-  useUpsertSadhanaReport: () => ({
-    mutate: vi.fn(),
-    isPending: false,
-    isError: false,
-    isSuccess: false,
-  }),
-}))
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useSadhanaReport: useSadhanaReportMock,
+    useUpsertSadhanaReport: () => ({
+      mutate: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+    }),
+  }
+})
 
 function renderPage(initialPath = '/sadhana') {
   return render(

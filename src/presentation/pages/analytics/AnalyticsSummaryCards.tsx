@@ -1,4 +1,4 @@
-import type { SadhanaAnalyticsSummary } from '@/application/sadhana/sadhana-analytics'
+import type { SadhanaAnalyticsSummary } from '@sadhana-connect/sadhana'
 import {
   Card,
   CardContent,

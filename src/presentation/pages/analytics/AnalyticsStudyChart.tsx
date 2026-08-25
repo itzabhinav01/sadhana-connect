@@ -9,7 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 
-import type { StudyChartPoint } from '@/application/sadhana/sadhana-analytics'
+import type { StudyChartPoint } from '@sadhana-connect/sadhana'
 import {
   Card,
   CardContent,

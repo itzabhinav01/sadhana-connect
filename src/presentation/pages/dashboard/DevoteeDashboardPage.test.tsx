@@ -16,16 +16,10 @@ const {
   useRecentSadhanaReportsMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-report', () => ({
+vi.mock('@sadhana-connect/sadhana', () => ({
   useSadhanaReport: useSadhanaReportMock,
-}))
-vi.mock('@/application/sadhana/use-sadhana-streak', () => ({
   useSadhanaStreak: useSadhanaStreakMock,
-}))
-vi.mock('@/application/sadhana/use-weekly-sadhana-summary', () => ({
   useWeeklySadhanaSummary: useWeeklySadhanaSummaryMock,
-}))
-vi.mock('@/application/sadhana/use-recent-sadhana-reports', () => ({
   useRecentSadhanaReports: useRecentSadhanaReportsMock,
 }))
 

@@ -10,7 +10,7 @@ const { useSadhanaHistoryMock, downloadTextFileMock } = vi.hoisted(() => ({
   downloadTextFileMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-sadhana-history', () => ({
+vi.mock('@sadhana-connect/sadhana', () => ({
   useSadhanaHistory: useSadhanaHistoryMock,
 }))
 

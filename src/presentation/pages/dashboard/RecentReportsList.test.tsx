@@ -8,7 +8,7 @@ const { useRecentSadhanaReportsMock } = vi.hoisted(() => ({
   useRecentSadhanaReportsMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-recent-sadhana-reports', () => ({
+vi.mock('@sadhana-connect/sadhana', () => ({
   useRecentSadhanaReports: useRecentSadhanaReportsMock,
 }))
 

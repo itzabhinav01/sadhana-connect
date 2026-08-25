@@ -7,7 +7,7 @@ const { useWeeklySadhanaSummaryMock } = vi.hoisted(() => ({
   useWeeklySadhanaSummaryMock: vi.fn(),
 }))
 
-vi.mock('@/application/sadhana/use-weekly-sadhana-summary', () => ({
+vi.mock('@sadhana-connect/sadhana', () => ({
   useWeeklySadhanaSummary: useWeeklySadhanaSummaryMock,
 }))
 

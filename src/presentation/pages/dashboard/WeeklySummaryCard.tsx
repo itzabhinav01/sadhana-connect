@@ -1,4 +1,4 @@
-import { useWeeklySadhanaSummary } from '@/application/sadhana/use-weekly-sadhana-summary'
+import { useWeeklySadhanaSummary } from '@sadhana-connect/sadhana'
 import {
   Card,
   CardContent,
