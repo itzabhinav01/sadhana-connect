@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
-import { useProfile } from '@/application/profile/use-profile'
+import { useProfile } from '@sadhana-connect/auth'
 import { supabaseSadhanaReportCommentRepository } from '@sadhana-connect/infra-supabase/sadhana-report-comment-repository'
 
 // mentorName is captured here, from the mentor's own live profile, at the

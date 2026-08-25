@@ -4,16 +4,20 @@ import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useUpdatePhoneNumber } from '@/application/profile/use-update-phone-number'
-import { profileQueryKeys } from '@/application/profile/profile-query-keys'
+import { profileQueryKeys } from '@sadhana-connect/auth'
 
 const { useAuthMock, updatePhoneNumberMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
   updatePhoneNumberMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
-  useAuth: useAuthMock,
-}))
+vi.mock('@sadhana-connect/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
+  return {
+    ...actual,
+    useAuth: useAuthMock,
+  }
+})
 
 vi.mock('@sadhana-connect/infra-supabase/profile-repository', () => ({
   supabaseProfileRepository: { updatePhoneNumber: updatePhoneNumberMock },

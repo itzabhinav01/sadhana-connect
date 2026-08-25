@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
 

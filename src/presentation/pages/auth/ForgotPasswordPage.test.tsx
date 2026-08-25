@@ -6,14 +6,18 @@ import { ForgotPasswordPage } from '@/presentation/pages/auth/ForgotPasswordPage
 
 const { mutateMock } = vi.hoisted(() => ({ mutateMock: vi.fn() }))
 
-vi.mock('@/application/auth/use-request-password-reset', () => ({
-  useRequestPasswordReset: () => ({
-    mutate: mutateMock,
-    isPending: false,
-    isError: false,
-    isSuccess: false,
-  }),
-}))
+vi.mock('@sadhana-connect/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
+  return {
+    ...actual,
+    useRequestPasswordReset: () => ({
+      mutate: mutateMock,
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+    }),
+  }
+})
 
 describe('ForgotPasswordPage', () => {
   it('shows the deferred password-recovery message instead of the reset form', () => {

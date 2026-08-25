@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
-import { useProfile } from '@/application/profile/use-profile'
+import { useProfile } from '@sadhana-connect/auth'
 
 interface RequireRoleProps {
   allow: AppRole[]

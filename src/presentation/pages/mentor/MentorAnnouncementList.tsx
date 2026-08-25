@@ -10,7 +10,7 @@ import {
   type AnnouncementExpirationPreset,
 } from '@/application/announcements/announcement-expiration'
 import { announcementSchema } from '@/application/announcements/announcement-schema'
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { useDeleteAnnouncement } from '@/application/announcements/use-delete-announcement'
 import { useUpdateAnnouncement } from '@/application/announcements/use-update-announcement'
 import type { Announcement } from '@sadhana-connect/domain/entities/announcement'

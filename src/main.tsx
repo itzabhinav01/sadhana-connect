@@ -10,6 +10,7 @@ import './index.css'
 initSupabaseClient({
   url: env.VITE_SUPABASE_URL,
   anonKey: env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  redirectBaseUrl: window.location.origin,
 })
 
 createRoot(document.getElementById('root')!).render(

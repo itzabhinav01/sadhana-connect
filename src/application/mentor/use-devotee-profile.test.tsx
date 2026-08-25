@@ -10,7 +10,7 @@ const { useAuthMock, getProfileMock } = vi.hoisted(() => ({
   getProfileMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

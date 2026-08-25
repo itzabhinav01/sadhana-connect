@@ -12,9 +12,13 @@ const { useProfileMock, useUpdatePhoneNumberMock, mutateMock } = vi.hoisted(
   }),
 )
 
-vi.mock('@/application/profile/use-profile', () => ({
-  useProfile: useProfileMock,
-}))
+vi.mock('@sadhana-connect/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
+  return {
+    ...actual,
+    useProfile: useProfileMock,
+  }
+})
 
 vi.mock('@/application/profile/use-update-phone-number', () => ({
   useUpdatePhoneNumber: useUpdatePhoneNumberMock,

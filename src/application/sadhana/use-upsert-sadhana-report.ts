@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import type { UpsertSadhanaReportParams } from '@sadhana-connect/domain/repositories/sadhana-report-repository'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'

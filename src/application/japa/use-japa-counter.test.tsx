@@ -7,7 +7,7 @@ import { getLocalDateIso } from '@/shared/utils/date'
 
 const { useAuthMock } = vi.hoisted(() => ({ useAuthMock: vi.fn() }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

@@ -22,7 +22,7 @@ vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
   supabaseSadhanaReportRepository: { getReportDateById: getReportDateByIdMock },
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

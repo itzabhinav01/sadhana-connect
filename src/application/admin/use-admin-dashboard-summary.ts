@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
 import { getLocalDateIso } from '@/shared/utils/date'
 

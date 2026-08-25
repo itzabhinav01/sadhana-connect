@@ -23,7 +23,7 @@ vi.mock('@/application/sadhana/use-sadhana-history', () => ({
   useSadhanaHistory: useSadhanaHistoryMock,
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

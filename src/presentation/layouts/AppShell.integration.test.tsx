@@ -26,11 +26,8 @@ const {
   useUnreadNotificationCountMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
-}))
-
-vi.mock('@/application/profile/use-profile', () => ({
   useProfile: useProfileMock,
 }))
 

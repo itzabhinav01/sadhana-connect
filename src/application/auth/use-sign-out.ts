@@ -5,7 +5,7 @@ import { announcementQueryKeys } from '@/application/announcements/announcement-
 import { commentQueryKeys } from '@/application/comments/comment-query-keys'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { profileQueryKeys } from '@/application/profile/profile-query-keys'
+import { profileQueryKeys } from '@sadhana-connect/auth'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import { supabaseAuthRepository } from '@sadhana-connect/infra-supabase/auth-repository'
 

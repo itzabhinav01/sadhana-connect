@@ -7,7 +7,7 @@ import { RequireRole } from '@/presentation/routing/RequireRole'
 
 const { useProfileMock } = vi.hoisted(() => ({ useProfileMock: vi.fn() }))
 
-vi.mock('@/application/profile/use-profile', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useProfile: useProfileMock,
 }))
 

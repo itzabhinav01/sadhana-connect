@@ -5,9 +5,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   type ResetPasswordInput,
   resetPasswordSchema,
-} from '@/application/auth/schemas'
-import { usePasswordRecovery } from '@/application/auth/use-password-recovery'
-import { useUpdatePassword } from '@/application/auth/use-update-password'
+} from '@sadhana-connect/auth'
+import { usePasswordRecovery } from '@sadhana-connect/auth'
+import { useUpdatePassword } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
 import {

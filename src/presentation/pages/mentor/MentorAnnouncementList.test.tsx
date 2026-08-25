@@ -20,7 +20,7 @@ const { useAuthMock, useUpdateAnnouncementMock, useDeleteAnnouncementMock } = vi
   useDeleteAnnouncementMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 vi.mock('@/application/announcements/use-update-announcement', () => ({

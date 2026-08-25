@@ -11,7 +11,7 @@ const { useAuthMock, useUpdateCommentMock, useDeleteCommentMock } = vi.hoisted((
   useDeleteCommentMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 vi.mock('@/application/comments/use-update-comment', () => ({

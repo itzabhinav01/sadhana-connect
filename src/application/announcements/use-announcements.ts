@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { announcementQueryKeys } from '@/application/announcements/announcement-query-keys'
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase/announcement-repository'
 
 // One RLS-filtered list query per page load — no per-scope branching

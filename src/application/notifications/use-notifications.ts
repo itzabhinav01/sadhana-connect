@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
 import type { NotificationListCursor } from '@sadhana-connect/domain/repositories/notification-repository'
 import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'

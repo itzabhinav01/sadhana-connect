@@ -10,13 +10,17 @@ const { mutateMock, navigateMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-sign-up', () => ({
-  useSignUp: () => ({
-    mutate: mutateMock,
-    isPending: false,
-    isError: false,
-  }),
-}))
+vi.mock('@sadhana-connect/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
+  return {
+    ...actual,
+    useSignUp: () => ({
+      mutate: mutateMock,
+      isPending: false,
+      isError: false,
+    }),
+  }
+})
 
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>()

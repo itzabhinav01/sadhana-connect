@@ -10,7 +10,7 @@ const { useAuthMock, getReportByDateMock } = vi.hoisted(() => ({
   getReportByDateMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

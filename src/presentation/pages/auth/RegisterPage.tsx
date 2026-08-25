@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { type SignUpInput, signUpSchema } from '@/application/auth/schemas'
-import { useSignUp } from '@/application/auth/use-sign-up'
+import { type SignUpInput, signUpSchema } from '@sadhana-connect/auth'
+import { useSignUp } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
 import {

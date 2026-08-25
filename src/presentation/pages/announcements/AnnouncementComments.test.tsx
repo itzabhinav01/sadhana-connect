@@ -20,8 +20,7 @@ const {
   useDeleteAnnouncementCommentMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@/application/profile/use-profile', () => ({ useProfile: useProfileMock }))
+vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock, useProfile: useProfileMock }))
 vi.mock('@/application/announcements/use-announcement-comments', () => ({
   useAnnouncementComments: useAnnouncementCommentsMock,
 }))

@@ -4,13 +4,17 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { LoginPage } from '@/presentation/pages/auth/LoginPage'
 
-vi.mock('@/application/auth/use-sign-in', () => ({
-  useSignIn: () => ({
-    mutate: vi.fn(),
-    isPending: false,
-    isError: false,
-  }),
-}))
+vi.mock('@sadhana-connect/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
+  return {
+    ...actual,
+    useSignIn: () => ({
+      mutate: vi.fn(),
+      isPending: false,
+      isError: false,
+    }),
+  }
+})
 
 describe('LoginPage', () => {
   it('does not link to the password-reset entry point while email recovery is disabled', () => {

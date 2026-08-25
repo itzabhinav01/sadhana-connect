@@ -10,7 +10,7 @@ const { useAuthMock, listCommentsMock } = vi.hoisted(() => ({
   listCommentsMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

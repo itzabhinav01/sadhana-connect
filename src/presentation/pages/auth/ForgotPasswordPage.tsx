@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom'
 import {
   type ForgotPasswordInput,
   forgotPasswordSchema,
-} from '@/application/auth/schemas'
-import { useRequestPasswordReset } from '@/application/auth/use-request-password-reset'
+} from '@sadhana-connect/auth'
+import { useRequestPasswordReset } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
 import {

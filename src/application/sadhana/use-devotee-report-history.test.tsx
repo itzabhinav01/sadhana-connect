@@ -10,7 +10,7 @@ const { useAuthMock, listReportHistoryMock } = vi.hoisted(() => ({
   listReportHistoryMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({

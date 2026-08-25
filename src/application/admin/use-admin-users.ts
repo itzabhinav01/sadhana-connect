@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import type { AdminUserFilters } from '@sadhana-connect/domain/repositories/admin-user-repository'
 import { supabaseAdminUserRepository } from '@sadhana-connect/infra-supabase/admin-user-repository'
 

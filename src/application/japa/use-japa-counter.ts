@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { calculateJapaProgress } from '@/application/japa/japa-progress'
 import { japaCounterLocalStorage } from '@/infrastructure/local-storage/japa-counter-local-storage'
 import { DEFAULT_TARGET_ROUNDS } from '@/shared/constants/japa'

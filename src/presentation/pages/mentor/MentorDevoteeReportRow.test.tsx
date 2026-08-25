@@ -13,10 +13,8 @@ const { useAuthMock, useProfileMock, useSadhanaReportCommentsMock, useAddComment
     useAddCommentMock: vi.fn(),
   }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
-}))
-vi.mock('@/application/profile/use-profile', () => ({
   useProfile: useProfileMock,
 }))
 vi.mock('@/application/comments/use-sadhana-report-comments', () => ({

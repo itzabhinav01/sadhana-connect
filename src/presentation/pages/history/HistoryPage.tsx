@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { formatSadhanaReportsRangeForText } from '@/application/sadhana/format-sadhana-report-for-text'
 import { buildSadhanaRangeExportFilename } from '@/application/sadhana/sadhana-export-filename'
 import {

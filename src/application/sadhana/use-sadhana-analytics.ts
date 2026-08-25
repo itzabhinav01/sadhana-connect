@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { calculateSadhanaAnalytics } from '@/application/sadhana/sadhana-analytics'
 import { sadhanaQueryKeys } from '@/application/sadhana/sadhana-query-keys'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'

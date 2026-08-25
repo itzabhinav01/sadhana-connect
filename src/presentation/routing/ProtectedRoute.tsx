@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
-import { useAuth } from '@/application/auth/use-auth'
-import { useProfile } from '@/application/profile/use-profile'
+import { useAuth } from '@sadhana-connect/auth'
+import { useProfile } from '@sadhana-connect/auth'
 import { AccountDisabledPage } from '@/presentation/pages/AccountDisabledPage'
 
 function LoadingScreen() {

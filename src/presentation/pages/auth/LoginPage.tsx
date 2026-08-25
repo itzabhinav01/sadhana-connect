@@ -2,8 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { type SignInInput, signInSchema } from '@/application/auth/schemas'
-import { useSignIn } from '@/application/auth/use-sign-in'
+import { type SignInInput, signInSchema } from '@sadhana-connect/auth'
+import { useSignIn } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
 import {

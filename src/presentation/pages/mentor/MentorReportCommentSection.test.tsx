@@ -12,7 +12,7 @@ const { useSadhanaReportCommentsMock, useAuthMock, useAddCommentMock } = vi.hois
 vi.mock('@/application/comments/use-sadhana-report-comments', () => ({
   useSadhanaReportComments: useSadhanaReportCommentsMock,
 }))
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 vi.mock('@/application/comments/use-add-comment', () => ({

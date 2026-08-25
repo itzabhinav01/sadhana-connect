@@ -1,8 +1,8 @@
 import { Outlet, useNavigation } from 'react-router-dom'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { useNotificationsRealtime } from '@/application/notifications/use-notifications-realtime'
-import { useProfile } from '@/application/profile/use-profile'
+import { useProfile } from '@sadhana-connect/auth'
 import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
 import { AppHeader } from '@/presentation/layouts/AppHeader'
 import { AppSidebar } from '@/presentation/layouts/AppSidebar'

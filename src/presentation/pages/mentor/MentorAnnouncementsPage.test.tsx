@@ -8,9 +8,6 @@ const { useProfileMock, useAnnouncementsMock } = vi.hoisted(() => ({
   useAnnouncementsMock: vi.fn(),
 }))
 
-vi.mock('@/application/profile/use-profile', () => ({
-  useProfile: useProfileMock,
-}))
 vi.mock('@/application/announcements/use-announcements', () => ({
   useAnnouncements: useAnnouncementsMock,
 }))
@@ -25,8 +22,9 @@ vi.mock('@/application/announcements/use-update-announcement', () => ({
 vi.mock('@/application/announcements/use-delete-announcement', () => ({
   useDeleteAnnouncement: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: () => ({ session: { userId: 'mentor-1', email: 'm@b.com', emailConfirmedAt: null }, isLoading: false }),
+  useProfile: useProfileMock,
 }))
 
 describe('MentorAnnouncementsPage', () => {

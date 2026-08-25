@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { useProfile } from '@/application/profile/use-profile'
+import { useProfile } from '@sadhana-connect/auth'
 import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
 
 // Live in-app updates only, while this app is open — NOT push. If the

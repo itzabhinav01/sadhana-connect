@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 
 // Redirects an already-authenticated session away from login/register/
 // forgot-password back to "/". Deliberately not used on /reset-password,

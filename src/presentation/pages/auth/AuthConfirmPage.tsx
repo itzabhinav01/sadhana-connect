@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
-import { useConfirmEmail } from '@/application/auth/use-confirm-email'
+import { useConfirmEmail } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { AuthCard } from '@/presentation/pages/auth/AuthCard'
 

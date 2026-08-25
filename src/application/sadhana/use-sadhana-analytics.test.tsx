@@ -11,7 +11,7 @@ const { useAuthMock, listReportsInRangeMock } = vi.hoisted(() => ({
   listReportsInRangeMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({
+vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 

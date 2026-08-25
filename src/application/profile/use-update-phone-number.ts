@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { profileQueryKeys } from '@/application/profile/profile-query-keys'
-import { useAuth } from '@/application/auth/use-auth'
+import { profileQueryKeys } from '@sadhana-connect/auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase/profile-repository'
 
 // Own-row only — enforced by RLS (profiles_update); no new policy was

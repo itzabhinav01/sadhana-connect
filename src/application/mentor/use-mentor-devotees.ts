@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { calculateMentorDevoteeSummaries } from '@/application/mentor/mentor-devotee-summary'
 import { mentorQueryKeys } from '@/application/mentor/mentor-query-keys'
 import { supabaseMentorRepository } from '@sadhana-connect/infra-supabase/mentor-repository'

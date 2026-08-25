@@ -8,7 +8,7 @@ import type {
   SignInParams,
   SignUpParams,
 } from '@sadhana-connect/domain'
-import { getSupabaseClient } from './client'
+import { getSupabaseClient, getRedirectBaseUrl } from './client'
 
 function mapSession(session: Session | null): AuthSession | null {
   if (!session) return null
@@ -40,7 +40,7 @@ export const supabaseAuthRepository: AuthRepository = {
       password,
       options: {
         data: { full_name: fullName, phone_number: phoneNumber },
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        emailRedirectTo: `${getRedirectBaseUrl()}/auth/confirm`,
       },
     })
 
@@ -70,7 +70,7 @@ export const supabaseAuthRepository: AuthRepository = {
 
   async requestPasswordReset(email: string) {
     const { error } = await getSupabaseClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${getRedirectBaseUrl()}/reset-password`,
     })
 
     if (error) throw error

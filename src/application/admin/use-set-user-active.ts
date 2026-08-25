@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { adminQueryKeys } from '@/application/admin/admin-query-keys'
-import { useAuth } from '@/application/auth/use-auth'
+import { useAuth } from '@sadhana-connect/auth'
 import { supabaseAdminUserRepository } from '@sadhana-connect/infra-supabase/admin-user-repository'
 
 // Disable/enable — the reversible half of the account lifecycle

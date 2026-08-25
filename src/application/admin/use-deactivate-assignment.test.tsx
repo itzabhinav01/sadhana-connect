@@ -11,7 +11,7 @@ const { useAuthMock, deactivateAssignmentMock } = vi.hoisted(() => ({
   deactivateAssignmentMock: vi.fn(),
 }))
 
-vi.mock('@/application/auth/use-auth', () => ({ useAuth: useAuthMock }))
+vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock }))
 vi.mock('@sadhana-connect/infra-supabase/admin-assignment-repository', () => ({
   supabaseAdminAssignmentRepository: { deactivateAssignment: deactivateAssignmentMock },
 }))
