@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
+import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { SadhanaReportComments } from '@/presentation/pages/sadhana/SadhanaReportComments'
 

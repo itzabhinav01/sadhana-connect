@@ -8,7 +8,8 @@ const { useRecentSadhanaReportsMock } = vi.hoisted(() => ({
   useRecentSadhanaReportsMock: vi.fn(),
 }))
 
-vi.mock('@sadhana-connect/sadhana', () => ({
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/sadhana')>()),
   useRecentSadhanaReports: useRecentSadhanaReportsMock,
 }))
 

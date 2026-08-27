@@ -1,4 +1,5 @@
 import {
+  buildWhatsAppShareUrl,
   useRecentSadhanaReports,
   useSadhanaReport,
   useSadhanaStreak,
@@ -6,7 +7,7 @@ import {
 } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { Stack, useRouter } from 'expo-router'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
@@ -37,6 +38,8 @@ export default function DashboardScreen() {
     return <LoadingScreen />
   }
 
+  const report = todayReport.data
+
   return (
     <>
       <Stack.Screen
@@ -57,25 +60,30 @@ export default function DashboardScreen() {
           <Text style={styles.mutedLine}>
             Current streak: {streak.data ?? 0} day{streak.data === 1 ? '' : 's'}
           </Text>
-          {todayReport.data ? (
+          {report ? (
             <>
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{todayReport.data.totalRounds}</Text>
+                  <Text style={styles.statValue}>{report.totalRounds}</Text>
                   <Text style={styles.statLabel}>Rounds</Text>
                 </View>
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{todayReport.data.readingMinutes}</Text>
+                  <Text style={styles.statValue}>{report.readingMinutes}</Text>
                   <Text style={styles.statLabel}>Reading (min)</Text>
                 </View>
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{todayReport.data.hearingMinutes}</Text>
+                  <Text style={styles.statValue}>{report.hearingMinutes}</Text>
                   <Text style={styles.statLabel}>Hearing (min)</Text>
                 </View>
               </View>
               <Button
                 title="Edit Sadhana"
                 onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
+                variant="outline"
+              />
+              <Button
+                title="Share to WhatsApp"
+                onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
                 variant="outline"
               />
             </>
@@ -127,13 +135,7 @@ export default function DashboardScreen() {
         <Card title="Recent Reports">
           {recentReports.data && recentReports.data.length > 0 ? (
             recentReports.data.slice(0, RECENT_REPORTS_DISPLAY_COUNT).map((report) => (
-              <SadhanaReportRow
-                key={report.id}
-                reportDate={report.reportDate}
-                totalRounds={report.totalRounds}
-                readingMinutes={report.readingMinutes}
-                hearingMinutes={report.hearingMinutes}
-              />
+              <SadhanaReportRow key={report.id} report={report} />
             ))
           ) : (
             <Text style={styles.mutedLine}>No reports yet — your submissions will show up here.</Text>

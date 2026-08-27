@@ -1,7 +1,7 @@
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
-import { WHATSAPP_RECIPIENT_NUMBER } from '@/shared/constants/whatsapp'
-import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
-import { formatTime12Hour } from '@sadhana-connect/shared'
+import type { SadhanaReport } from '@sadhana-connect/domain'
+import { formatIsoDateAsDdMmYyyy, formatTime12Hour } from '@sadhana-connect/shared'
+
+import { WHATSAPP_RECIPIENT_NUMBER } from './whatsapp-recipient'
 
 // Placeholder for any unset nullable field (approved product decision,
 // Phase 15) — the WhatsApp template's line structure must stay identical
@@ -47,7 +47,7 @@ export function formatSadhanaReportForWhatsApp(report: SadhanaReport): string {
 
 // The full share URL, including the fixed recipient (Phase 15 — not
 // configurable) and the URL-encoded message. This is the only string a
-// "Share to WhatsApp" link's href should ever be built from.
+// "Share to WhatsApp" action should ever be built from, on any platform.
 export function buildWhatsAppShareUrl(report: SadhanaReport): string {
   const message = formatSadhanaReportForWhatsApp(report)
   return `https://wa.me/${WHATSAPP_RECIPIENT_NUMBER}?text=${encodeURIComponent(message)}`

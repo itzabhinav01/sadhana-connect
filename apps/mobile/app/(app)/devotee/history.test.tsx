@@ -15,7 +15,8 @@ jest.mock('expo-router', () => {
 })
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
-import { useSadhanaHistory } from '@sadhana-connect/sadhana'
+import { buildWhatsAppShareUrl, useSadhanaHistory } from '@sadhana-connect/sadhana'
+import { Linking } from 'react-native'
 
 import HistoryScreen from './history'
 
@@ -23,6 +24,30 @@ const mockUseSadhanaHistory = useSadhanaHistory as jest.Mock
 
 function page(reports: unknown[], nextCursor: string | null = null) {
   return { pages: [{ reports, nextCursor }] }
+}
+
+const fullReport = {
+  id: 'r1',
+  profileId: 'user-1',
+  reportDate: '2026-08-20',
+  roundsBefore430: 4,
+  roundsTill7am: 8,
+  lastRoundTime: '06:30',
+  totalRounds: 16,
+  readingMinutes: 10,
+  bookName: null,
+  hearingMinutes: 10,
+  speakerName: null,
+  sleepTime: '22:00',
+  wakeTime: '04:00',
+  dayRestMinutes: 0,
+  totalRestMinutes: 0,
+  officeGoingTime: null,
+  officeReturnTime: null,
+  notes: null,
+  signatureText: 'Test Devotee',
+  createdAt: '2026-08-20T00:00:00.000Z',
+  updatedAt: '2026-08-20T00:00:00.000Z',
 }
 
 describe('HistoryScreen', () => {
@@ -73,6 +98,23 @@ describe('HistoryScreen', () => {
     const { getByRole } = await render(<HistoryScreen />)
     await fireEvent.press(getByRole('button', { name: 'Load more' }))
     expect(fetchNextPage).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the correctly formatted WhatsApp share URL for a report row', async () => {
+    mockUseSadhanaHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: page([fullReport]),
+      hasNextPage: false,
+    })
+    const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
+
+    const { getByRole } = await render(<HistoryScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: `Share ${fullReport.reportDate} report to WhatsApp` }),
+    )
+
+    expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullReport))
   })
 
   it('shows an error message when the query fails', async () => {

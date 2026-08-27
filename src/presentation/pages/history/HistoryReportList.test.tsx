@@ -10,7 +10,8 @@ const { useSadhanaHistoryMock, downloadTextFileMock } = vi.hoisted(() => ({
   downloadTextFileMock: vi.fn(),
 }))
 
-vi.mock('@sadhana-connect/sadhana', () => ({
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/sadhana')>()),
   useSadhanaHistory: useSadhanaHistoryMock,
 }))
 

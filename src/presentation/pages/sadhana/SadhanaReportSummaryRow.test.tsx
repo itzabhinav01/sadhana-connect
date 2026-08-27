@@ -4,7 +4,7 @@ import type { ComponentProps } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
+import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import { SadhanaReportSummaryRow } from '@/presentation/pages/sadhana/SadhanaReportSummaryRow'
 

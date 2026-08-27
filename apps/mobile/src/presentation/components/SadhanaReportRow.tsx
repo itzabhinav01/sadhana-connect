@@ -1,46 +1,50 @@
+import type { SadhanaReport } from '@sadhana-connect/domain'
+import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
 import { formatTime12Hour } from '@sadhana-connect/shared'
 import { useRouter } from 'expo-router'
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { colors, fontSize, spacing } from '../../shared/theme'
 
 interface SadhanaReportRowProps {
-  reportDate: string
-  totalRounds: number
-  readingMinutes: number
-  hearingMinutes: number
-  sleepTime?: string | null
-  wakeTime?: string | null
+  report: SadhanaReport
+  // 'compact' (dashboard's Recent Reports card): date + summary only.
+  // 'detailed' (History): also sleep/wake when present. Same navigation
+  // and share behavior either way — only how much is shown differs.
+  variant?: 'compact' | 'detailed'
 }
 
-export function SadhanaReportRow({
-  reportDate,
-  totalRounds,
-  readingMinutes,
-  hearingMinutes,
-  sleepTime,
-  wakeTime,
-}: SadhanaReportRowProps) {
+export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportRowProps) {
   const router = useRouter()
-  const hasSleepInfo = Boolean(sleepTime || wakeTime)
+  const hasSleepInfo = Boolean(report.sleepTime || report.wakeTime)
 
   return (
-    <Pressable
-      onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: reportDate } })}
-      style={styles.row}
-      accessibilityRole="button"
-      accessibilityLabel={`Sadhana report for ${reportDate}`}
-    >
-      <Text style={styles.date}>{reportDate}</Text>
-      <Text style={styles.summary}>
-        {totalRounds} rounds · {readingMinutes}m reading · {hearingMinutes}m hearing
-      </Text>
-      {hasSleepInfo ? (
-        <Text style={styles.muted}>
-          {formatTime12Hour(sleepTime)} → {formatTime12Hour(wakeTime)}
+    <View style={styles.row}>
+      <Pressable
+        onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: report.reportDate } })}
+        accessibilityRole="button"
+        accessibilityLabel={`Sadhana report for ${report.reportDate}`}
+      >
+        <Text style={styles.date}>{report.reportDate}</Text>
+        <Text style={styles.summary}>
+          {report.totalRounds} rounds · {report.readingMinutes}m reading · {report.hearingMinutes}m
+          hearing
         </Text>
-      ) : null}
-    </Pressable>
+        {variant === 'detailed' && hasSleepInfo ? (
+          <Text style={styles.muted}>
+            {formatTime12Hour(report.sleepTime)} → {formatTime12Hour(report.wakeTime)}
+          </Text>
+        ) : null}
+      </Pressable>
+      <Pressable
+        onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
+        accessibilityRole="button"
+        accessibilityLabel={`Share ${report.reportDate} report to WhatsApp`}
+        style={styles.shareLink}
+      >
+        <Text style={styles.shareLinkText}>Share to WhatsApp</Text>
+      </Pressable>
+    </View>
   )
 }
 
@@ -63,5 +67,13 @@ const styles = StyleSheet.create({
   muted: {
     fontSize: fontSize.sm,
     color: colors.muted,
+  },
+  shareLink: {
+    alignSelf: 'flex-start',
+    paddingVertical: spacing.xs,
+  },
+  shareLinkText: {
+    fontSize: fontSize.sm,
+    color: colors.link,
   },
 })

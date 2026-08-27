@@ -62,15 +62,7 @@ export default function HistoryScreen() {
       ) : (
         <>
           {reports.map((report) => (
-            <SadhanaReportRow
-              key={report.id}
-              reportDate={report.reportDate}
-              totalRounds={report.totalRounds}
-              readingMinutes={report.readingMinutes}
-              hearingMinutes={report.hearingMinutes}
-              sleepTime={report.sleepTime}
-              wakeTime={report.wakeTime}
-            />
+            <SadhanaReportRow key={report.id} report={report} variant="detailed" />
           ))}
           {historyQuery.hasNextPage ? (
             <Button

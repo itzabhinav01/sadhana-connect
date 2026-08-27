@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { buildWhatsAppShareUrl } from '@/application/sadhana/format-sadhana-report-for-whatsapp'
+import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { TodaySadhanaCard } from '@/presentation/pages/dashboard/TodaySadhanaCard'
 
@@ -35,7 +35,8 @@ const { useSadhanaReportMock, useSadhanaStreakMock } = vi.hoisted(() => ({
   useSadhanaStreakMock: vi.fn(),
 }))
 
-vi.mock('@sadhana-connect/sadhana', () => ({
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/sadhana')>()),
   useSadhanaReport: useSadhanaReportMock,
   useSadhanaStreak: useSadhanaStreakMock,
 }))

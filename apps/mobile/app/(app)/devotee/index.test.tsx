@@ -26,15 +26,41 @@ jest.mock('expo-router', () => {
   }
 })
 
-import { cleanup, render } from '@testing-library/react-native'
+import { cleanup, fireEvent, render } from '@testing-library/react-native'
 import {
+  buildWhatsAppShareUrl,
   useRecentSadhanaReports,
   useSadhanaReport,
   useSadhanaStreak,
   useWeeklySadhanaSummary,
 } from '@sadhana-connect/sadhana'
+import { Linking } from 'react-native'
 
 import DashboardScreen from './index'
+
+const fullTodayReport = {
+  id: 'r1',
+  profileId: 'user-1',
+  reportDate: '2026-08-19',
+  roundsBefore430: 4,
+  roundsTill7am: 8,
+  lastRoundTime: '06:30',
+  totalRounds: 16,
+  readingMinutes: 20,
+  bookName: null,
+  hearingMinutes: 15,
+  speakerName: null,
+  sleepTime: '22:00',
+  wakeTime: '04:00',
+  dayRestMinutes: 0,
+  totalRestMinutes: 0,
+  officeGoingTime: null,
+  officeReturnTime: null,
+  notes: null,
+  signatureText: 'Test Devotee',
+  createdAt: '2026-08-19T00:00:00.000Z',
+  updatedAt: '2026-08-19T00:00:00.000Z',
+}
 
 const mockUseSadhanaReport = useSadhanaReport as jest.Mock
 const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
@@ -85,10 +111,33 @@ describe('DashboardScreen', () => {
     expect(getByRole('button', { name: 'Edit Sadhana' })).toBeTruthy()
   })
 
+  it('opens the correctly formatted WhatsApp share URL when "Share to WhatsApp" is pressed', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: fullTodayReport })
+    const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
+
+    const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Share to WhatsApp' }))
+
+    expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullTodayReport))
+  })
+
   it('shows the empty state for Recent Reports when there are none yet', async () => {
     mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
 
     const { getByText } = await render(<DashboardScreen />)
     expect(getByText('No reports yet — your submissions will show up here.')).toBeTruthy()
+  })
+
+  it('opens the correctly formatted WhatsApp share URL for a Recent Reports row', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+    mockUseRecentSadhanaReports.mockReturnValue({ data: [fullTodayReport] })
+    const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
+
+    const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: `Share ${fullTodayReport.reportDate} report to WhatsApp` }),
+    )
+
+    expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullTodayReport))
   })
 })
