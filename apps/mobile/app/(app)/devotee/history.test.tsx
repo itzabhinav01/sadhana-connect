@@ -14,13 +14,30 @@ jest.mock('expo-router', () => {
   }
 })
 
+jest.mock('expo-print', () => ({
+  printToFileAsync: jest.fn(),
+}))
+
+jest.mock('expo-sharing', () => ({
+  shareAsync: jest.fn(),
+}))
+
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
-import { buildWhatsAppShareUrl, useSadhanaHistory } from '@sadhana-connect/sadhana'
-import { Linking } from 'react-native'
+import {
+  buildSadhanaReportHtml,
+  buildWhatsAppShareUrl,
+  formatSadhanaReportForText,
+  useSadhanaHistory,
+} from '@sadhana-connect/sadhana'
+import * as Print from 'expo-print'
+import * as Sharing from 'expo-sharing'
+import { Linking, Share } from 'react-native'
 
 import HistoryScreen from './history'
 
 const mockUseSadhanaHistory = useSadhanaHistory as jest.Mock
+const mockPrintToFileAsync = Print.printToFileAsync as jest.Mock
+const mockShareAsync = Sharing.shareAsync as jest.Mock
 
 function page(reports: unknown[], nextCursor: string | null = null) {
   return { pages: [{ reports, nextCursor }] }
@@ -115,6 +132,62 @@ describe('HistoryScreen', () => {
     )
 
     expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullReport))
+  })
+
+  it('shares the correctly formatted text export when "Export Text" is pressed', async () => {
+    mockUseSadhanaHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: page([fullReport]),
+      hasNextPage: false,
+    })
+    const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' })
+
+    const { getByRole } = await render(<HistoryScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: `Export ${fullReport.reportDate} report as text` }),
+    )
+
+    expect(shareSpy).toHaveBeenCalledWith({ message: formatSadhanaReportForText(fullReport) })
+  })
+
+  it('generates and shares a PDF when "Export PDF" is pressed', async () => {
+    mockUseSadhanaHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: page([fullReport]),
+      hasNextPage: false,
+    })
+    mockPrintToFileAsync.mockResolvedValue({ uri: 'file:///sadhana-report.pdf' })
+    mockShareAsync.mockResolvedValue(undefined)
+
+    const { getByRole } = await render(<HistoryScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: `Export ${fullReport.reportDate} report as PDF` }),
+    )
+
+    expect(mockPrintToFileAsync).toHaveBeenCalledWith({ html: buildSadhanaReportHtml(fullReport) })
+    expect(mockShareAsync).toHaveBeenCalledWith('file:///sadhana-report.pdf', {
+      mimeType: 'application/pdf',
+      dialogTitle: `Sadhana Report ${fullReport.reportDate}`,
+    })
+  })
+
+  it('shows an error message when the PDF export fails', async () => {
+    mockUseSadhanaHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: page([fullReport]),
+      hasNextPage: false,
+    })
+    mockPrintToFileAsync.mockRejectedValue(new Error('disk full'))
+
+    const { getByRole, getByText } = await render(<HistoryScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: `Export ${fullReport.reportDate} report as PDF` }),
+    )
+
+    expect(getByText('Something went wrong exporting this report. Please try again.')).toBeTruthy()
   })
 
   it('shows an error message when the query fails', async () => {

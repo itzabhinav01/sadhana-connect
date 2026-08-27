@@ -1,4 +1,4 @@
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatTime12Hour } from '@sadhana-connect/shared'
 
 // Placeholder for any unset nullable field in an export (Phase 16,

@@ -1,4 +1,4 @@
-import { buildSadhanaReportExportSections } from '@/application/sadhana/sadhana-export-fields'
+import { buildSadhanaReportExportSections } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 

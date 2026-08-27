@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   formatSadhanaReportForText,
   formatSadhanaReportsRangeForText,
-} from '@/application/sadhana/format-sadhana-report-for-text'
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+} from './format-sadhana-report-for-text'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {
   return {

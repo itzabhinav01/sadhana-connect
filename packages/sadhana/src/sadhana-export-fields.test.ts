@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSadhanaReportExportSections } from '@/application/sadhana/sadhana-export-fields'
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import { buildSadhanaReportExportSections } from './sadhana-export-fields'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {
   return {

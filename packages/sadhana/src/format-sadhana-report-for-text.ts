@@ -1,8 +1,8 @@
 import {
   buildSadhanaReportExportSections,
   type SadhanaExportSection,
-} from '@/application/sadhana/sadhana-export-fields'
-import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+} from './sadhana-export-fields'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 
 const NO_REPORTS_MESSAGE = 'No Sadhana reports were submitted in this date range.'

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildSadhanaRangeExportFilename,
   buildSadhanaSingleExportFilename,
-} from '@/application/sadhana/sadhana-export-filename'
+} from './sadhana-export-filename'
 
 describe('buildSadhanaSingleExportFilename', () => {
   it('builds the exact PDF filename', () => {

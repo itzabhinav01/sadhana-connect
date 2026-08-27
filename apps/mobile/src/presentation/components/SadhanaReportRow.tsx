@@ -1,22 +1,56 @@
 import type { SadhanaReport } from '@sadhana-connect/domain'
-import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
+import {
+  buildSadhanaReportHtml,
+  buildWhatsAppShareUrl,
+  formatSadhanaReportForText,
+} from '@sadhana-connect/sadhana'
 import { formatTime12Hour } from '@sadhana-connect/shared'
+import * as Print from 'expo-print'
 import { useRouter } from 'expo-router'
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native'
+import * as Sharing from 'expo-sharing'
+import { useState } from 'react'
+import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 
 import { colors, fontSize, spacing } from '../../shared/theme'
 
 interface SadhanaReportRowProps {
   report: SadhanaReport
-  // 'compact' (dashboard's Recent Reports card): date + summary only.
-  // 'detailed' (History): also sleep/wake when present. Same navigation
-  // and share behavior either way — only how much is shown differs.
+  // 'compact' (dashboard's Recent Reports card): date + summary + WhatsApp
+  // share only. 'detailed' (History): also sleep/wake when present, plus
+  // Export PDF/Text — matching web's Dashboard-vs-History split, where
+  // export actions are History-only (Phase 16 approved product decision).
   variant?: 'compact' | 'detailed'
 }
 
 export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportRowProps) {
   const router = useRouter()
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const [exportError, setExportError] = useState(false)
   const hasSleepInfo = Boolean(report.sleepTime || report.wakeTime)
+
+  const handleExportText = () => {
+    Share.share({ message: formatSadhanaReportForText(report) })
+  }
+
+  // Native has no browser print API, so this renders the same field data
+  // as web's SadhanaExportPrintView to a real PDF file via expo-print,
+  // then hands it to the native share sheet (save, email, etc.) via
+  // expo-sharing.
+  const handleExportPdf = async () => {
+    setExportError(false)
+    setIsExportingPdf(true)
+    try {
+      const { uri } = await Print.printToFileAsync({ html: buildSadhanaReportHtml(report) })
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Sadhana Report ${report.reportDate}`,
+      })
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }
 
   return (
     <View style={styles.row}>
@@ -36,14 +70,42 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
           </Text>
         ) : null}
       </Pressable>
-      <Pressable
-        onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
-        accessibilityRole="button"
-        accessibilityLabel={`Share ${report.reportDate} report to WhatsApp`}
-        style={styles.shareLink}
-      >
-        <Text style={styles.shareLinkText}>Share to WhatsApp</Text>
-      </Pressable>
+      <View style={styles.actionsRow}>
+        <Pressable
+          onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
+          accessibilityRole="button"
+          accessibilityLabel={`Share ${report.reportDate} report to WhatsApp`}
+          style={styles.actionLink}
+        >
+          <Text style={styles.actionLinkText}>Share to WhatsApp</Text>
+        </Pressable>
+        {variant === 'detailed' ? (
+          <>
+            <Pressable
+              onPress={handleExportPdf}
+              disabled={isExportingPdf}
+              accessibilityRole="button"
+              accessibilityLabel={`Export ${report.reportDate} report as PDF`}
+              style={styles.actionLink}
+            >
+              <Text style={styles.actionLinkText}>
+                {isExportingPdf ? 'Preparing…' : 'Export PDF'}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleExportText}
+              accessibilityRole="button"
+              accessibilityLabel={`Export ${report.reportDate} report as text`}
+              style={styles.actionLink}
+            >
+              <Text style={styles.actionLinkText}>Export Text</Text>
+            </Pressable>
+          </>
+        ) : null}
+      </View>
+      {exportError ? (
+        <Text style={styles.errorLine}>Something went wrong exporting this report. Please try again.</Text>
+      ) : null}
     </View>
   )
 }
@@ -68,12 +130,20 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.muted,
   },
-  shareLink: {
-    alignSelf: 'flex-start',
+  actionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  actionLink: {
     paddingVertical: spacing.xs,
   },
-  shareLinkText: {
+  actionLinkText: {
     fontSize: fontSize.sm,
     color: colors.link,
+  },
+  errorLine: {
+    fontSize: fontSize.sm,
+    color: colors.destructive,
   },
 })
