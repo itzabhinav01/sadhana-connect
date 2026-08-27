@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { announcementQueryKeys } from '@sadhana-connect/announcements'
+import { announcementQueryKeys } from './announcement-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
 import type { AnnouncementScope } from '@sadhana-connect/domain'
 import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase'

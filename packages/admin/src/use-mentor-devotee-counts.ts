@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { adminQueryKeys } from '@sadhana-connect/admin'
+import { adminQueryKeys } from './admin-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
-import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase/admin-assignment-repository'
+import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase'
 
 // All mentors' counts in one query, used by the Mentors list page to avoid
 // N+1 per-row count queries.

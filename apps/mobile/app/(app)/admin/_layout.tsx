@@ -18,6 +18,8 @@ export default function AdminLayout() {
       <Stack.Screen name="users/[id]" options={{ title: 'User' }} />
       <Stack.Screen name="assignments" options={{ title: 'Mentor Assignments' }} />
       <Stack.Screen name="temple-groups" options={{ title: 'Temple Groups' }} />
+      <Stack.Screen name="mentors" options={{ title: 'Mentors' }} />
+      <Stack.Screen name="announcements" options={{ title: 'Announcements' }} />
     </Stack>
   )
 }

@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useAdminTempleGroups } from '@sadhana-connect/admin'
-import { useCreateAdminAnnouncement } from '@/application/admin/use-create-admin-announcement'
 import {
+  useCreateAdminAnnouncement,
   ANNOUNCEMENT_EXPIRATION_PRESETS,
   ANNOUNCEMENT_EXPIRATION_PRESET_LABELS,
   announcementSchema,

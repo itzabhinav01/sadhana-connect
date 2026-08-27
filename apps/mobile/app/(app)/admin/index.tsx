@@ -58,6 +58,24 @@ export default function AdminHomeScreen() {
             onPress={() => router.push('/admin/temple-groups')}
           />
         </Card>
+
+        <Card title="Mentors">
+          <Text style={styles.mutedLine}>Every mentor and how many devotees they currently have.</Text>
+          <Button
+            title="View Mentors"
+            variant="outline"
+            onPress={() => router.push('/admin/mentors')}
+          />
+        </Card>
+
+        <Card title="Announcements">
+          <Text style={styles.mutedLine}>Create, edit, publish, and remove announcements.</Text>
+          <Button
+            title="Manage Announcements"
+            variant="outline"
+            onPress={() => router.push('/admin/announcements')}
+          />
+        </Card>
       </ScrollView>
     </>
   )
