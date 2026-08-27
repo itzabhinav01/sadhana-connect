@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { useAdminUsers } from '@/application/admin/use-admin-users'
-import type { AdminUserFilters } from '@sadhana-connect/domain/repositories/admin-user-repository'
+import { useAdminUsers } from '@sadhana-connect/admin'
+import type { AdminUserFilters } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { AdminUserFilterBar } from '@/presentation/pages/admin/AdminUserFilterBar'
 import { AdminUserList } from '@/presentation/pages/admin/AdminUserList'

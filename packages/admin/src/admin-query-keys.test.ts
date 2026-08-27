@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from './admin-query-keys'
 
 // Every key must be scoped by the viewing admin's own userId — this is the
 // mechanism that prevents one admin's cached list/detail/count data from

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain'
 import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailPage'
 
 const {
@@ -32,23 +32,22 @@ const {
   useSendReminderMock: vi.fn(),
 }))
 
-vi.mock('@/application/admin/use-admin-user-detail', () => ({
-  useAdminUserDetail: useAdminUserDetailMock,
-}))
-vi.mock('@/application/admin/use-admin-assignments', () => ({
-  useAdminAssignments: useAdminAssignmentsMock,
-}))
-vi.mock('@/application/admin/use-deactivate-assignment', () => ({
-  useDeactivateAssignment: useDeactivateAssignmentMock,
-}))
-vi.mock('@/application/admin/use-mentor-devotee-count', () => ({
-  useMentorDevoteeCount: useMentorDevoteeCountMock,
-}))
+vi.mock('@sadhana-connect/admin', async () => {
+  const actual = await vi.importActual<
+    typeof import('@sadhana-connect/admin')
+  >('@sadhana-connect/admin')
+  return {
+    ...actual,
+    useAdminUserDetail: useAdminUserDetailMock,
+    useAdminAssignments: useAdminAssignmentsMock,
+    useDeactivateAssignment: useDeactivateAssignmentMock,
+    useMentorDevoteeCount: useMentorDevoteeCountMock,
+    useSetUserActive: useSetUserActiveMock,
+    useChangeUserRole: useChangeUserRoleMock,
+  }
+})
 vi.mock('@/application/admin/use-admin-user-email', () => ({
   useRevealUserEmail: useRevealUserEmailMock,
-}))
-vi.mock('@/application/admin/use-set-user-active', () => ({
-  useSetUserActive: useSetUserActiveMock,
 }))
 vi.mock('@/application/admin/use-hard-delete-user', () => ({
   useHardDeleteUser: useHardDeleteUserMock,
@@ -56,12 +55,6 @@ vi.mock('@/application/admin/use-hard-delete-user', () => ({
 vi.mock('@/application/admin/use-generate-recovery-link', () => ({
   useGenerateRecoveryLink: useGenerateRecoveryLinkMock,
 }))
-vi.mock('@/application/admin/use-change-user-role', async () => {
-  const actual = await vi.importActual<
-    typeof import('@/application/admin/use-change-user-role')
-  >('@/application/admin/use-change-user-role')
-  return { ...actual, useChangeUserRole: useChangeUserRoleMock }
-})
 vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
   return {

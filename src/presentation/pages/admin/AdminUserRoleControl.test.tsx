@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain'
 import { AdminUserRoleControl } from '@/presentation/pages/admin/AdminUserRoleControl'
 
 // Radix's Select renders its popup in a portal with no native <select>
@@ -22,14 +22,15 @@ const { useMentorDevoteeCountMock, useChangeUserRoleMock } = vi.hoisted(() => ({
   useChangeUserRoleMock: vi.fn(),
 }))
 
-vi.mock('@/application/admin/use-mentor-devotee-count', () => ({
-  useMentorDevoteeCount: useMentorDevoteeCountMock,
-}))
-vi.mock('@/application/admin/use-change-user-role', async () => {
+vi.mock('@sadhana-connect/admin', async () => {
   const actual = await vi.importActual<
-    typeof import('@/application/admin/use-change-user-role')
-  >('@/application/admin/use-change-user-role')
-  return { ...actual, useChangeUserRole: useChangeUserRoleMock }
+    typeof import('@sadhana-connect/admin')
+  >('@sadhana-connect/admin')
+  return {
+    ...actual,
+    useMentorDevoteeCount: useMentorDevoteeCountMock,
+    useChangeUserRole: useChangeUserRoleMock,
+  }
 })
 
 const devotee: AdminUser = {

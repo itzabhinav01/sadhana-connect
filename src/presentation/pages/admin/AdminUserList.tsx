@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import type { AdminUser } from '@sadhana-connect/domain'
 import { AdminUserStatusBadge } from '@/presentation/pages/admin/AdminUserStatusBadge'
 
 function formatDate(iso: string) {

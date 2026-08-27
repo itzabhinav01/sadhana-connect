@@ -11,5 +11,13 @@ export default function AdminLayout() {
     return <Redirect href="/" />
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ title: 'Admin' }} />
+      <Stack.Screen name="users/index" options={{ title: 'Users' }} />
+      <Stack.Screen name="users/[id]" options={{ title: 'User' }} />
+      <Stack.Screen name="assignments" options={{ title: 'Mentor Assignments' }} />
+      <Stack.Screen name="temple-groups" options={{ title: 'Temple Groups' }} />
+    </Stack>
+  )
 }

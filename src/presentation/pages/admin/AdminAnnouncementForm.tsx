@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { useAdminTempleGroups } from '@/application/admin/use-admin-temple-groups'
+import { useAdminTempleGroups } from '@sadhana-connect/admin'
 import { useCreateAdminAnnouncement } from '@/application/admin/use-create-admin-announcement'
 import {
   ANNOUNCEMENT_EXPIRATION_PRESETS,

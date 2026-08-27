@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from './admin-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
-import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase/admin-assignment-repository'
+import { supabaseAdminAssignmentRepository } from '@sadhana-connect/infra-supabase'
 
 // Exact required copy — the RPC (public.assign_devotee_to_mentor, 0015)
 // raises a message prefixed "MENTOR_CAP_REACHED:" specifically so this

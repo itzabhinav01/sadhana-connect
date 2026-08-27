@@ -3,8 +3,8 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
-import { useDeactivateAssignment } from '@/application/admin/use-deactivate-assignment'
+import { adminQueryKeys } from './admin-query-keys'
+import { useDeactivateAssignment } from './use-deactivate-assignment'
 
 const { useAuthMock, deactivateAssignmentMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -12,7 +12,7 @@ const { useAuthMock, deactivateAssignmentMock } = vi.hoisted(() => ({
 }))
 
 vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@sadhana-connect/infra-supabase/admin-assignment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseAdminAssignmentRepository: { deactivateAssignment: deactivateAssignmentMock },
 }))
 

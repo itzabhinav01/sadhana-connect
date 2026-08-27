@@ -80,6 +80,7 @@ export default defineConfig({
       '@sadhana-connect/comments': path.resolve(import.meta.dirname, './packages/comments/src'),
       '@sadhana-connect/notifications': path.resolve(import.meta.dirname, './packages/notifications/src'),
       '@sadhana-connect/announcements': path.resolve(import.meta.dirname, './packages/announcements/src'),
+      '@sadhana-connect/admin': path.resolve(import.meta.dirname, './packages/admin/src'),
     },
   },
   test: {

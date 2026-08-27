@@ -1,13 +1,13 @@
 import { useState } from 'react'
 
-import { useAdminTempleGroups } from '@/application/admin/use-admin-temple-groups'
 import {
+  templeGroupNameSchema,
+  useAdminTempleGroups,
   useCreateTempleGroup,
   useDeleteTempleGroup,
   useRenameTempleGroup,
-} from '@/application/admin/use-temple-group-mutations'
-import { templeGroupNameSchema } from '@/application/admin/admin-user-schema'
-import type { TempleGroup } from '@sadhana-connect/domain/entities/temple-group'
+} from '@sadhana-connect/admin'
+import type { TempleGroup } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 

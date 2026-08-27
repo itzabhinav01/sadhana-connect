@@ -1,9 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useAdminAssignments } from '@/application/admin/use-admin-assignments'
-import { useAdminUserDetail } from '@/application/admin/use-admin-user-detail'
-import { useDeactivateAssignment } from '@/application/admin/use-deactivate-assignment'
-import { useMentorDevoteeCount } from '@/application/admin/use-mentor-devotee-count'
+import {
+  useAdminAssignments,
+  useAdminUserDetail,
+  useDeactivateAssignment,
+  useMentorDevoteeCount,
+} from '@sadhana-connect/admin'
 import { Button } from '@/presentation/components/ui/button'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
 import { AdminUserEmailReveal } from '@/presentation/pages/admin/AdminUserEmailReveal'

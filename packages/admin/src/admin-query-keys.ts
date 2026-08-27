@@ -1,4 +1,4 @@
-import type { AdminUserFilters } from '@sadhana-connect/domain/repositories/admin-user-repository'
+import type { AdminUserFilters } from '@sadhana-connect/domain'
 
 // Every key is scoped by the VIEWING SUPER ADMIN's own userId, matching the
 // mentorQueryKeys/profileQueryKeys convention exactly — switching admin

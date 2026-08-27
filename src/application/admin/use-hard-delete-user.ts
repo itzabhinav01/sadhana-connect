@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from '@sadhana-connect/admin'
 import { useAuth } from '@sadhana-connect/auth'
 import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase/admin-account-actions-repository'
 

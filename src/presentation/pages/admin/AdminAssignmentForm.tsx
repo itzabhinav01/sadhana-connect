@@ -2,9 +2,9 @@ import { useState } from 'react'
 
 import {
   MentorCapReachedError,
+  useAdminUsers,
   useAssignMentor,
-} from '@/application/admin/use-assign-mentor'
-import { useAdminUsers } from '@/application/admin/use-admin-users'
+} from '@sadhana-connect/admin'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 import {

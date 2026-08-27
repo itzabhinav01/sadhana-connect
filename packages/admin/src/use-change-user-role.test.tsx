@@ -3,12 +3,12 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from './admin-query-keys'
 import {
   MENTOR_HAS_ACTIVE_DEVOTEES_MESSAGE,
   MentorHasActiveDevoteesError,
   useChangeUserRole,
-} from '@/application/admin/use-change-user-role'
+} from './use-change-user-role'
 
 const { useAuthMock, getMentorDevoteeCountMock, changeUserRoleMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -19,10 +19,8 @@ const { useAuthMock, getMentorDevoteeCountMock, changeUserRoleMock } = vi.hoiste
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/admin-assignment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseAdminAssignmentRepository: { getMentorDevoteeCount: getMentorDevoteeCountMock },
-}))
-vi.mock('@sadhana-connect/infra-supabase/admin-user-repository', () => ({
   supabaseAdminUserRepository: { changeUserRole: changeUserRoleMock },
 }))
 

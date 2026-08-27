@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { MentorCapReachedError } from '@/application/admin/use-assign-mentor'
+import { MentorCapReachedError } from '@sadhana-connect/admin'
 import { AdminAssignmentForm } from '@/presentation/pages/admin/AdminAssignmentForm'
 
 // Radix's Select renders its popup in a portal with no native <select>
@@ -23,14 +23,15 @@ const { useAdminUsersMock, useAssignMentorMock, mutateMock } = vi.hoisted(() => 
   mutateMock: vi.fn(),
 }))
 
-vi.mock('@/application/admin/use-admin-users', () => ({
-  useAdminUsers: useAdminUsersMock,
-}))
-vi.mock('@/application/admin/use-assign-mentor', async () => {
-  const actual = await vi.importActual<typeof import('@/application/admin/use-assign-mentor')>(
-    '@/application/admin/use-assign-mentor',
+vi.mock('@sadhana-connect/admin', async () => {
+  const actual = await vi.importActual<typeof import('@sadhana-connect/admin')>(
+    '@sadhana-connect/admin',
   )
-  return { ...actual, useAssignMentor: useAssignMentorMock }
+  return {
+    ...actual,
+    useAdminUsers: useAdminUsersMock,
+    useAssignMentor: useAssignMentorMock,
+  }
 })
 
 const devoteesPage = {

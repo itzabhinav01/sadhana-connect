@@ -24,7 +24,7 @@ const { useCreateAdminAnnouncementMock, useAdminTempleGroupsMock } = vi.hoisted(
 vi.mock('@/application/admin/use-create-admin-announcement', () => ({
   useCreateAdminAnnouncement: useCreateAdminAnnouncementMock,
 }))
-vi.mock('@/application/admin/use-admin-temple-groups', () => ({
+vi.mock('@sadhana-connect/admin', () => ({
   useAdminTempleGroups: useAdminTempleGroupsMock,
 }))
 

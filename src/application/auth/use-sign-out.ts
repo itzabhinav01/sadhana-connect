@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from '@sadhana-connect/admin'
 import { announcementQueryKeys } from '@sadhana-connect/announcements'
 import { commentQueryKeys } from '@sadhana-connect/comments'
 import { mentorQueryKeys } from '@sadhana-connect/mentor'

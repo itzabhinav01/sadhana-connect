@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { adminQueryKeys } from '@/application/admin/admin-query-keys'
+import { adminQueryKeys } from '@sadhana-connect/admin'
 import { useHardDeleteUser } from '@/application/admin/use-hard-delete-user'
 
 const { useAuthMock, hardDeleteUserMock } = vi.hoisted(() => ({

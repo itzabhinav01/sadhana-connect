@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { useHardDeleteUser } from '@/application/admin/use-hard-delete-user'
-import { useSetUserActive } from '@/application/admin/use-set-user-active'
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
+import { useSetUserActive } from '@sadhana-connect/admin'
+import type { AdminUser } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 

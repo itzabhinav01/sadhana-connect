@@ -1,4 +1,4 @@
-import { useAdminAssignments } from '@/application/admin/use-admin-assignments'
+import { useAdminAssignments } from '@sadhana-connect/admin'
 import { AdminAssignmentForm } from '@/presentation/pages/admin/AdminAssignmentForm'
 import { AdminAssignmentList } from '@/presentation/pages/admin/AdminAssignmentList'
 

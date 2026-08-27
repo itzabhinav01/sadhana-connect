@@ -1,4 +1,4 @@
-import { useAdminUsers } from '@/application/admin/use-admin-users'
+import { useAdminUsers } from '@sadhana-connect/admin'
 import { useMentorDevoteeCounts } from '@/application/admin/use-mentor-devotee-counts'
 import { Button } from '@/presentation/components/ui/button'
 import { AdminMentorList } from '@/presentation/pages/admin/AdminMentorList'

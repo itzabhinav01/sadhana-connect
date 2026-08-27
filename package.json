@@ -3,7 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "overrides": {
+    "react-native-reanimated": "4.5.1"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

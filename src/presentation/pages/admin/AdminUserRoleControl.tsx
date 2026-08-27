@@ -4,10 +4,9 @@ import {
   MENTOR_HAS_ACTIVE_DEVOTEES_MESSAGE,
   MentorHasActiveDevoteesError,
   useChangeUserRole,
-} from '@/application/admin/use-change-user-role'
-import { useMentorDevoteeCount } from '@/application/admin/use-mentor-devotee-count'
-import type { AdminUser } from '@sadhana-connect/domain/entities/admin-user'
-import type { AppRole } from '@sadhana-connect/domain/entities/profile'
+  useMentorDevoteeCount,
+} from '@sadhana-connect/admin'
+import type { AdminUser, AppRole } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Select,

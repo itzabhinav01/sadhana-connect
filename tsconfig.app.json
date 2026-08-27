@@ -26,7 +26,8 @@
       "@sadhana-connect/mentor": ["./packages/mentor/src"],
       "@sadhana-connect/comments": ["./packages/comments/src"],
       "@sadhana-connect/notifications": ["./packages/notifications/src"],
-      "@sadhana-connect/announcements": ["./packages/announcements/src"]
+      "@sadhana-connect/announcements": ["./packages/announcements/src"],
+      "@sadhana-connect/admin": ["./packages/admin/src"]
     },
 
     /* Linting */
