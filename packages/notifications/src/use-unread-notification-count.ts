@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
+import { notificationQueryKeys } from './notification-query-keys'
+import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase'
 
 export function useUnreadNotificationCount() {
   const { session } = useAuth()

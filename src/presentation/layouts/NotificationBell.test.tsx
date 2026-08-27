@@ -8,7 +8,8 @@ const { useUnreadNotificationCountMock } = vi.hoisted(() => ({
   useUnreadNotificationCountMock: vi.fn(),
 }))
 
-vi.mock('@/application/notifications/use-unread-notification-count', () => ({
+vi.mock('@sadhana-connect/notifications', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/notifications')>()),
   useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 

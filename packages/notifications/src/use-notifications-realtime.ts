@@ -2,9 +2,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
+import { notificationQueryKeys } from './notification-query-keys'
 import { useProfile } from '@sadhana-connect/auth'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+import { getSupabaseClient } from '@sadhana-connect/infra-supabase'
 
 // Live in-app updates only, while this app is open — NOT push. If the
 // tab is closed, nothing is delivered; the devotee simply sees the

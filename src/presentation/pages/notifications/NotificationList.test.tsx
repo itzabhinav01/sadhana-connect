@@ -11,10 +11,9 @@ const { useNotificationsMock, markReadMutateMock, navigateToNotificationMock } =
     navigateToNotificationMock: vi.fn(),
   }))
 
-vi.mock('@/application/notifications/use-notifications', () => ({
+vi.mock('@sadhana-connect/notifications', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/notifications')>()),
   useNotifications: useNotificationsMock,
-}))
-vi.mock('@/application/notifications/use-mark-notification-read', () => ({
   useMarkNotificationRead: () => ({ mutate: markReadMutateMock }),
 }))
 vi.mock('@/application/notifications/use-notification-navigation', () => ({

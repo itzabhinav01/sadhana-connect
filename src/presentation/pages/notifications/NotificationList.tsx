@@ -1,4 +1,4 @@
-import { useNotifications } from '@/application/notifications/use-notifications'
+import { useNotifications } from '@sadhana-connect/notifications'
 import { Button } from '@/presentation/components/ui/button'
 import { NotificationItem } from '@/presentation/pages/notifications/NotificationItem'
 

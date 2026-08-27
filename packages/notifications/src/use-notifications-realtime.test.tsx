@@ -3,8 +3,8 @@ import { renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { useNotificationsRealtime } from '@/application/notifications/use-notifications-realtime'
+import { notificationQueryKeys } from './notification-query-keys'
+import { useNotificationsRealtime } from './use-notifications-realtime'
 
 const {
   useAuthMock,
@@ -30,7 +30,7 @@ const {
 })
 
 vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock, useProfile: useProfileMock }))
-vi.mock('@sadhana-connect/infra-supabase/client', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   getSupabaseClient: () => ({
     channel: channelFactoryMock,
     removeChannel: removeChannelMock,

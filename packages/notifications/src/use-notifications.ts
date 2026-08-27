@@ -1,9 +1,9 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import type { NotificationListCursor } from '@sadhana-connect/domain/repositories/notification-repository'
-import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
+import { notificationQueryKeys } from './notification-query-keys'
+import type { NotificationListCursor } from '@sadhana-connect/domain'
+import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase'
 
 export const NOTIFICATIONS_PAGE_SIZE = 20
 

@@ -42,11 +42,9 @@ vi.mock('@/application/auth/use-sign-out', () => ({
 // See the matching note in AppLayout.test.tsx — every hook in this shell
 // is mocked at this level, not run for real, and these two need a
 // QueryClient this test file never sets up.
-vi.mock('@/application/notifications/use-notifications-realtime', () => ({
+vi.mock('@sadhana-connect/notifications', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/notifications')>()),
   useNotificationsRealtime: vi.fn(),
-}))
-
-vi.mock('@/application/notifications/use-unread-notification-count', () => ({
   useUnreadNotificationCount: useUnreadNotificationCountMock,
 }))
 

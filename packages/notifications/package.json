@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./src/index.ts",
   "dependencies": {
+    "@sadhana-connect/auth": "*",
     "@sadhana-connect/domain": "*",
     "@sadhana-connect/infra-supabase": "*",
     "@tanstack/react-query": "^5.101.4"

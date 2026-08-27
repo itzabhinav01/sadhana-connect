@@ -1,5 +1,5 @@
-import { useMarkAllNotificationsRead } from '@/application/notifications/use-mark-all-notifications-read'
-import { useUnreadNotificationCount } from '@/application/notifications/use-unread-notification-count'
+import { useMarkAllNotificationsRead } from '@sadhana-connect/notifications'
+import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
 import { Button } from '@/presentation/components/ui/button'
 import { NotificationList } from '@/presentation/pages/notifications/NotificationList'
 

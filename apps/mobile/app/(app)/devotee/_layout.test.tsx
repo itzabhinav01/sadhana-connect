@@ -2,6 +2,10 @@ jest.mock('../../../../../packages/auth/src/use-profile', () => ({
   useProfile: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/notifications/src/use-notifications-realtime', () => ({
+  useNotificationsRealtime: jest.fn(),
+}))
+
 jest.mock('expo-router', () => ({
   Redirect: ({ href }: { href: string }) => {
     const { Text } = require('react-native')

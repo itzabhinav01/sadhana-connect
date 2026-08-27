@@ -14,19 +14,26 @@ jest.mock('../../../../../packages/sadhana/src/use-recent-sadhana-reports', () =
   useRecentSadhanaReports: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/notifications/src/use-unread-notification-count', () => ({
+  useUnreadNotificationCount: jest.fn(),
+}))
+
 jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))
+
+const mockPush = jest.fn()
 
 jest.mock('expo-router', () => {
   const { View } = require('react-native')
   return {
     Stack: { Screen: () => <View /> },
-    useRouter: jest.fn(() => ({ push: jest.fn(), replace: jest.fn() })),
+    useRouter: jest.fn(() => ({ push: mockPush, replace: jest.fn() })),
   }
 })
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
+import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
 import {
   buildWhatsAppShareUrl,
   useRecentSadhanaReports,
@@ -66,6 +73,7 @@ const mockUseSadhanaReport = useSadhanaReport as jest.Mock
 const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
 const mockUseWeeklySadhanaSummary = useWeeklySadhanaSummary as jest.Mock
 const mockUseRecentSadhanaReports = useRecentSadhanaReports as jest.Mock
+const mockUseUnreadNotificationCount = useUnreadNotificationCount as jest.Mock
 
 describe('DashboardScreen', () => {
   afterEach(async () => {
@@ -76,6 +84,8 @@ describe('DashboardScreen', () => {
     mockUseSadhanaStreak.mockReturnValue({ data: 0 })
     mockUseWeeklySadhanaSummary.mockReturnValue({ data: undefined })
     mockUseRecentSadhanaReports.mockReturnValue({ data: [] })
+    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
+    mockPush.mockReset()
   })
 
   it('shows a loading screen while the report query is pending', async () => {
@@ -139,5 +149,33 @@ describe('DashboardScreen', () => {
     )
 
     expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullTodayReport))
+  })
+
+  it('shows a plain "Notifications" label when there are no unread notifications', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
+
+    const { getByRole } = await render(<DashboardScreen />)
+
+    expect(getByRole('button', { name: 'Notifications' })).toBeTruthy()
+  })
+
+  it('shows the unread count in the Notifications label when there are unread notifications', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+    mockUseUnreadNotificationCount.mockReturnValue({ data: 3 })
+
+    const { getByRole } = await render(<DashboardScreen />)
+
+    expect(getByRole('button', { name: 'Notifications (3)' })).toBeTruthy()
+  })
+
+  it('navigates to /devotee/notifications when "Notifications" is pressed', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
+
+    const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Notifications' }))
+
+    expect(mockPush).toHaveBeenCalledWith('/devotee/notifications')
   })
 })

@@ -1,3 +1,4 @@
+import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
 import {
   buildWhatsAppShareUrl,
   useRecentSadhanaReports,
@@ -27,6 +28,7 @@ export default function DashboardScreen() {
   const streak = useSadhanaStreak()
   const weeklySummary = useWeeklySadhanaSummary()
   const recentReports = useRecentSadhanaReports()
+  const unreadCount = useUnreadNotificationCount()
 
   const handleSignOut = () => {
     signOut.mutate(undefined, {
@@ -146,6 +148,14 @@ export default function DashboardScreen() {
             variant="outline"
           />
         </Card>
+
+        <Button
+          title={
+            unreadCount.data ? `Notifications (${unreadCount.data})` : 'Notifications'
+          }
+          onPress={() => router.push('/devotee/notifications')}
+          variant="outline"
+        />
 
         <Button
           title="Verse of the Day"

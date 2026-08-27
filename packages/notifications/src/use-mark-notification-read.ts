@@ -1,21 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase/notification-repository'
+import { notificationQueryKeys } from './notification-query-keys'
+import { supabaseNotificationRepository } from '@sadhana-connect/infra-supabase'
 
-export function useMarkAllNotificationsRead() {
+// Ownership is enforced by RLS (notifications_update) — this hook never
+// needs to pass or verify the recipient itself.
+export function useMarkNotificationRead() {
   const { session } = useAuth()
   const queryClient = useQueryClient()
   const userId = session?.userId ?? null
 
   return useMutation({
-    mutationFn: () => {
-      if (!userId) {
-        throw new Error('useMarkAllNotificationsRead: no authenticated user')
-      }
-      return supabaseNotificationRepository.markAllRead(userId)
-    },
+    mutationFn: (notificationId: string) =>
+      supabaseNotificationRepository.markRead(notificationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationQueryKeys.list(userId) })
       queryClient.invalidateQueries({

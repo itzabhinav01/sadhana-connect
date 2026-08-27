@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useUnreadNotificationCount } from '@/application/notifications/use-unread-notification-count'
+import { useUnreadNotificationCount } from './use-unread-notification-count'
 
 const { useAuthMock, countUnreadMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -13,7 +13,7 @@ const { useAuthMock, countUnreadMock } = vi.hoisted(() => ({
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseNotificationRepository: { countUnread: countUnreadMock },
 }))
 

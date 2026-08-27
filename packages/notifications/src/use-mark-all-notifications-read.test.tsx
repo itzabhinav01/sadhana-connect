@@ -3,19 +3,19 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
-import { useMarkNotificationRead } from '@/application/notifications/use-mark-notification-read'
+import { notificationQueryKeys } from './notification-query-keys'
+import { useMarkAllNotificationsRead } from './use-mark-all-notifications-read'
 
-const { useAuthMock, markReadMock } = vi.hoisted(() => ({
+const { useAuthMock, markAllReadMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
-  markReadMock: vi.fn(),
+  markAllReadMock: vi.fn(),
 }))
 
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
-  supabaseNotificationRepository: { markRead: markReadMock },
+vi.mock('@sadhana-connect/infra-supabase', () => ({
+  supabaseNotificationRepository: { markAllRead: markAllReadMock },
 }))
 
 function createWrapper(queryClient: QueryClient) {
@@ -26,38 +26,38 @@ function createWrapper(queryClient: QueryClient) {
   }
 }
 
-describe('useMarkNotificationRead', () => {
+describe('useMarkAllNotificationsRead', () => {
   beforeEach(() => {
     useAuthMock.mockReset()
-    markReadMock.mockReset()
+    markAllReadMock.mockReset()
     useAuthMock.mockReturnValue({
       session: { userId: 'user-1', email: 'a@b.com', emailConfirmedAt: null },
       isLoading: false,
     })
   })
 
-  it('calls markRead with the given notification id', async () => {
-    markReadMock.mockResolvedValue(undefined)
+  it("marks all of the current user's notifications read", async () => {
+    markAllReadMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-    const { result } = renderHook(() => useMarkNotificationRead(), {
+    const { result } = renderHook(() => useMarkAllNotificationsRead(), {
       wrapper: createWrapper(queryClient),
     })
 
-    result.current.mutate('notification-1')
+    result.current.mutate()
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(markReadMock).toHaveBeenCalledWith('notification-1')
+    expect(markAllReadMock).toHaveBeenCalledWith('user-1')
   })
 
-  it('invalidates the list and unread-count caches for the current user on success', async () => {
-    markReadMock.mockResolvedValue(undefined)
+  it('invalidates the list and unread-count caches on success', async () => {
+    markAllReadMock.mockResolvedValue(undefined)
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-    const { result } = renderHook(() => useMarkNotificationRead(), {
+    const { result } = renderHook(() => useMarkAllNotificationsRead(), {
       wrapper: createWrapper(queryClient),
     })
 
-    result.current.mutate('notification-1')
+    result.current.mutate()
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(invalidateSpy).toHaveBeenCalledWith({

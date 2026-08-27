@@ -7,7 +7,7 @@ import { useSignOut } from '@/application/auth/use-sign-out'
 import { announcementQueryKeys } from '@sadhana-connect/announcements'
 import { commentQueryKeys } from '@sadhana-connect/comments'
 import { mentorQueryKeys } from '@sadhana-connect/mentor'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
+import { notificationQueryKeys } from '@sadhana-connect/notifications'
 import { profileQueryKeys } from '@sadhana-connect/auth'
 import { sadhanaQueryKeys } from '@sadhana-connect/sadhana'
 

@@ -14,16 +14,13 @@ const {
   useNotificationsMock: vi.fn(),
 }))
 
-vi.mock('@/application/notifications/use-unread-notification-count', () => ({
+vi.mock('@sadhana-connect/notifications', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/notifications')>()),
   useUnreadNotificationCount: useUnreadNotificationCountMock,
-}))
-vi.mock('@/application/notifications/use-mark-all-notifications-read', () => ({
   useMarkAllNotificationsRead: () => ({
     mutate: markAllReadMutateMock,
     isPending: false,
   }),
-}))
-vi.mock('@/application/notifications/use-notifications', () => ({
   useNotifications: useNotificationsMock,
 }))
 

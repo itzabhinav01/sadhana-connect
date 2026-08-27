@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useMarkNotificationRead } from '@/application/notifications/use-mark-notification-read'
+import { useMarkNotificationRead } from '@sadhana-connect/notifications'
 import { useNotificationNavigation } from '@/application/notifications/use-notification-navigation'
 import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
 import { cn } from '@/shared/utils/cn'

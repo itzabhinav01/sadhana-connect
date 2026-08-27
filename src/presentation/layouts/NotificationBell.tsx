@@ -1,7 +1,7 @@
 import { Bell } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { useUnreadNotificationCount } from '@/application/notifications/use-unread-notification-count'
+import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
 
 // Devotee-only (see AppHeader) — the entry point to /notifications.
 export function NotificationBell() {

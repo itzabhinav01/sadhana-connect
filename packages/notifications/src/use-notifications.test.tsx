@@ -3,8 +3,8 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useNotifications } from '@/application/notifications/use-notifications'
-import { notificationQueryKeys } from '@/application/notifications/notification-query-keys'
+import { useNotifications } from './use-notifications'
+import { notificationQueryKeys } from './notification-query-keys'
 
 const { useAuthMock, listNotificationsMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -14,7 +14,7 @@ const { useAuthMock, listNotificationsMock } = vi.hoisted(() => ({
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/notification-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseNotificationRepository: { listNotifications: listNotificationsMock },
 }))
 
