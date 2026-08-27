@@ -158,6 +158,12 @@ export default function DashboardScreen() {
         />
 
         <Button
+          title="Announcements"
+          onPress={() => router.push('/devotee/announcements')}
+          variant="outline"
+        />
+
+        <Button
           title="Verse of the Day"
           onPress={() => router.push('/devotee/verse')}
           variant="outline"

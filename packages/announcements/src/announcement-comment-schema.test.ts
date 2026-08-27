@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   ANNOUNCEMENT_COMMENT_MAX_LENGTH,
   announcementCommentSchema,
-} from '@/application/announcements/announcement-comment-schema'
+} from './announcement-comment-schema'
 
 describe('announcementCommentSchema', () => {
   it('accepts a normal comment', () => {

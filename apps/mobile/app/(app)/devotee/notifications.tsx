@@ -44,11 +44,10 @@ function NotificationRow({ notification, onPress, isNavigating }: NotificationRo
   )
 }
 
-// Mobile equivalent of web's useNotificationNavigation — announcement
-// deep-linking is left as a same-screen no-op (mobile has no devotee
-// announcement feed/detail screen yet, unlike web's /announcements/:id;
-// that's its own increment). mentor_comment and sadhana_reminder both
-// resolve to existing mobile routes.
+// Mobile equivalent of web's useNotificationNavigation. mentor_comment,
+// announcement, and sadhana_reminder all resolve to existing mobile
+// routes; an unresolvable target (deleted/expired) falls through and
+// simply stays on the notifications screen, same as web.
 function useNavigateToNotification() {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -66,6 +65,11 @@ function useNavigateToNotification() {
         router.push({ pathname: '/devotee/sadhana', params: { date: reportDate } })
         return
       }
+    }
+
+    if (notification.type === 'announcement' && notification.relatedAnnouncementId) {
+      router.push(`/devotee/announcements/${notification.relatedAnnouncementId}`)
+      return
     }
 
     if (notification.type === 'sadhana_reminder') {

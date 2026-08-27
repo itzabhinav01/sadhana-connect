@@ -21,16 +21,11 @@ const {
 }))
 
 vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock, useProfile: useProfileMock }))
-vi.mock('@/application/announcements/use-announcement-comments', () => ({
+vi.mock('@sadhana-connect/announcements', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@sadhana-connect/announcements')>()),
   useAnnouncementComments: useAnnouncementCommentsMock,
-}))
-vi.mock('@/application/announcements/use-create-announcement-comment', () => ({
   useCreateAnnouncementComment: useCreateAnnouncementCommentMock,
-}))
-vi.mock('@/application/announcements/use-update-announcement-comment', () => ({
   useUpdateAnnouncementComment: useUpdateAnnouncementCommentMock,
-}))
-vi.mock('@/application/announcements/use-delete-announcement-comment', () => ({
   useDeleteAnnouncementComment: useDeleteAnnouncementCommentMock,
 }))
 

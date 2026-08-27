@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { announcementCommentQueryKeys } from '@/application/announcements/announcement-comment-query-keys'
+import { announcementCommentQueryKeys } from './announcement-comment-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
-import { supabaseAnnouncementCommentRepository } from '@sadhana-connect/infra-supabase/announcement-comment-repository'
+import { supabaseAnnouncementCommentRepository } from '@sadhana-connect/infra-supabase'
 
 interface UpdateAnnouncementCommentInput {
   commentId: string

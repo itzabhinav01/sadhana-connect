@@ -5,11 +5,11 @@ import { useForm } from 'react-hook-form'
 import {
   announcementCommentSchema,
   type AnnouncementCommentFormValues,
-} from '@/application/announcements/announcement-comment-schema'
-import { useAnnouncementComments } from '@/application/announcements/use-announcement-comments'
-import { useCreateAnnouncementComment } from '@/application/announcements/use-create-announcement-comment'
-import { useDeleteAnnouncementComment } from '@/application/announcements/use-delete-announcement-comment'
-import { useUpdateAnnouncementComment } from '@/application/announcements/use-update-announcement-comment'
+  useAnnouncementComments,
+  useCreateAnnouncementComment,
+  useDeleteAnnouncementComment,
+  useUpdateAnnouncementComment,
+} from '@sadhana-connect/announcements'
 import { useAuth } from '@sadhana-connect/auth'
 import { useProfile } from '@sadhana-connect/auth'
 import type { AnnouncementComment } from '@sadhana-connect/domain/entities/announcement-comment'

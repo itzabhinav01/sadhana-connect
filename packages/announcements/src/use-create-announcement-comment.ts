@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { announcementCommentQueryKeys } from '@/application/announcements/announcement-comment-query-keys'
+import { announcementCommentQueryKeys } from './announcement-comment-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
 import { useProfile } from '@sadhana-connect/auth'
-import { supabaseAnnouncementCommentRepository } from '@sadhana-connect/infra-supabase/announcement-comment-repository'
+import { supabaseAnnouncementCommentRepository } from '@sadhana-connect/infra-supabase'
 
 // authorName is captured here, from the caller's own live profile, at
 // the moment of posting — becoming the permanent snapshot stored on the

@@ -3,8 +3,8 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { announcementCommentQueryKeys } from '@/application/announcements/announcement-comment-query-keys'
-import { useUpdateAnnouncementComment } from '@/application/announcements/use-update-announcement-comment'
+import { announcementCommentQueryKeys } from './announcement-comment-query-keys'
+import { useUpdateAnnouncementComment } from './use-update-announcement-comment'
 
 const { useAuthMock, updateCommentMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -14,7 +14,7 @@ const { useAuthMock, updateCommentMock } = vi.hoisted(() => ({
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
-vi.mock('@sadhana-connect/infra-supabase/announcement-comment-repository', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   supabaseAnnouncementCommentRepository: { updateComment: updateCommentMock },
 }))
 

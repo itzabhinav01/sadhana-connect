@@ -254,11 +254,35 @@ describe('NotificationsScreen', () => {
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/devotee/sadhana'))
   })
 
-  it('does not navigate anywhere for an announcement notification (no mobile announcement screen yet)', async () => {
+  it('marks an unread notification read and navigates to the announcement detail screen', async () => {
     const notification = makeNotification({
       type: 'announcement',
       relatedReportId: null,
       relatedAnnouncementId: 'ann-1',
+      isRead: false,
+    })
+    mockUseNotifications.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: page([notification]),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    })
+
+    const { getByRole } = await render(<NotificationsScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Unread: New mentor comment' }))
+
+    expect(markReadMutate).toHaveBeenCalledWith('n1')
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/devotee/announcements/ann-1'))
+  })
+
+  it('does not navigate anywhere for an unresolvable notification target', async () => {
+    const notification = makeNotification({
+      type: 'announcement',
+      relatedReportId: null,
+      relatedAnnouncementId: null,
       isRead: false,
     })
     mockUseNotifications.mockReturnValue({

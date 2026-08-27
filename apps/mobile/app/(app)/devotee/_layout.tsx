@@ -25,6 +25,8 @@ export default function DevoteeLayout() {
       <Stack.Screen name="analytics" options={{ title: 'Analytics' }} />
       <Stack.Screen name="profile" options={{ title: 'Profile' }} />
       <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Stack.Screen name="announcements" options={{ title: 'Announcements' }} />
+      <Stack.Screen name="announcements/[id]" options={{ title: 'Announcement' }} />
     </Stack>
   )
 }
