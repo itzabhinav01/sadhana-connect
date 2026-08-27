@@ -176,6 +176,12 @@ export default function DashboardScreen() {
         />
 
         <Button
+          title="Japa Counter"
+          onPress={() => router.push('/devotee/japa')}
+          variant="outline"
+        />
+
+        <Button
           title="Profile"
           onPress={() => router.push('/devotee/profile')}
           variant="outline"

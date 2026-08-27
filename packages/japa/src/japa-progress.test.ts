@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { calculateJapaProgress } from '@/application/japa/japa-progress'
+import { calculateJapaProgress } from './japa-progress'
 
 describe('calculateJapaProgress', () => {
   it('starts at round 1, bead 0 with zero taps', () => {

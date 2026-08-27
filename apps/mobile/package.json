@@ -12,6 +12,7 @@
     "@sadhana-connect/comments": "*",
     "@sadhana-connect/domain": "*",
     "@sadhana-connect/infra-supabase": "*",
+    "@sadhana-connect/japa": "*",
     "@sadhana-connect/mentor": "*",
     "@sadhana-connect/notifications": "*",
     "@sadhana-connect/sadhana": "*",

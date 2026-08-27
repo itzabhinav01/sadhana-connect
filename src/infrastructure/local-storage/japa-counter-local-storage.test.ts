@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { japaCounterLocalStorage } from '@/infrastructure/local-storage/japa-counter-local-storage'
-import { DEFAULT_TARGET_ROUNDS } from '@/shared/constants/japa'
+import { DEFAULT_TARGET_ROUNDS } from '@sadhana-connect/japa'
 
 describe('japaCounterLocalStorage', () => {
   beforeEach(() => {

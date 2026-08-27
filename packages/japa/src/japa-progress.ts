@@ -1,4 +1,4 @@
-import { BEADS_PER_ROUND } from '@/shared/constants/japa'
+import { BEADS_PER_ROUND } from './japa-constants'
 
 export interface JapaProgress {
   totalTapsToday: number

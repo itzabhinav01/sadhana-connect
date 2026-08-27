@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { calculateJapaProgress } from '@/application/japa/japa-progress'
+import { calculateJapaProgress } from '@sadhana-connect/japa'
 import { japaCounterLocalStorage } from '@/infrastructure/local-storage/japa-counter-local-storage'
-import { DEFAULT_TARGET_ROUNDS } from '@/shared/constants/japa'
+import { DEFAULT_TARGET_ROUNDS } from '@sadhana-connect/japa'
 import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 
 const RETENTION_DAYS = 30

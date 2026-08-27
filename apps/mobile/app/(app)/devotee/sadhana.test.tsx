@@ -6,8 +6,10 @@ jest.mock('../../../../../packages/sadhana/src/use-upsert-sadhana-report', () =>
   useUpsertSadhanaReport: jest.fn(),
 }))
 
+const mockUseLocalSearchParams = jest.fn(() => ({}))
+
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: jest.fn(() => ({})),
+  useLocalSearchParams: () => mockUseLocalSearchParams(),
   useRouter: jest.fn(() => ({ back: jest.fn() })),
 }))
 
@@ -27,6 +29,7 @@ describe('SadhanaFormScreen', () => {
   beforeEach(() => {
     mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
     mockUseUpsertSadhanaReport.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
+    mockUseLocalSearchParams.mockReturnValue({})
   })
 
   it('shows "Save Sadhana" for a new report', async () => {
@@ -93,5 +96,21 @@ describe('SadhanaFormScreen', () => {
     expect(params.roundsBefore430).toBe(5)
     expect(params.roundsTill7am).toBe(3)
     expect(params.totalRounds).toBe(20)
+  })
+
+  it('pre-fills Total Rounds from ?prefillRounds= when arriving from the Japa Counter', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ prefillRounds: '12' })
+
+    const { getByLabelText } = await render(<SadhanaFormScreen />)
+
+    expect(getByLabelText('Total Rounds').props.value).toBe('12')
+  })
+
+  it('ignores an invalid ?prefillRounds= value', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ prefillRounds: 'not-a-number' })
+
+    const { getByLabelText } = await render(<SadhanaFormScreen />)
+
+    expect(getByLabelText('Total Rounds').props.value).toBe('')
   })
 })

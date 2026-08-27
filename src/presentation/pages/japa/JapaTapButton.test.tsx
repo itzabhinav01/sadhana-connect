@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
-import { calculateJapaProgress } from '@/application/japa/japa-progress'
+import { calculateJapaProgress } from '@sadhana-connect/japa'
 import { JapaTapButton } from '@/presentation/pages/japa/JapaTapButton'
 
 describe('JapaTapButton', () => {

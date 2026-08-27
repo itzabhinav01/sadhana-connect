@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { calculateJapaProgress } from '@/application/japa/japa-progress'
+import { calculateJapaProgress } from '@sadhana-connect/japa'
 import { JapaProgressDisplay } from '@/presentation/pages/japa/JapaProgressDisplay'
 
 describe('JapaProgressDisplay', () => {

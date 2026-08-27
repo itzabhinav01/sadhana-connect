@@ -1,4 +1,4 @@
-import type { JapaProgress } from '@/application/japa/japa-progress'
+import type { JapaProgress } from '@sadhana-connect/japa'
 
 interface JapaProgressDisplayProps {
   progress: JapaProgress

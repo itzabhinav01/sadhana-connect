@@ -1,11 +1,13 @@
-import type {
-  JapaCounterStorage,
-  JapaDailyState,
-} from '@sadhana-connect/domain/repositories/japa-counter-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { DEFAULT_TARGET_ROUNDS } from '@sadhana-connect/japa'
 
 const STORAGE_PREFIX = 'sadhana-connect:japa'
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+
+export interface JapaDailyState {
+  totalTapsToday: number
+  updatedAt: string
+}
 
 function targetKey(userId: string): string {
   return `${STORAGE_PREFIX}:${userId}:target`
@@ -25,21 +27,26 @@ function dailyKeyDate(key: string, userId: string): string | null {
   return DATE_KEY_PATTERN.test(suffix) ? suffix : null
 }
 
-export const japaCounterLocalStorage: JapaCounterStorage = {
-  getTarget(userId) {
-    const raw = window.localStorage.getItem(targetKey(userId))
+// Mobile equivalent of web's japaCounterLocalStorage (Phase 10) —
+// AsyncStorage instead of localStorage, so every operation here is
+// async unlike the web version's synchronous reads/writes. Same key
+// scheme, same 30-day retention policy, same local-only, no-Supabase
+// scope.
+export const japaCounterAsyncStorage = {
+  async getTarget(userId: string): Promise<number> {
+    const raw = await AsyncStorage.getItem(targetKey(userId))
     if (raw === null) return DEFAULT_TARGET_ROUNDS
 
     const parsed = Number(raw)
     return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_TARGET_ROUNDS
   },
 
-  setTarget(userId, target) {
-    window.localStorage.setItem(targetKey(userId), String(target))
+  async setTarget(userId: string, target: number): Promise<void> {
+    await AsyncStorage.setItem(targetKey(userId), String(target))
   },
 
-  getDailyState(userId, date) {
-    const raw = window.localStorage.getItem(dailyKey(userId, date))
+  async getDailyState(userId: string, date: string): Promise<JapaDailyState | null> {
+    const raw = await AsyncStorage.getItem(dailyKey(userId, date))
     if (raw === null) return null
 
     try {
@@ -54,23 +61,19 @@ export const japaCounterLocalStorage: JapaCounterStorage = {
     }
   },
 
-  setDailyState(userId, date, state) {
-    window.localStorage.setItem(dailyKey(userId, date), JSON.stringify(state))
+  async setDailyState(userId: string, date: string, state: JapaDailyState): Promise<void> {
+    await AsyncStorage.setItem(dailyKey(userId, date), JSON.stringify(state))
   },
 
-  pruneOldDailyStates(userId, cutoffDateIso) {
-    const keysToRemove: string[] = []
-
-    for (let i = 0; i < window.localStorage.length; i += 1) {
-      const key = window.localStorage.key(i)
-      if (!key) continue
-
+  async pruneOldDailyStates(userId: string, cutoffDateIso: string): Promise<void> {
+    const allKeys = await AsyncStorage.getAllKeys()
+    const keysToRemove = allKeys.filter((key) => {
       const date = dailyKeyDate(key, userId)
-      if (date && date < cutoffDateIso) {
-        keysToRemove.push(key)
-      }
-    }
+      return date !== null && date < cutoffDateIso
+    })
 
-    keysToRemove.forEach((key) => window.localStorage.removeItem(key))
+    if (keysToRemove.length > 0) {
+      await AsyncStorage.multiRemove(keysToRemove)
+    }
   },
 }

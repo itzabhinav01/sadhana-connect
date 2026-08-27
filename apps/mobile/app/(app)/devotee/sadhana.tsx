@@ -20,24 +20,38 @@ import { LoadingScreen } from '../../../src/presentation/components/LoadingScree
 import { TextField } from '../../../src/presentation/components/TextField'
 import { colors, fontSize, spacing } from '../../../src/shared/theme'
 
+function parsePrefillRoundsParam(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined
+}
+
 export default function SadhanaFormScreen() {
-  const params = useLocalSearchParams<{ date?: string }>()
+  const params = useLocalSearchParams<{ date?: string; prefillRounds?: string }>()
   const date = params.date ?? getLocalDateIso()
+  const prefillRounds = parsePrefillRoundsParam(params.prefillRounds)
   const existingReport = useSadhanaReport(date)
 
   if (existingReport.isPending) {
     return <LoadingScreen />
   }
 
-  return <SadhanaFormBody date={date} existingReport={existingReport.data ?? null} />
+  return (
+    <SadhanaFormBody date={date} existingReport={existingReport.data ?? null} prefillRounds={prefillRounds} />
+  )
 }
 
 function SadhanaFormBody({
   date,
   existingReport,
+  prefillRounds,
 }: {
   date: string
   existingReport: ReturnType<typeof useSadhanaReport>['data']
+  // Set only when arriving from the Japa Counter's "Use in Sadhana"
+  // action — an explicitly devotee-chosen initial value for Total
+  // Rounds, matching web's SadhanaReportForm.
+  prefillRounds?: number
 }) {
   const router = useRouter()
   const upsertReport = useUpsertSadhanaReport()
@@ -45,7 +59,10 @@ function SadhanaFormBody({
 
   const { control, handleSubmit } = useForm<SadhanaReportFormInput>({
     resolver: zodResolver(sadhanaReportSchema),
-    defaultValues: existingReport ? reportToFormValues(existingReport) : emptyFormValues(date),
+    defaultValues: (() => {
+      const base = existingReport ? reportToFormValues(existingReport) : emptyFormValues(date)
+      return prefillRounds !== undefined ? { ...base, totalRounds: String(prefillRounds) } : base
+    })(),
   })
 
   const onSubmit = handleSubmit((values) => {

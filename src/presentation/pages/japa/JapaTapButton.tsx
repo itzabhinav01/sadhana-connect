@@ -1,5 +1,5 @@
-import type { JapaProgress } from '@/application/japa/japa-progress'
-import { BEADS_PER_ROUND } from '@/shared/constants/japa'
+import type { JapaProgress } from '@sadhana-connect/japa'
+import { BEADS_PER_ROUND } from '@sadhana-connect/japa'
 
 interface JapaTapButtonProps {
   progress: JapaProgress
