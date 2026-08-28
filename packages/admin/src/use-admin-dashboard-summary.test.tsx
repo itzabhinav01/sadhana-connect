@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useAdminDashboardSummary } from '@/application/admin/use-admin-dashboard-summary'
+import { useAdminDashboardSummary } from './use-admin-dashboard-summary'
 
 const { useAuthMock, fromMock } = vi.hoisted(() => ({
   useAuthMock: vi.fn(),
@@ -11,7 +11,7 @@ const { useAuthMock, fromMock } = vi.hoisted(() => ({
 }))
 
 vi.mock('@sadhana-connect/auth', () => ({ useAuth: useAuthMock }))
-vi.mock('@sadhana-connect/infra-supabase/client', () => ({
+vi.mock('@sadhana-connect/infra-supabase', () => ({
   getSupabaseClient: () => ({ from: fromMock }),
 }))
 

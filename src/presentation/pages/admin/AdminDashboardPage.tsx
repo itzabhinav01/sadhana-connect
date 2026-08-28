@@ -1,4 +1,4 @@
-import { useAdminDashboardSummary } from '@/application/admin/use-admin-dashboard-summary'
+import { useAdminDashboardSummary } from '@sadhana-connect/admin'
 import { AdminSummaryCards } from '@/presentation/pages/admin/AdminSummaryCards'
 
 export function AdminDashboardPage() {

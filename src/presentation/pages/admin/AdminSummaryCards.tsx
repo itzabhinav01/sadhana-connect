@@ -1,4 +1,4 @@
-import type { AdminDashboardSummary } from '@/application/admin/use-admin-dashboard-summary'
+import type { AdminDashboardSummary } from '@sadhana-connect/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 
 interface AdminSummaryCardsProps {

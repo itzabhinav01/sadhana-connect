@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { adminQueryKeys } from '@sadhana-connect/admin'
+import { adminQueryKeys } from './admin-query-keys'
 import { useAuth } from '@sadhana-connect/auth'
-import { getSupabaseClient } from '@sadhana-connect/infra-supabase/client'
+import { getSupabaseClient } from '@sadhana-connect/infra-supabase'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 
 export interface AdminDashboardSummary {
