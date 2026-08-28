@@ -12,6 +12,10 @@ interface ButtonProps {
   isPending?: boolean
   disabled?: boolean
   variant?: 'primary' | 'outline'
+  // Overrides the accessible name when the visible title alone would be
+  // ambiguous — e.g. several quick-amount buttons on the same screen
+  // sharing the same number.
+  accessibilityLabel?: string
 }
 
 export function Button({
@@ -21,6 +25,7 @@ export function Button({
   isPending = false,
   disabled = false,
   variant = 'primary',
+  accessibilityLabel,
 }: ButtonProps) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -31,7 +36,9 @@ export function Button({
       onPress={onPress}
       disabled={disabled || isPending}
       accessibilityRole="button"
-      accessibilityLabel={isPending && pendingTitle ? pendingTitle : title}
+      accessibilityLabel={
+        isPending && pendingTitle ? pendingTitle : (accessibilityLabel ?? title)
+      }
       style={({ pressed }) => [
         styles.button,
         isOutline ? styles.outline : styles.primary,

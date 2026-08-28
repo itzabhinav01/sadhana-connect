@@ -107,6 +107,22 @@ describe('SadhanaFormScreen', () => {
     expect(params.totalRounds).toBe(20)
   })
 
+  it('fills Total Rounds from a quick-amount button', async () => {
+    const { getByLabelText, getByRole } = await render(<SadhanaFormScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Set Total Rounds to 16' }))
+    expect(getByLabelText('Total Rounds').props.value).toBe('16')
+  })
+
+  it('adjusts Rounds before 4:30 AM with the stepper buttons', async () => {
+    const { getByLabelText, getByRole } = await render(<SadhanaFormScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Increase Rounds before 4:30 AM' }))
+    await fireEvent.press(getByRole('button', { name: 'Increase Rounds before 4:30 AM' }))
+    expect(getByLabelText('Rounds before 4:30 AM').props.value).toBe('2')
+
+    await fireEvent.press(getByRole('button', { name: 'Decrease Rounds before 4:30 AM' }))
+    expect(getByLabelText('Rounds before 4:30 AM').props.value).toBe('1')
+  })
+
   it('pre-fills Total Rounds from ?prefillRounds= when arriving from the Japa Counter', async () => {
     mockUseLocalSearchParams.mockReturnValue({ prefillRounds: '12' })
 

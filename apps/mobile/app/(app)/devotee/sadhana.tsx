@@ -12,15 +12,16 @@ import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { ScrollView, StyleSheet, Text } from 'react-native'
+import { ScrollView, StyleSheet } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { DateTimeField } from '../../../src/presentation/components/DateTimeField'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
+import { NumberField } from '../../../src/presentation/components/NumberField'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function parsePrefillRoundsParam(value: string | undefined): number | undefined {
@@ -83,15 +84,34 @@ function SadhanaFormBody({
       ) : null}
 
       <DateTimeField control={control} name="reportDate" label="Date" mode="date" />
-      <TextField control={control} name="roundsBefore430" label="Rounds before 4:30 AM" keyboardType="numeric" />
-      <TextField control={control} name="roundsTill7am" label="Rounds till 7 AM" keyboardType="numeric" />
+      <NumberField
+        control={control}
+        name="roundsBefore430"
+        label="Rounds before 4:30 AM"
+        showStepper
+        quickAmounts={[1, 2, 4]}
+      />
+      <NumberField
+        control={control}
+        name="roundsTill7am"
+        label="Rounds till 7 AM"
+        showStepper
+        quickAmounts={[4, 8, 16]}
+      />
       <DateTimeField control={control} name="lastRoundTime" label="Last Round Time" mode="time" clearable />
-      <TextField control={control} name="totalRounds" label="Total Rounds" keyboardType="numeric" />
-      <Text style={styles.helperText}>
-        Enter the complete number of rounds chanted today — this may include rounds chanted after 7
-        AM that aren&apos;t reflected in the fields above.
-      </Text>
-      <TextField control={control} name="readingMinutes" label="Reading Minutes" keyboardType="numeric" />
+      <NumberField
+        control={control}
+        name="totalRounds"
+        label="Total Rounds"
+        showStepper
+        quickAmounts={[8, 16, 25]}
+      />
+      <NumberField
+        control={control}
+        name="readingMinutes"
+        label="Reading Minutes"
+        quickAmounts={[10, 15, 30, 60]}
+      />
       <TextField control={control} name="bookName" label="Book Name" />
       <TextField control={control} name="hearingMinutes" label="Hearing Minutes" keyboardType="numeric" />
       <TextField control={control} name="speakerName" label="Speaker Name" />
@@ -120,11 +140,6 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
-    },
-    helperText: {
-      fontSize: fontSize.sm,
-      color: colors.muted,
-      marginTop: -spacing.sm,
     },
   })
 }
