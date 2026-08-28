@@ -1,12 +1,14 @@
 import { getLastNDaysRange, useSadhanaAnalytics } from '@sadhana-connect/sadhana'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 const PRESETS = [
   { label: 'Last 7 days', days: 7 },
@@ -23,6 +25,8 @@ function formatAverage(value: number, hasSubmittedDays: boolean, format: (v: num
 }
 
 export default function AnalyticsScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [selectedDays, setSelectedDays] = useState<number>(30)
   const range = getLastNDaysRange(selectedDays)
 
@@ -151,37 +155,39 @@ export default function AnalyticsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  stat: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statValue: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  statLabel: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-    textAlign: 'center',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    stat: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    statValue: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    statLabel: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+      textAlign: 'center',
+    },
+  })
+}

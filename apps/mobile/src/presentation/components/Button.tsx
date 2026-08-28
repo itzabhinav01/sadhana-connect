@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 
 interface ButtonProps {
   onPress: () => void
@@ -19,6 +22,8 @@ export function Button({
   disabled = false,
   variant = 'primary',
 }: ButtonProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const isOutline = variant === 'outline'
 
   return (
@@ -45,35 +50,37 @@ export function Button({
   )
 }
 
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 8,
-    paddingVertical: spacing.sm + 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  primaryText: {
-    color: colors.primaryForeground,
-    fontSize: fontSize.base,
-    fontWeight: '600',
-  },
-  outlineText: {
-    color: colors.foreground,
-    fontSize: fontSize.base,
-    fontWeight: '600',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    button: {
+      borderRadius: 8,
+      paddingVertical: spacing.sm + 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    primary: {
+      backgroundColor: colors.primary,
+    },
+    outline: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    disabled: {
+      opacity: 0.6,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    primaryText: {
+      color: colors.primaryForeground,
+      fontSize: fontSize.base,
+      fontWeight: '600',
+    },
+    outlineText: {
+      color: colors.foreground,
+      fontSize: fontSize.base,
+      fontWeight: '600',
+    },
+  })
+}

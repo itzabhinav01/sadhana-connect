@@ -12,16 +12,18 @@ import {
 import { buildDateRangeList } from '@sadhana-connect/shared'
 import type { SadhanaReportHistoryEntry } from '@sadhana-connect/domain'
 import { Stack, useLocalSearchParams } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
 import { CommentThread } from '../../../../src/presentation/components/CommentThread'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
 import { ReminderForm } from '../../../../src/presentation/components/ReminderForm'
-import { colors, fontSize, spacing } from '../../../../src/shared/theme'
+import { fontSize, spacing } from '../../../../src/shared/theme'
+import type { ThemeColors } from '../../../../src/shared/theme'
 
 const PRESETS = [
   { label: 'Last 7 days', days: 7 },
@@ -35,6 +37,8 @@ function formatDisplayDate(iso: string) {
 }
 
 function ReadOnlyReportRow({ report }: { report: SadhanaReportHistoryEntry }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [showComments, setShowComments] = useState(false)
 
   return (
@@ -55,6 +59,8 @@ function ReadOnlyReportRow({ report }: { report: SadhanaReportHistoryEntry }) {
 }
 
 export default function MentorDevoteeDetailScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const { id } = useLocalSearchParams<{ id: string }>()
   const devoteeId = id ?? ''
   const [selectedDays, setSelectedDays] = useState<number>(7)
@@ -165,42 +171,44 @@ export default function MentorDevoteeDetailScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  heading: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  rowMuted: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  reportRow: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: spacing.xs,
-  },
-  reportDate: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.lg,
+      backgroundColor: colors.background,
+    },
+    heading: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    rowMuted: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    reportRow: {
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      gap: spacing.xs,
+    },
+    reportDate: {
+      fontSize: fontSize.base,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+  })
+}

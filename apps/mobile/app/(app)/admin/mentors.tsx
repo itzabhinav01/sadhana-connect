@@ -1,10 +1,13 @@
 import { useAdminUsers, useMentorDevoteeCounts } from '@sadhana-connect/admin'
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString()
@@ -15,6 +18,8 @@ function formatDate(iso: string) {
 // not a parallel system. Mirrors web's AdminMentorsPage.
 export default function AdminMentorsScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const mentorsQuery = useAdminUsers({ role: 'mentor' })
   const countsQuery = useMentorDevoteeCounts()
 
@@ -71,41 +76,43 @@ export default function AdminMentorsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  row: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: 2,
-  },
-  rowHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rowName: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  badgeActive: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  badgeDisabled: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.muted,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    row: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: 2,
+    },
+    rowHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    rowName: {
+      fontSize: fontSize.base,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    badgeActive: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    badgeDisabled: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.muted,
+    },
+  })
+}

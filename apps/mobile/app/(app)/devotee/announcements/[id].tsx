@@ -11,12 +11,14 @@ import {
 import { useAuth, useProfile } from '@sadhana-connect/auth'
 import type { AnnouncementComment } from '@sadhana-connect/domain'
 import { useLocalSearchParams } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
-import { colors, fontSize, spacing } from '../../../../src/shared/theme'
+import { fontSize, spacing } from '../../../../src/shared/theme'
+import type { ThemeColors } from '../../../../src/shared/theme'
 
 function formatTimestamp(iso: string) {
   return new Date(iso).toLocaleString()
@@ -30,6 +32,8 @@ interface CommentItemProps {
 }
 
 function CommentItem({ comment, announcementId, isOwn, canModerate }: CommentItemProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isEditing, setIsEditing] = useState(false)
   const [draftText, setDraftText] = useState(comment.commentText)
   const [validationError, setValidationError] = useState<string | null>(null)
@@ -113,6 +117,8 @@ function AnnouncementComments({
   announcementId: string
   announcementAuthorId: string | null
 }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const { session } = useAuth()
   const profile = useProfile()
   const currentUserId = session?.userId ?? null
@@ -190,6 +196,8 @@ function AnnouncementComments({
 // AnnouncementDetailPage, which reuses the same viewer-scoped
 // useAnnouncements() query rather than a separate detail fetch.
 export default function AnnouncementDetailScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const { id } = useLocalSearchParams<{ id: string }>()
   const announcementsQuery = useAnnouncements()
   const announcement = announcementsQuery.data?.find((item) => item.id === id)
@@ -222,88 +230,90 @@ export default function AnnouncementDetailScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  errorLine: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  title: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  body: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  container: {
-    gap: spacing.sm,
-    backgroundColor: colors.mutedBackground,
-    borderRadius: 8,
-    padding: spacing.sm,
-  },
-  heading: {
-    fontSize: fontSize.base,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  item: {
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    padding: spacing.sm,
-    gap: spacing.xs,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  itemName: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  itemTimestamp: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  itemText: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  editBlock: {
-    gap: spacing.xs,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  addForm: {
-    gap: spacing.xs,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    minHeight: 72,
-    textAlignVertical: 'top',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    errorLine: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    title: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    body: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    container: {
+      gap: spacing.sm,
+      backgroundColor: colors.mutedBackground,
+      borderRadius: 8,
+      padding: spacing.sm,
+    },
+    heading: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    item: {
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      padding: spacing.sm,
+      gap: spacing.xs,
+    },
+    itemHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    itemName: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    itemTimestamp: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    itemText: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    editBlock: {
+      gap: spacing.xs,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    addForm: {
+      gap: spacing.xs,
+    },
+    textArea: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      minHeight: 72,
+      textAlignVertical: 'top',
+    },
+  })
+}

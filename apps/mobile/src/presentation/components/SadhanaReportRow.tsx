@@ -8,10 +8,12 @@ import { formatTime12Hour } from '@sadhana-connect/shared'
 import * as Print from 'expo-print'
 import { useRouter } from 'expo-router'
 import * as Sharing from 'expo-sharing'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 
 interface SadhanaReportRowProps {
   report: SadhanaReport
@@ -24,6 +26,8 @@ interface SadhanaReportRowProps {
 
 export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportRowProps) {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [exportError, setExportError] = useState(false)
   const hasSleepInfo = Boolean(report.sleepTime || report.wakeTime)
@@ -110,40 +114,42 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: 2,
-  },
-  date: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  summary: {
-    fontSize: fontSize.sm,
-    color: colors.foreground,
-  },
-  muted: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  actionLink: {
-    paddingVertical: spacing.xs,
-  },
-  actionLinkText: {
-    fontSize: fontSize.sm,
-    color: colors.link,
-  },
-  errorLine: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    row: {
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      gap: 2,
+    },
+    date: {
+      fontSize: fontSize.base,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    summary: {
+      fontSize: fontSize.sm,
+      color: colors.foreground,
+    },
+    muted: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    actionLink: {
+      paddingVertical: spacing.xs,
+    },
+    actionLinkText: {
+      fontSize: fontSize.sm,
+      color: colors.link,
+    },
+    errorLine: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+  })
+}

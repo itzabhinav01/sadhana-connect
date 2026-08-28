@@ -13,16 +13,18 @@ import {
   type AnnouncementFormValues,
 } from '@sadhana-connect/announcements'
 import type { Announcement, AnnouncementScope } from '@sadhana-connect/domain'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { ExpirationPicker } from '../../../src/presentation/components/ExpirationPicker'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
   return new Date(iso).toLocaleDateString()
@@ -46,6 +48,8 @@ const SCOPE_LABEL: Record<AnnouncementScope, string> = {
 // (private.can_publish_announcement's is_super_admin() branch) allows
 // any scope, so this is the one form on mobile that offers the choice.
 function AdminAnnouncementForm() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const createAnnouncement = useCreateAdminAnnouncement()
   const templeGroupsQuery = useAdminTempleGroups()
   const [publishNow, setPublishNow] = useState(true)
@@ -187,6 +191,8 @@ function AdminAnnouncementForm() {
 // on any row, so there is no "own row" restriction to mirror here,
 // unlike the mentor announcements screen.
 function AdminAnnouncementItem({ announcement }: { announcement: Announcement }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isEditing, setIsEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [draftTitle, setDraftTitle] = useState(announcement.title)
@@ -349,6 +355,8 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
 }
 
 export default function AdminAnnouncementsScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const announcementsQuery = useAnnouncements()
 
   return (
@@ -371,95 +379,97 @@ export default function AdminAnnouncementsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    minHeight: 96,
-    textAlignVertical: 'top',
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  item: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  itemHeaderRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  itemTitle: {
-    fontSize: fontSize.base,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  badge: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.muted,
-    backgroundColor: colors.mutedBackground,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  itemContent: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  itemMuted: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  editBlock: {
-    gap: spacing.sm,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    fieldGroup: {
+      gap: spacing.xs,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    textArea: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      minHeight: 96,
+      textAlignVertical: 'top',
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    optionRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    item: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    itemHeaderRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    itemTitle: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    badge: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.muted,
+      backgroundColor: colors.mutedBackground,
+      borderRadius: 999,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+    },
+    itemContent: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    itemMuted: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    editBlock: {
+      gap: spacing.sm,
+    },
+  })
+}

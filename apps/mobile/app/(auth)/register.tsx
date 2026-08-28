@@ -1,18 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type SignUpInput, signUpSchema, useSignUp } from '@sadhana-connect/auth'
 import { Link, useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { StyleSheet, Text } from 'react-native'
 
+import { useTheme } from '../../src/application/theme/use-theme'
 import { AuthCard } from '../../src/presentation/components/AuthCard'
 import { Button } from '../../src/presentation/components/Button'
 import { ErrorBanner } from '../../src/presentation/components/ErrorBanner'
 import { TextField } from '../../src/presentation/components/TextField'
-import { colors, fontSize, spacing } from '../../src/shared/theme'
+import { fontSize, spacing } from '../../src/shared/theme'
+import type { ThemeColors } from '../../src/shared/theme'
 
 export default function RegisterScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const signUp = useSignUp()
   const [signUpIncomplete, setSignUpIncomplete] = useState(false)
 
@@ -105,15 +109,17 @@ export default function RegisterScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  footerText: {
-    marginTop: spacing.sm,
-    fontSize: fontSize.sm,
-    color: colors.muted,
-    textAlign: 'center',
-  },
-  link: {
-    color: colors.link,
-    textDecorationLine: 'underline',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    footerText: {
+      marginTop: spacing.sm,
+      fontSize: fontSize.sm,
+      color: colors.muted,
+      textAlign: 'center',
+    },
+    link: {
+      color: colors.link,
+      textDecorationLine: 'underline',
+    },
+  })
+}

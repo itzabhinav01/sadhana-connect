@@ -5,13 +5,15 @@ import {
   useAssignMentor,
   useDeactivateAssignment,
 } from '@sadhana-connect/admin'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString()
@@ -26,6 +28,8 @@ interface UserSearchPickerProps {
 }
 
 function UserSearchPicker({ role, label, selectedId, selectedName, onSelect }: UserSearchPickerProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [search, setSearch] = useState('')
   const usersQuery = useAdminUsers({ role, status: 'active', search })
   const results = usersQuery.data?.pages.flatMap((page) => page.users) ?? []
@@ -69,6 +73,8 @@ function UserSearchPicker({ role, label, selectedId, selectedName, onSelect }: U
 }
 
 export default function AdminAssignmentsScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [devoteeId, setDevoteeId] = useState<string | null>(null)
   const [devoteeName, setDevoteeName] = useState<string | null>(null)
   const [mentorId, setMentorId] = useState<string | null>(null)
@@ -170,68 +176,70 @@ export default function AdminAssignmentsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  resultRow: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  selectedRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  successText: {
-    fontSize: fontSize.sm,
-    color: colors.primary,
-  },
-  assignmentRow: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  rowName: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    fieldGroup: {
+      gap: spacing.xs,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    resultRow: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    selectedRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    successText: {
+      fontSize: fontSize.sm,
+      color: colors.primary,
+    },
+    assignmentRow: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.xs,
+    },
+    rowName: {
+      fontSize: fontSize.base,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+  })
+}

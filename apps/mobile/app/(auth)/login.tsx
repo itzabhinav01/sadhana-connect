@@ -1,14 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type SignInInput, signInSchema, useSignIn } from '@sadhana-connect/auth'
 import { Link, useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../src/application/theme/use-theme'
 import { AuthCard } from '../../src/presentation/components/AuthCard'
 import { Button } from '../../src/presentation/components/Button'
 import { ErrorBanner } from '../../src/presentation/components/ErrorBanner'
 import { TextField } from '../../src/presentation/components/TextField'
-import { colors, fontSize, spacing } from '../../src/shared/theme'
+import { fontSize, spacing } from '../../src/shared/theme'
+import type { ThemeColors } from '../../src/shared/theme'
 
 // Feature-flagged off project-wide (see web's src/shared/constants/feature-flags.ts)
 // until a verified Resend sending domain is available. Mirrored here rather
@@ -24,6 +27,8 @@ function getLoginErrorMessage(error: unknown) {
 
 export default function LoginScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const signIn = useSignIn()
 
   const { control, handleSubmit } = useForm<SignInInput>({
@@ -82,20 +87,22 @@ export default function LoginScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  footer: {
-    marginTop: spacing.sm,
-    gap: spacing.xs,
-    alignItems: 'center',
-  },
-  mutedText: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-    textAlign: 'center',
-  },
-  link: {
-    color: colors.link,
-    fontSize: fontSize.sm,
-    textDecorationLine: 'underline',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    footer: {
+      marginTop: spacing.sm,
+      gap: spacing.xs,
+      alignItems: 'center',
+    },
+    mutedText: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+      textAlign: 'center',
+    },
+    link: {
+      color: colors.link,
+      fontSize: fontSize.sm,
+      textDecorationLine: 'underline',
+    },
+  })
+}

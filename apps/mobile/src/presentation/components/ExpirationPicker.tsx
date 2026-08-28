@@ -4,10 +4,12 @@ import {
   type AnnouncementExpirationPreset,
 } from '@sadhana-connect/announcements'
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 
 function tomorrow() {
@@ -31,6 +33,8 @@ export function ExpirationPicker({
   onCustomDateChange,
   error,
 }: ExpirationPickerProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
 
   const handleChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -82,33 +86,35 @@ export function ExpirationPicker({
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  presetRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  dateInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  dateText: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      gap: spacing.xs,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    presetRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    dateInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    dateText: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+  })
+}

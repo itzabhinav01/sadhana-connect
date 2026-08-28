@@ -1,3 +1,12 @@
+jest.mock('../../application/theme/use-theme', () => ({
+  useTheme: () => ({
+    colors: require('../../shared/theme').lightColors,
+    resolvedTheme: 'light',
+    theme: 'system',
+    setTheme: jest.fn(),
+  }),
+}))
+
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 
 import { ExpirationPicker } from './ExpirationPicker'

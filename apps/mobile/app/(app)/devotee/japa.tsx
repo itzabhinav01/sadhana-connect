@@ -1,16 +1,20 @@
 import { BEADS_PER_ROUND } from '@sadhana-connect/japa'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { useJapaCounter } from '../../../src/application/japa/use-japa-counter'
 import { Button } from '../../../src/presentation/components/Button'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 export default function JapaCounterScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const japa = useJapaCounter()
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [targetInput, setTargetInput] = useState(String(japa.targetRounds))
@@ -124,81 +128,83 @@ export default function JapaCounterScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.lg,
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  heading: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-    alignSelf: 'flex-start',
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  progressBlock: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  progressText: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  tapButton: {
-    width: 224,
-    height: 224,
-    borderRadius: 112,
-    borderWidth: 4,
-    borderColor: colors.primary,
-    backgroundColor: colors.mutedBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  tapButtonPressed: {
-    opacity: 0.85,
-  },
-  tapButtonCount: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  tapButtonLabel: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  targetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  targetInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    width: 80,
-    textAlign: 'center',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.lg,
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
+    heading: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+      alignSelf: 'flex-start',
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    progressBlock: {
+      alignItems: 'center',
+      gap: 2,
+    },
+    progressText: {
+      fontSize: fontSize.base,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    tapButton: {
+      width: 224,
+      height: 224,
+      borderRadius: 112,
+      borderWidth: 4,
+      borderColor: colors.primary,
+      backgroundColor: colors.mutedBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+    },
+    tapButtonPressed: {
+      opacity: 0.85,
+    },
+    tapButtonCount: {
+      fontSize: 48,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    tapButtonLabel: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    controlsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+    },
+    targetRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    targetInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      width: 80,
+      textAlign: 'center',
+    },
+  })
+}

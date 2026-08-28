@@ -8,20 +8,25 @@ import {
 } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { Stack, useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 const RECENT_REPORTS_DISPLAY_COUNT = 5
 
 export default function DashboardScreen() {
   const router = useRouter()
   const signOut = useSignOut()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const today = getLocalDateIso()
 
   const todayReport = useSadhanaReport(today)
@@ -191,30 +196,32 @@ export default function DashboardScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  stat: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  statLabel: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    stat: {
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    statLabel: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+  })
+}

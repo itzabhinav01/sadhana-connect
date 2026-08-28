@@ -1,9 +1,12 @@
 import type { Announcement } from '@sadhana-connect/domain'
 import { useAnnouncements } from '@sadhana-connect/announcements'
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { useTheme } from '../../../src/application/theme/use-theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
   return new Date(iso).toLocaleDateString()
@@ -11,6 +14,8 @@ function formatDisplayDate(iso: string) {
 
 function AnnouncementFeedCard({ announcement }: { announcement: Announcement }) {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   return (
     <Pressable
@@ -40,6 +45,8 @@ function AnnouncementFeedCard({ announcement }: { announcement: Announcement }) 
 // exactly what this viewer may see, pinned-first then newest first, so
 // this screen adds no client-side filtering/sorting of its own.
 export default function AnnouncementsFeedScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const announcementsQuery = useAnnouncements()
 
   return (
@@ -63,49 +70,51 @@ export default function AnnouncementsFeedScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  errorLine: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  card: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  cardTitle: {
-    fontSize: fontSize.base,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  cardContent: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  badge: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.muted,
-    backgroundColor: colors.mutedBackground,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    errorLine: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    card: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    cardHeaderRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    cardTitle: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    cardContent: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    badge: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.muted,
+      backgroundColor: colors.mutedBackground,
+      borderRadius: 999,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+    },
+  })
+}

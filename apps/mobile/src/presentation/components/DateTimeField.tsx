@@ -1,10 +1,12 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { formatTime12Hour, getLocalDateIso } from '@sadhana-connect/shared'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 
 interface DateTimeFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -50,6 +52,8 @@ export function DateTimeField<T extends FieldValues>({
   mode,
   clearable = false,
 }: DateTimeFieldProps<T>) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
 
   return (
@@ -106,44 +110,46 @@ export function DateTimeField<T extends FieldValues>({
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.xs,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  inputError: {
-    borderColor: colors.destructive,
-  },
-  valueText: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  clearButton: {
-    paddingHorizontal: spacing.sm,
-  },
-  clearText: {
-    fontSize: fontSize.sm,
-    color: colors.link,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      gap: spacing.xs,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    input: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    inputError: {
+      borderColor: colors.destructive,
+    },
+    valueText: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    clearButton: {
+      paddingHorizontal: spacing.sm,
+    },
+    clearText: {
+      fontSize: fontSize.sm,
+      color: colors.link,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+  })
+}

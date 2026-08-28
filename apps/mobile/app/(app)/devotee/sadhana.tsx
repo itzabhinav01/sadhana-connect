@@ -10,15 +10,18 @@ import {
 } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { ScrollView, StyleSheet, Text } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { DateTimeField } from '../../../src/presentation/components/DateTimeField'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function parsePrefillRoundsParam(value: string | undefined): number | undefined {
   if (value === undefined) return undefined
@@ -54,6 +57,8 @@ function SadhanaFormBody({
   prefillRounds?: number
 }) {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const upsertReport = useUpsertSadhanaReport()
   const isEditingMode = Boolean(existingReport)
 
@@ -109,15 +114,17 @@ function SadhanaFormBody({
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  helperText: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-    marginTop: -spacing.sm,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    helperText: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+      marginTop: -spacing.sm,
+    },
+  })
+}

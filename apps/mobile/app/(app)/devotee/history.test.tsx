@@ -1,3 +1,12 @@
+jest.mock('../../../src/application/theme/use-theme', () => ({
+  useTheme: () => ({
+    colors: require('../../../src/shared/theme').lightColors,
+    resolvedTheme: 'light',
+    theme: 'system',
+    setTheme: jest.fn(),
+  }),
+}))
+
 jest.mock('../../../../../packages/sadhana/src/use-sadhana-history', () => ({
   useSadhanaHistory: jest.fn(),
 }))

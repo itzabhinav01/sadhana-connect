@@ -13,23 +13,27 @@ import {
 } from '@sadhana-connect/announcements'
 import { useAuth, useProfile } from '@sadhana-connect/auth'
 import type { Announcement } from '@sadhana-connect/domain'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { ExpirationPicker } from '../../../src/presentation/components/ExpirationPicker'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
   return new Date(iso).toLocaleDateString()
 }
 
 function AnnouncementForm() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const createAnnouncement = useCreateMentorAnnouncement()
   const [publishNow, setPublishNow] = useState(true)
   const [expirationPreset, setExpirationPreset] = useState<AnnouncementExpirationPreset>('never')
@@ -123,6 +127,8 @@ function AnnouncementForm() {
 }
 
 function AnnouncementItem({ announcement }: { announcement: Announcement }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const { session } = useAuth()
   const currentUserId = session?.userId ?? null
   const isOwn = announcement.authorId === currentUserId
@@ -271,6 +277,8 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
 }
 
 export default function MentorAnnouncementsScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const profile = useProfile()
   const announcementsQuery = useAnnouncements()
 
@@ -300,86 +308,88 @@ export default function MentorAnnouncementsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    minHeight: 96,
-    textAlignVertical: 'top',
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  item: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  itemHeaderRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  itemTitle: {
-    fontSize: fontSize.base,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  badge: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.muted,
-    backgroundColor: colors.mutedBackground,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  itemContent: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  itemMuted: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  editBlock: {
-    gap: spacing.sm,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    fieldGroup: {
+      gap: spacing.xs,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    textArea: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      minHeight: 96,
+      textAlignVertical: 'top',
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    item: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    itemHeaderRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    itemTitle: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    badge: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.muted,
+      backgroundColor: colors.mutedBackground,
+      borderRadius: 999,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+    },
+    itemContent: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    itemMuted: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    editBlock: {
+      gap: spacing.sm,
+    },
+  })
+}

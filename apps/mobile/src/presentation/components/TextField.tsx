@@ -1,7 +1,10 @@
+import { useMemo } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 
 interface TextFieldProps<T extends FieldValues> {
   control: Control<T>
@@ -19,6 +22,9 @@ export function TextField<T extends FieldValues>({
   label,
   ...inputProps
 }: TextFieldProps<T>) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+
   return (
     <Controller
       control={control}
@@ -33,6 +39,7 @@ export function TextField<T extends FieldValues>({
             value={value as string | undefined}
             autoCapitalize="none"
             accessibilityLabel={label}
+            placeholderTextColor={colors.muted}
             {...inputProps}
           />
           {error ? <Text style={styles.errorText}>{error.message}</Text> : null}
@@ -42,29 +49,31 @@ export function TextField<T extends FieldValues>({
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.xs,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    color: colors.foreground,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  inputError: {
-    borderColor: colors.destructive,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      gap: spacing.xs,
+    },
+    label: {
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      color: colors.foreground,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    inputError: {
+      borderColor: colors.destructive,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+  })
+}

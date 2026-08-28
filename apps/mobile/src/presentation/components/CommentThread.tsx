@@ -7,10 +7,12 @@ import {
   useUpdateComment,
 } from '@sadhana-connect/comments'
 import type { SadhanaReportComment } from '@sadhana-connect/domain'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 import { ErrorBanner } from './ErrorBanner'
 
@@ -25,6 +27,8 @@ interface CommentItemProps {
 }
 
 function CommentItem({ comment, sadhanaReportId, isOwnComment }: CommentItemProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [isEditing, setIsEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [draftText, setDraftText] = useState(comment.commentText)
@@ -107,6 +111,8 @@ function CommentItem({ comment, sadhanaReportId, isOwnComment }: CommentItemProp
 }
 
 export function CommentThread({ sadhanaReportId }: { sadhanaReportId: string }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const commentsQuery = useSadhanaReportComments(sadhanaReportId, true)
   const { session } = useAuth()
   const currentUserId = session?.userId ?? null
@@ -171,61 +177,63 @@ export function CommentThread({ sadhanaReportId }: { sadhanaReportId: string }) 
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.sm,
-    backgroundColor: colors.mutedBackground,
-    borderRadius: 8,
-    padding: spacing.sm,
-  },
-  item: {
-    backgroundColor: colors.background,
-    borderRadius: 8,
-    padding: spacing.sm,
-    gap: spacing.xs,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  itemName: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  itemTimestamp: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  itemText: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  editBlock: {
-    gap: spacing.xs,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  addForm: {
-    gap: spacing.xs,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    minHeight: 72,
-    textAlignVertical: 'top',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      gap: spacing.sm,
+      backgroundColor: colors.mutedBackground,
+      borderRadius: 8,
+      padding: spacing.sm,
+    },
+    item: {
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      padding: spacing.sm,
+      gap: spacing.xs,
+    },
+    itemHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    itemName: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    itemTimestamp: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    itemText: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    editBlock: {
+      gap: spacing.xs,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    errorText: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    addForm: {
+      gap: spacing.xs,
+    },
+    textArea: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      minHeight: 72,
+      textAlignVertical: 'top',
+    },
+  })
+}

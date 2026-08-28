@@ -8,11 +8,13 @@ import {
 } from '@sadhana-connect/notifications'
 import { useAuth } from '@sadhana-connect/auth'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatTimestamp(iso: string) {
   return new Date(iso).toLocaleString()
@@ -25,6 +27,8 @@ interface NotificationRowProps {
 }
 
 function NotificationRow({ notification, onPress, isNavigating }: NotificationRowProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   return (
     <Pressable
       onPress={() => onPress(notification)}
@@ -79,6 +83,8 @@ function useNavigateToNotification() {
 }
 
 export default function NotificationsScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const notificationsQuery = useNotifications()
   const markRead = useMarkNotificationRead()
   const markAllRead = useMarkAllNotificationsRead()
@@ -148,53 +154,55 @@ export default function NotificationsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  heading: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  errorLine: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  row: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: 2,
-  },
-  unreadRow: {
-    backgroundColor: colors.mutedBackground,
-  },
-  rowTitle: {
-    fontSize: fontSize.base,
-    color: colors.foreground,
-  },
-  unreadTitle: {
-    fontWeight: '700',
-  },
-  rowBody: {
-    fontSize: fontSize.sm,
-    color: colors.foreground,
-  },
-  rowTimestamp: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    heading: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    errorLine: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    row: {
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      gap: 2,
+    },
+    unreadRow: {
+      backgroundColor: colors.mutedBackground,
+    },
+    rowTitle: {
+      fontSize: fontSize.base,
+      color: colors.foreground,
+    },
+    unreadTitle: {
+      fontWeight: '700',
+    },
+    rowBody: {
+      fontSize: fontSize.sm,
+      color: colors.foreground,
+    },
+    rowTimestamp: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+  })
+}

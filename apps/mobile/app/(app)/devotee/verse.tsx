@@ -5,17 +5,21 @@ import {
   formatVerseCitationForCopy,
   useVerseOfTheDay,
 } from '@sadhana-connect/verse'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 const COPIED_FEEDBACK_MS = 2000
 
 export default function VerseOfTheDayScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const verseQuery = useVerseOfTheDay()
   const [isCopied, setIsCopied] = useState(false)
 
@@ -83,47 +87,49 @@ export default function VerseOfTheDayScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  heading: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  block: {
-    gap: spacing.xs,
-  },
-  blockLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.foreground,
-  },
-  sanskritText: {
-    fontSize: fontSize.base,
-    fontStyle: 'italic',
-    color: colors.foreground,
-  },
-  translationText: {
-    fontSize: fontSize.base,
-    lineHeight: fontSize.base * 1.5,
-    color: colors.foreground,
-  },
-  actions: {
-    gap: spacing.sm,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.lg,
+      backgroundColor: colors.background,
+    },
+    heading: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    block: {
+      gap: spacing.xs,
+    },
+    blockLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.foreground,
+    },
+    sanskritText: {
+      fontSize: fontSize.base,
+      fontStyle: 'italic',
+      color: colors.foreground,
+    },
+    translationText: {
+      fontSize: fontSize.base,
+      lineHeight: fontSize.base * 1.5,
+      color: colors.foreground,
+    },
+    actions: {
+      gap: spacing.sm,
+    },
+  })
+}

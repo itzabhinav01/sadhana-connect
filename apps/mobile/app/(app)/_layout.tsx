@@ -1,10 +1,13 @@
 import { useAuth, useProfile } from '@sadhana-connect/auth'
 import { Redirect, Stack } from 'expo-router'
+import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../src/application/theme/use-theme'
 import { AccountDisabledScreen } from '../../src/presentation/components/AccountDisabledScreen'
 import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
-import { colors, fontSize, spacing } from '../../src/shared/theme'
+import { fontSize, spacing } from '../../src/shared/theme'
+import type { ThemeColors } from '../../src/shared/theme'
 
 // ProtectedRoute equivalent: authentication (is there a session?) plus a
 // UX-level authorization gate (is this profile active?). Neither check is
@@ -13,6 +16,8 @@ import { colors, fontSize, spacing } from '../../src/shared/theme'
 export default function AppLayout() {
   const { session, isLoading: isSessionLoading } = useAuth()
   const profile = useProfile()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   if (isSessionLoading) {
     return <LoadingScreen />
@@ -43,17 +48,19 @@ export default function AppLayout() {
   return <Stack screenOptions={{ headerShown: false }} />
 }
 
-const styles = StyleSheet.create({
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  errorText: {
-    fontSize: fontSize.base,
-    color: colors.destructive,
-    textAlign: 'center',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    errorContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.lg,
+      backgroundColor: colors.background,
+    },
+    errorText: {
+      fontSize: fontSize.base,
+      color: colors.destructive,
+      textAlign: 'center',
+    },
+  })
+}

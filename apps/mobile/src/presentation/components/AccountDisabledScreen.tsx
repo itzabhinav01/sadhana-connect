@@ -1,13 +1,18 @@
 import { useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import { useSignOut } from '../../application/auth/use-sign-out'
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 
 export function AccountDisabledScreen() {
   const router = useRouter()
   const signOut = useSignOut()
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   const handleSignOut = () => {
     signOut.mutate(undefined, {
@@ -32,23 +37,25 @@ export function AccountDisabledScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  description: {
-    fontSize: fontSize.base,
-    color: colors.muted,
-    textAlign: 'center',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.lg,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    description: {
+      fontSize: fontSize.base,
+      color: colors.muted,
+      textAlign: 'center',
+    },
+  })
+}

@@ -1,12 +1,14 @@
 import { useSadhanaHistory } from '@sadhana-connect/sadhana'
 import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
 import { Link } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
-import { colors, fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, spacing } from '../../../src/shared/theme'
+import type { ThemeColors } from '../../../src/shared/theme'
 
 interface HistoryFilters {
   fromDate: string
@@ -14,6 +16,8 @@ interface HistoryFilters {
 }
 
 export default function HistoryScreen() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [filters, setFilters] = useState<HistoryFilters>({ fromDate: '', toDate: '' })
   const today = getLocalDateIso()
 
@@ -79,36 +83,38 @@ export default function HistoryScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  mutedLine: {
-    fontSize: fontSize.sm,
-    color: colors.muted,
-  },
-  errorLine: {
-    fontSize: fontSize.sm,
-    color: colors.destructive,
-  },
-  emptyState: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  link: {
-    color: colors.link,
-    textDecorationLine: 'underline',
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    content: {
+      padding: spacing.md,
+      gap: spacing.md,
+      backgroundColor: colors.background,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    mutedLine: {
+      fontSize: fontSize.sm,
+      color: colors.muted,
+    },
+    errorLine: {
+      fontSize: fontSize.sm,
+      color: colors.destructive,
+    },
+    emptyState: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderStyle: 'dashed',
+      borderRadius: 12,
+      padding: spacing.lg,
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    link: {
+      color: colors.link,
+      textDecorationLine: 'underline',
+    },
+  })
+}

@@ -1,14 +1,18 @@
 import { ReminderRateLimitedError, useSendReminder } from '@sadhana-connect/notifications'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { colors, fontSize, spacing } from '../../shared/theme'
+import { useTheme } from '../../application/theme/use-theme'
+import { fontSize, spacing } from '../../shared/theme'
+import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 import { ErrorBanner } from './ErrorBanner'
 
 const REMINDER_MESSAGE_MAX_LENGTH = 500
 
 export function ReminderForm({ devoteeId }: { devoteeId: string }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [mode, setMode] = useState<'generic' | 'custom'>('generic')
   const [customMessage, setCustomMessage] = useState('')
   const sendReminder = useSendReminder()
@@ -76,37 +80,39 @@ export function ReminderForm({ devoteeId }: { devoteeId: string }) {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  title: {
-    fontSize: fontSize.base,
-    fontWeight: '700',
-    color: colors.foreground,
-  },
-  modeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.base,
-    color: colors.foreground,
-    minHeight: 72,
-    textAlignVertical: 'top',
-  },
-  successText: {
-    fontSize: fontSize.sm,
-    color: colors.primary,
-  },
-})
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: spacing.md,
+      gap: spacing.sm,
+    },
+    title: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    modeRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    textArea: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      color: colors.foreground,
+      minHeight: 72,
+      textAlignVertical: 'top',
+    },
+    successText: {
+      fontSize: fontSize.sm,
+      color: colors.primary,
+    },
+  })
+}

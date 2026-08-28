@@ -1,3 +1,12 @@
+jest.mock('../../application/theme/use-theme', () => ({
+  useTheme: () => ({
+    colors: require('../../shared/theme').lightColors,
+    resolvedTheme: 'light',
+    theme: 'system',
+    setTheme: jest.fn(),
+  }),
+}))
+
 jest.mock('../../../../../packages/auth/src/use-auth', () => ({
   useAuth: jest.fn(),
 }))
