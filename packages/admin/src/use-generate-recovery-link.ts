@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
-import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase/admin-account-actions-repository'
+import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase'
 
 // Deliberately a plain useMutation with no queryKey — the result (a
 // one-time recovery link) must never be cached, logged, or persisted.

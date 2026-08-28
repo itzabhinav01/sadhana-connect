@@ -1,3 +1,12 @@
+jest.mock('../../../../src/application/theme/use-theme', () => ({
+  useTheme: () => ({
+    colors: require('../../../../src/shared/theme').lightColors,
+    resolvedTheme: 'light',
+    theme: 'system',
+    setTheme: jest.fn(),
+  }),
+}))
+
 jest.mock('../../../../../../packages/admin/src/use-admin-user-detail', () => ({
   useAdminUserDetail: jest.fn(),
 }))
@@ -16,6 +25,14 @@ jest.mock('../../../../../../packages/admin/src/use-deactivate-assignment', () =
 
 jest.mock('../../../../../../packages/admin/src/use-set-user-active', () => ({
   useSetUserActive: jest.fn(),
+}))
+
+jest.mock('../../../../../../packages/admin/src/use-generate-recovery-link', () => ({
+  useGenerateRecoveryLink: jest.fn(),
+}))
+
+jest.mock('expo-clipboard', () => ({
+  setStringAsync: jest.fn(),
 }))
 
 jest.mock('../../../../../../packages/admin/src/use-change-user-role', () => {
@@ -48,9 +65,11 @@ import {
   useAdminUserDetail,
   useChangeUserRole,
   useDeactivateAssignment,
+  useGenerateRecoveryLink,
   useMentorDevoteeCount,
   useSetUserActive,
 } from '@sadhana-connect/admin'
+import * as Clipboard from 'expo-clipboard'
 
 import AdminUserDetailScreen from './[id]'
 
@@ -60,6 +79,8 @@ const mockUseAdminAssignments = useAdminAssignments as jest.Mock
 const mockUseDeactivateAssignment = useDeactivateAssignment as jest.Mock
 const mockUseSetUserActive = useSetUserActive as jest.Mock
 const mockUseChangeUserRole = useChangeUserRole as jest.Mock
+const mockUseGenerateRecoveryLink = useGenerateRecoveryLink as jest.Mock
+const mockSetStringAsync = Clipboard.setStringAsync as jest.Mock
 
 const devoteeUser = {
   id: 'u1',
@@ -85,12 +106,20 @@ describe('AdminUserDetailScreen', () => {
     mockUseDeactivateAssignment.mockReset()
     mockUseSetUserActive.mockReset()
     mockUseChangeUserRole.mockReset()
+    mockUseGenerateRecoveryLink.mockReset()
+    mockSetStringAsync.mockReset()
 
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 0 })
     mockUseAdminAssignments.mockReturnValue({ isPending: false, data: [] })
     mockUseDeactivateAssignment.mockReturnValue({ mutate: jest.fn(), isPending: false })
     mockUseSetUserActive.mockReturnValue({ mutate: jest.fn(), isPending: false })
     mockUseChangeUserRole.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
+    mockUseGenerateRecoveryLink.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      isError: false,
+      reset: jest.fn(),
+    })
   })
 
   it('shows a loading state while pending', async () => {
@@ -159,5 +188,64 @@ describe('AdminUserDetailScreen', () => {
     await fireEvent.press(getByRole('button', { name: 'Disable account' }))
 
     expect(mockSetActive).toHaveBeenCalledWith({ userId: 'u1', isActive: false })
+  })
+
+  it('generates and shows a one-time recovery link, then copies it to the clipboard', async () => {
+    const mockGenerate = jest.fn((_userId, { onSuccess }: { onSuccess: (link: string) => void }) =>
+      onSuccess('https://example.supabase.co/auth/v1/verify?token=abc'),
+    )
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseGenerateRecoveryLink.mockReturnValue({
+      mutate: mockGenerate,
+      isPending: false,
+      isError: false,
+      reset: jest.fn(),
+    })
+
+    const { getByRole, getByText } = await render(<AdminUserDetailScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Generate recovery link' }))
+
+    expect(mockGenerate).toHaveBeenCalledWith('u1', { onSuccess: expect.any(Function) })
+    expect(getByText('https://example.supabase.co/auth/v1/verify?token=abc')).toBeTruthy()
+
+    await fireEvent.press(getByRole('button', { name: 'Copy link' }))
+    expect(mockSetStringAsync).toHaveBeenCalledWith(
+      'https://example.supabase.co/auth/v1/verify?token=abc',
+    )
+    expect(getByText('Copied')).toBeTruthy()
+  })
+
+  it('closing the recovery link modal discards the link', async () => {
+    const mockReset = jest.fn()
+    const mockGenerate = jest.fn((_userId, { onSuccess }: { onSuccess: (link: string) => void }) =>
+      onSuccess('https://example.supabase.co/auth/v1/verify?token=abc'),
+    )
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseGenerateRecoveryLink.mockReturnValue({
+      mutate: mockGenerate,
+      isPending: false,
+      isError: false,
+      reset: mockReset,
+    })
+
+    const { getByRole, queryByText } = await render(<AdminUserDetailScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Generate recovery link' }))
+    await fireEvent.press(getByRole('button', { name: 'Close' }))
+
+    expect(mockReset).toHaveBeenCalledTimes(1)
+    expect(queryByText('https://example.supabase.co/auth/v1/verify?token=abc')).toBeNull()
+  })
+
+  it('shows an error message when generating a recovery link fails', async () => {
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseGenerateRecoveryLink.mockReturnValue({
+      mutate: jest.fn(),
+      isPending: false,
+      isError: true,
+      reset: jest.fn(),
+    })
+
+    const { getByText } = await render(<AdminUserDetailScreen />)
+    expect(getByText('Could not generate a recovery link.')).toBeTruthy()
   })
 })

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useGenerateRecoveryLink } from '@/application/admin/use-generate-recovery-link'
+import { useGenerateRecoveryLink } from '@sadhana-connect/admin'
 import { Button } from '@/presentation/components/ui/button'
 
 interface AdminUserPasswordResetProps {

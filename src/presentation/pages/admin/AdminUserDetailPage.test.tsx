@@ -44,6 +44,7 @@ vi.mock('@sadhana-connect/admin', async () => {
     useMentorDevoteeCount: useMentorDevoteeCountMock,
     useSetUserActive: useSetUserActiveMock,
     useChangeUserRole: useChangeUserRoleMock,
+    useGenerateRecoveryLink: useGenerateRecoveryLinkMock,
   }
 })
 vi.mock('@/application/admin/use-admin-user-email', () => ({
@@ -51,9 +52,6 @@ vi.mock('@/application/admin/use-admin-user-email', () => ({
 }))
 vi.mock('@/application/admin/use-hard-delete-user', () => ({
   useHardDeleteUser: useHardDeleteUserMock,
-}))
-vi.mock('@/application/admin/use-generate-recovery-link', () => ({
-  useGenerateRecoveryLink: useGenerateRecoveryLinkMock,
 }))
 vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
