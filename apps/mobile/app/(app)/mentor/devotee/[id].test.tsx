@@ -191,7 +191,7 @@ describe('MentorDevoteeDetailScreen', () => {
     const { getByRole, getByText } = await render(<MentorDevoteeDetailScreen />)
     expect(getByText(/Missed \d+ of 7 days/)).toBeTruthy()
 
-    await fireEvent.press(getByRole('button', { name: 'Last 30 days' }))
+    await fireEvent.press(getByRole('button', { name: 'Last month' }))
 
     const expected = getLastNDaysRange(30)
     expect(mockUseDevoteeReportHistory).toHaveBeenLastCalledWith(

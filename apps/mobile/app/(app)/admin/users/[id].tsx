@@ -20,6 +20,7 @@ import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
+import { DevoteeSadhanaHistorySection } from '../../../../src/presentation/components/DevoteeSadhanaHistorySection'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
 import { fontSize, radius, spacing } from '../../../../src/shared/theme'
@@ -57,25 +58,29 @@ function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
   const deactivate = useDeactivateAssignment()
 
   return (
-    <Card title="Current mentors">
-      {assignmentsQuery.isPending ? (
-        <Text style={styles.mutedLine}>Loading…</Text>
-      ) : activeAssignments.length === 0 ? (
-        <Text style={styles.mutedLine}>No mentor assigned</Text>
-      ) : (
-        activeAssignments.map((assignment) => (
-          <View key={assignment.id} style={styles.mentorRow}>
-            <Text style={styles.mutedLine}>{assignment.mentorName}</Text>
-            <Button
-              title="Remove"
-              variant="outline"
-              isPending={deactivate.isPending}
-              onPress={() => deactivate.mutate(assignment.id)}
-            />
-          </View>
-        ))
-      )}
-    </Card>
+    <>
+      <Card title="Current mentors">
+        {assignmentsQuery.isPending ? (
+          <Text style={styles.mutedLine}>Loading…</Text>
+        ) : activeAssignments.length === 0 ? (
+          <Text style={styles.mutedLine}>No mentor assigned</Text>
+        ) : (
+          activeAssignments.map((assignment) => (
+            <View key={assignment.id} style={styles.mentorRow}>
+              <Text style={styles.mutedLine}>{assignment.mentorName}</Text>
+              <Button
+                title="Remove"
+                variant="outline"
+                isPending={deactivate.isPending}
+                onPress={() => deactivate.mutate(assignment.id)}
+              />
+            </View>
+          ))
+        )}
+      </Card>
+
+      <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
+    </>
   )
 }
 

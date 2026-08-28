@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { SadhanaReport } from '@sadhana-connect/domain'
 
-import { buildSadhanaReportHtml } from './sadhana-export-html'
+import { buildSadhanaHistoryHtml, buildSadhanaReportHtml } from './sadhana-export-html'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {
   return {
@@ -81,5 +81,49 @@ describe('buildSadhanaReportHtml', () => {
     expect(html).not.toContain('undefined')
     expect(html).not.toContain('null')
     expect(html).toContain('—')
+  })
+})
+
+describe('buildSadhanaHistoryHtml', () => {
+  it('produces a well-formed standalone HTML document with the date range in the header', () => {
+    const html = buildSadhanaHistoryHtml([makeReport()], '2026-01-01', '2026-01-31')
+
+    expect(html).toMatch(/^<!doctype html>/)
+    expect(html).toContain('<html>')
+    expect(html).toContain('</html>')
+    expect(html).toContain('Date Range: 01-01-2026 to 31-01-2026')
+  })
+
+  it('includes one full report block per report, oldest to newest regardless of input order', () => {
+    const html = buildSadhanaHistoryHtml(
+      [
+        makeReport({ id: 'r2', reportDate: '2026-01-10', totalRounds: 20 }),
+        makeReport({ id: 'r1', reportDate: '2026-01-05', totalRounds: 16 }),
+      ],
+      '2026-01-01',
+      '2026-01-31',
+    )
+
+    const firstIndex = html.indexOf('Date: 05-01-2026')
+    const secondIndex = html.indexOf('Date: 10-01-2026')
+    expect(firstIndex).toBeGreaterThan(-1)
+    expect(secondIndex).toBeGreaterThan(firstIndex)
+  })
+
+  it('shows a no-reports message for an empty range instead of an empty body', () => {
+    const html = buildSadhanaHistoryHtml([], '2026-01-01', '2026-01-31')
+
+    expect(html).toContain('No Sadhana reports were submitted in this date range.')
+  })
+
+  it('escapes HTML-significant characters in free-text fields', () => {
+    const html = buildSadhanaHistoryHtml(
+      [makeReport({ notes: `Line <two>` })],
+      '2026-01-01',
+      '2026-01-31',
+    )
+
+    expect(html).not.toContain('Line <two>')
+    expect(html).toContain('Line &lt;two&gt;')
   })
 })

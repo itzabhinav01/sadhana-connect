@@ -1,11 +1,32 @@
-import { useSadhanaHistory } from '@sadhana-connect/sadhana'
+import { useAuth } from '@sadhana-connect/auth'
+import type { SadhanaReport } from '@sadhana-connect/domain'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
+import {
+  buildSadhanaHistoryCsv,
+  buildSadhanaHistoryHtml,
+  buildSadhanaRangeExportFilename,
+  sadhanaQueryKeys,
+  useSadhanaHistory,
+  validateDateRange,
+  type DateRangeValidationResult,
+} from '@sadhana-connect/sadhana'
 import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
+import { useQueryClient } from '@tanstack/react-query'
+// SDK 57 replaced the top-level string-path API (cacheDirectory,
+// writeAsStringAsync) with a new synchronous File/Directory class API —
+// expo-file-system/legacy is Expo's own documented compatibility path,
+// preserving the async, string-URI API this file (and expo-print's own
+// promise-based printToFileAsync it sits alongside) already relies on.
+import * as FileSystem from 'expo-file-system/legacy'
+import * as Print from 'expo-print'
 import { Link } from 'expo-router'
+import * as Sharing from 'expo-sharing'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
+import { DateRangeFields } from '../../../src/presentation/components/DateRangeFields'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
 import { fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
@@ -18,7 +39,13 @@ interface HistoryFilters {
 export default function HistoryScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+  const { session } = useAuth()
+  const userId = session?.userId ?? null
+  const queryClient = useQueryClient()
   const [filters, setFilters] = useState<HistoryFilters>({ fromDate: '', toDate: '' })
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [exportError, setExportError] = useState(false)
   const today = getLocalDateIso()
 
   const historyQuery = useSadhanaHistory({
@@ -28,8 +55,76 @@ export default function HistoryScreen() {
 
   const reports = historyQuery.data?.pages.flatMap((page) => page.reports) ?? []
 
+  // A bulk export requires a concrete, bounded range — deliberately
+  // unavailable for "All time" (blank fromDate), which has no lower
+  // bound to pass to either validateDateRange or listReportsInRange.
+  // Mirrors web's HistoryPage (Phase 16) exactly.
+  const exportFromDate = filters.fromDate
+  const exportToDate = filters.toDate && filters.toDate < today ? filters.toDate : today
+  const hasConcreteRange = exportFromDate !== ''
+  const rangeValidation: DateRangeValidationResult = hasConcreteRange
+    ? validateDateRange(exportFromDate, exportToDate)
+    : { valid: false, error: 'Choose a specific date range (not All time) to export.' }
+  const canExportRange = hasConcreteRange && rangeValidation.valid
+
+  async function fetchRangeReports(): Promise<SadhanaReport[]> {
+    if (!userId) throw new Error('HistoryScreen: no authenticated user')
+    return queryClient.fetchQuery({
+      queryKey: sadhanaQueryKeys.range(userId, exportFromDate, exportToDate),
+      queryFn: () =>
+        supabaseSadhanaReportRepository.listReportsInRange(userId, exportFromDate, exportToDate),
+    })
+  }
+
+  async function handleExportRangePdf() {
+    setExportError(false)
+    setIsExportingPdf(true)
+    try {
+      const rangeReports = await fetchRangeReports()
+      const { uri } = await Print.printToFileAsync({
+        html: buildSadhanaHistoryHtml(rangeReports, exportFromDate, exportToDate),
+      })
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Sadhana Reports ${exportFromDate} to ${exportToDate}`,
+      })
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }
+
+  async function handleExportRangeCsv() {
+    setExportError(false)
+    setIsExportingCsv(true)
+    try {
+      const rangeReports = await fetchRangeReports()
+      const fileUri =
+        FileSystem.cacheDirectory + buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'csv')
+      await FileSystem.writeAsStringAsync(fileUri, buildSadhanaHistoryCsv(rangeReports), {
+        encoding: FileSystem.EncodingType.UTF8,
+      })
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'text/csv',
+        dialogTitle: `Sadhana Reports ${exportFromDate} to ${exportToDate}`,
+      })
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingCsv(false)
+    }
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <DateRangeFields
+        fromDate={filters.fromDate}
+        toDate={filters.toDate}
+        onFromDateChange={(fromDate) => setFilters({ ...filters, fromDate })}
+        onToDateChange={(toDate) => setFilters({ ...filters, toDate })}
+      />
+
       <View style={styles.filterRow}>
         <Button
           title="Last 30 days"
@@ -48,9 +143,34 @@ export default function HistoryScreen() {
         />
       </View>
 
-      <Text style={styles.mutedLine}>
-        {filters.fromDate ? `From ${filters.fromDate}` : 'All time'}
-      </Text>
+      <View style={styles.filterRow}>
+        <Button
+          title="Export PDF"
+          pendingTitle="Preparing…"
+          isPending={isExportingPdf}
+          disabled={!canExportRange || isExportingPdf || isExportingCsv}
+          variant="outline"
+          onPress={handleExportRangePdf}
+        />
+        <Button
+          title="Export CSV"
+          pendingTitle="Preparing…"
+          isPending={isExportingCsv}
+          disabled={!canExportRange || isExportingPdf || isExportingCsv}
+          variant="outline"
+          onPress={handleExportRangeCsv}
+        />
+      </View>
+      {!canExportRange ? (
+        <Text style={styles.mutedLine}>
+          {hasConcreteRange && !rangeValidation.valid
+            ? rangeValidation.error
+            : 'Choose a specific date range (not All time) to export.'}
+        </Text>
+      ) : null}
+      {exportError ? (
+        <Text style={styles.errorLine}>Something went wrong exporting your reports. Please try again.</Text>
+      ) : null}
 
       {historyQuery.isPending ? (
         <Text style={styles.mutedLine}>Loading…</Text>

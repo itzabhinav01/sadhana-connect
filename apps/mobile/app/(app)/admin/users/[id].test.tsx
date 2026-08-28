@@ -39,6 +39,17 @@ jest.mock('../../../../../../packages/admin/src/use-set-user-temple-group', () =
   useSetUserTempleGroup: jest.fn(),
 }))
 
+jest.mock('../../../../../../packages/auth/src/use-auth', () => ({
+  useAuth: jest.fn(() => ({
+    session: { userId: 'admin-1', email: 'a@b.com', emailConfirmedAt: null },
+    isLoading: false,
+  })),
+}))
+
+jest.mock('../../../../../../packages/sadhana/src/use-devotee-report-history', () => ({
+  useDevoteeReportHistory: jest.fn(),
+}))
+
 jest.mock('expo-clipboard', () => ({
   setStringAsync: jest.fn(),
 }))
@@ -79,6 +90,7 @@ import {
   useSetUserActive,
   useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
+import { useDevoteeReportHistory } from '@sadhana-connect/sadhana'
 import * as Clipboard from 'expo-clipboard'
 
 import AdminUserDetailScreen from './[id]'
@@ -92,6 +104,7 @@ const mockUseChangeUserRole = useChangeUserRole as jest.Mock
 const mockUseGenerateRecoveryLink = useGenerateRecoveryLink as jest.Mock
 const mockUseAdminTempleGroups = useAdminTempleGroups as jest.Mock
 const mockUseSetUserTempleGroup = useSetUserTempleGroup as jest.Mock
+const mockUseDevoteeReportHistory = useDevoteeReportHistory as jest.Mock
 const mockSetStringAsync = Clipboard.setStringAsync as jest.Mock
 
 const devoteeUser = {
@@ -121,6 +134,7 @@ describe('AdminUserDetailScreen', () => {
     mockUseGenerateRecoveryLink.mockReset()
     mockUseAdminTempleGroups.mockReset()
     mockUseSetUserTempleGroup.mockReset()
+    mockUseDevoteeReportHistory.mockReset()
     mockSetStringAsync.mockReset()
 
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 0 })
@@ -144,6 +158,12 @@ describe('AdminUserDetailScreen', () => {
       ],
     })
     mockUseSetUserTempleGroup.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
+    mockUseDevoteeReportHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [],
+    })
   })
 
   it('shows a loading state while pending', async () => {
@@ -167,6 +187,22 @@ describe('AdminUserDetailScreen', () => {
     expect(getByText('Test Devotee')).toBeTruthy()
     expect(getByText('+919876543210')).toBeTruthy()
     expect(getByText('Active')).toBeTruthy()
+  })
+
+  it("shows the devotee's Sadhana History section", async () => {
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseDevoteeReportHistory.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [{ id: 'r1', reportDate: '2026-01-15', totalRounds: 16, readingMinutes: 20, hearingMinutes: 10 }],
+    })
+
+    const { getByText, queryByRole } = await render(<AdminUserDetailScreen />)
+    expect(getByText('Sadhana History')).toBeTruthy()
+    expect(getByText(/16 rounds · 20m reading · 10m hearing/)).toBeTruthy()
+    // Admin can view, but not comment — that's mentor-only.
+    expect(queryByRole('button', { name: 'Comments' })).toBeNull()
   })
 
   it("shows the mentor's assigned devotee count for a mentor", async () => {

@@ -11,6 +11,23 @@ jest.mock('../../../../../packages/sadhana/src/use-sadhana-history', () => ({
   useSadhanaHistory: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-auth', () => ({
+  useAuth: jest.fn(() => ({
+    session: { userId: 'user-1', email: 'a@b.com', emailConfirmedAt: null },
+    isLoading: false,
+  })),
+}))
+
+jest.mock('../../../../../packages/infra-supabase/src/sadhana-report-repository', () => ({
+  supabaseSadhanaReportRepository: { listReportsInRange: jest.fn() },
+}))
+
+const mockFetchQuery = jest.fn()
+
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: jest.fn(() => ({ fetchQuery: mockFetchQuery })),
+}))
+
 jest.mock('expo-router', () => {
   const { Text } = require('react-native')
   return {
@@ -31,13 +48,23 @@ jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(),
 }))
 
+jest.mock('expo-file-system/legacy', () => ({
+  cacheDirectory: 'file:///cache/',
+  writeAsStringAsync: jest.fn(),
+  EncodingType: { UTF8: 'utf8' },
+}))
+
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 import {
+  buildSadhanaHistoryCsv,
+  buildSadhanaHistoryHtml,
   buildSadhanaReportHtml,
   buildWhatsAppShareUrl,
   formatSadhanaReportForText,
   useSadhanaHistory,
 } from '@sadhana-connect/sadhana'
+import { addDaysIso, getLocalDateIso } from '@sadhana-connect/shared'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as Print from 'expo-print'
 import * as Sharing from 'expo-sharing'
 import { Linking, Share } from 'react-native'
@@ -47,6 +74,7 @@ import HistoryScreen from './history'
 const mockUseSadhanaHistory = useSadhanaHistory as jest.Mock
 const mockPrintToFileAsync = Print.printToFileAsync as jest.Mock
 const mockShareAsync = Sharing.shareAsync as jest.Mock
+const mockWriteAsStringAsync = FileSystem.writeAsStringAsync as jest.Mock
 
 function page(reports: unknown[], nextCursor: string | null = null) {
   return { pages: [{ reports, nextCursor }] }
@@ -79,6 +107,13 @@ const fullReport = {
 describe('HistoryScreen', () => {
   afterEach(async () => {
     await cleanup()
+  })
+
+  beforeEach(() => {
+    mockFetchQuery.mockReset()
+    mockPrintToFileAsync.mockReset()
+    mockShareAsync.mockReset()
+    mockWriteAsStringAsync.mockReset()
   })
 
   it('shows the empty state with a link to fill sadhana when there are no reports', async () => {
@@ -160,7 +195,7 @@ describe('HistoryScreen', () => {
     expect(shareSpy).toHaveBeenCalledWith({ message: formatSadhanaReportForText(fullReport) })
   })
 
-  it('generates and shares a PDF when "Export PDF" is pressed', async () => {
+  it('generates and shares a PDF when a report row\'s "Export PDF" is pressed', async () => {
     mockUseSadhanaHistory.mockReturnValue({
       isPending: false,
       isError: false,
@@ -182,7 +217,7 @@ describe('HistoryScreen', () => {
     })
   })
 
-  it('shows an error message when the PDF export fails', async () => {
+  it('shows an error message when a report row\'s PDF export fails', async () => {
     mockUseSadhanaHistory.mockReturnValue({
       isPending: false,
       isError: false,
@@ -204,5 +239,94 @@ describe('HistoryScreen', () => {
 
     const { getByText } = await render(<HistoryScreen />)
     expect(getByText('Something went wrong loading your history.')).toBeTruthy()
+  })
+
+  describe('bulk range export', () => {
+    beforeEach(() => {
+      mockUseSadhanaHistory.mockReturnValue({
+        isPending: false,
+        isError: false,
+        data: page([fullReport]),
+        hasNextPage: false,
+      })
+    })
+
+    it('disables the bulk export buttons for the default "All time" range', async () => {
+      const { getByRole, getByText } = await render(<HistoryScreen />)
+
+      expect(getByRole('button', { name: 'Export PDF' }).props.accessibilityState.disabled).toBe(
+        true,
+      )
+      expect(getByRole('button', { name: 'Export CSV' }).props.accessibilityState.disabled).toBe(
+        true,
+      )
+      expect(getByText('Choose a specific date range (not All time) to export.')).toBeTruthy()
+    })
+
+    it('enables the bulk export buttons once a concrete preset is chosen', async () => {
+      const { getByRole } = await render(<HistoryScreen />)
+
+      await fireEvent.press(getByRole('button', { name: 'Last 30 days' }))
+
+      expect(getByRole('button', { name: 'Export PDF' }).props.accessibilityState.disabled).toBe(
+        false,
+      )
+      expect(getByRole('button', { name: 'Export CSV' }).props.accessibilityState.disabled).toBe(
+        false,
+      )
+    })
+
+    it('fetches the full range and shares a PDF when "Export PDF" is pressed', async () => {
+      mockFetchQuery.mockResolvedValue([fullReport])
+      mockPrintToFileAsync.mockResolvedValue({ uri: 'file:///sadhana-history.pdf' })
+      mockShareAsync.mockResolvedValue(undefined)
+
+      const today = getLocalDateIso()
+      const expectedFromDate = addDaysIso(today, -29)
+
+      const { getByRole } = await render(<HistoryScreen />)
+      await fireEvent.press(getByRole('button', { name: 'Last 30 days' }))
+      await fireEvent.press(getByRole('button', { name: 'Export PDF' }))
+
+      expect(mockFetchQuery).toHaveBeenCalledTimes(1)
+      expect(mockPrintToFileAsync).toHaveBeenCalledWith({
+        html: buildSadhanaHistoryHtml([fullReport], expectedFromDate, today),
+      })
+      expect(mockShareAsync).toHaveBeenCalledWith('file:///sadhana-history.pdf', {
+        mimeType: 'application/pdf',
+        dialogTitle: `Sadhana Reports ${expectedFromDate} to ${today}`,
+      })
+    })
+
+    it('fetches the full range and shares a CSV file when "Export CSV" is pressed', async () => {
+      mockFetchQuery.mockResolvedValue([fullReport])
+      mockWriteAsStringAsync.mockResolvedValue(undefined)
+      mockShareAsync.mockResolvedValue(undefined)
+
+      const { getByRole } = await render(<HistoryScreen />)
+      await fireEvent.press(getByRole('button', { name: 'Last 30 days' }))
+      await fireEvent.press(getByRole('button', { name: 'Export CSV' }))
+
+      expect(mockFetchQuery).toHaveBeenCalledTimes(1)
+      expect(mockWriteAsStringAsync).toHaveBeenCalledWith(
+        expect.stringMatching(/^file:\/\/\/cache\/Sadhana-.*\.csv$/),
+        buildSadhanaHistoryCsv([fullReport]),
+        { encoding: 'utf8' },
+      )
+      expect(mockShareAsync).toHaveBeenCalledWith(
+        expect.stringMatching(/^file:\/\/\/cache\/Sadhana-.*\.csv$/),
+        { mimeType: 'text/csv', dialogTitle: expect.stringContaining('Sadhana Reports') },
+      )
+    })
+
+    it('shows an error message when the bulk export fails', async () => {
+      mockFetchQuery.mockRejectedValue(new Error('network error'))
+
+      const { getByRole, findByText } = await render(<HistoryScreen />)
+      await fireEvent.press(getByRole('button', { name: 'Last 30 days' }))
+      await fireEvent.press(getByRole('button', { name: 'Export PDF' }))
+
+      await findByText('Something went wrong exporting your reports. Please try again.')
+    })
   })
 })
