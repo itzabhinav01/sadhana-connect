@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -86,11 +86,15 @@ function createStyles(colors: ThemeColors) {
       color: colors.destructive,
     },
     card: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
       padding: spacing.md,
       gap: spacing.sm,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
     },
     cardHeaderRow: {
       flexDirection: 'row',

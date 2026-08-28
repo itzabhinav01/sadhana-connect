@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
@@ -88,11 +88,15 @@ function createStyles(colors: ThemeColors) {
       color: colors.muted,
     },
     row: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
       padding: spacing.md,
       gap: 2,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
     },
     rowHeader: {
       flexDirection: 'row',

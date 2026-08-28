@@ -15,12 +15,19 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
+import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 const RECENT_REPORTS_DISPLAY_COUNT = 5
+
+function greetingForHour(hour: number): string {
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
 
 export default function DashboardScreen() {
   const router = useRouter()
@@ -52,21 +59,31 @@ export default function DashboardScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Button
-              title="Sign Out"
-              pendingTitle="…"
-              isPending={signOut.isPending}
-              onPress={handleSignOut}
-              variant="outline"
-            />
+            <View style={styles.headerActions}>
+              <HeaderThemeToggle />
+              <Button
+                title="Sign Out"
+                pendingTitle="…"
+                isPending={signOut.isPending}
+                onPress={handleSignOut}
+                variant="outline"
+              />
+            </View>
           ),
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
+          <Text style={styles.headerTitle}>Your sadhana at a glance</Text>
+        </View>
+
         <Card title="Today's Sadhana">
-          <Text style={styles.mutedLine}>
-            Current streak: {streak.data ?? 0} day{streak.data === 1 ? '' : 's'}
-          </Text>
+          <View style={styles.streakBadge}>
+            <Text style={styles.streakText}>
+              Current streak: {streak.data ?? 0} day{streak.data === 1 ? '' : 's'}
+            </Text>
+          </View>
           {report ? (
             <>
               <View style={styles.statsRow}>
@@ -154,43 +171,56 @@ export default function DashboardScreen() {
           />
         </Card>
 
-        <Button
-          title={
-            unreadCount.data ? `Notifications (${unreadCount.data})` : 'Notifications'
-          }
-          onPress={() => router.push('/devotee/notifications')}
-          variant="outline"
-        />
+        <Text style={styles.sectionLabel}>Explore</Text>
+        <View style={styles.quickLinksGrid}>
+          <View style={styles.quickLinkTile}>
+            <Button
+              title={unreadCount.data ? `Notifications (${unreadCount.data})` : 'Notifications'}
+              onPress={() => router.push('/devotee/notifications')}
+              variant="outline"
+            />
+          </View>
 
-        <Button
-          title="Announcements"
-          onPress={() => router.push('/devotee/announcements')}
-          variant="outline"
-        />
+          <View style={styles.quickLinkTile}>
+            <Button
+              title="Announcements"
+              onPress={() => router.push('/devotee/announcements')}
+              variant="outline"
+            />
+          </View>
 
-        <Button
-          title="Verse of the Day"
-          onPress={() => router.push('/devotee/verse')}
-          variant="outline"
-        />
+          <View style={styles.quickLinkTile}>
+            <Button
+              title="Verse of the Day"
+              onPress={() => router.push('/devotee/verse')}
+              variant="outline"
+            />
+          </View>
 
-        <Button
-          title="Analytics"
-          onPress={() => router.push('/devotee/analytics')}
-          variant="outline"
-        />
+          <View style={styles.quickLinkTile}>
+            <Button
+              title="Analytics"
+              onPress={() => router.push('/devotee/analytics')}
+              variant="outline"
+            />
+          </View>
 
-        <Button
-          title="Japa Counter"
-          onPress={() => router.push('/devotee/japa')}
-          variant="outline"
-        />
+          <View style={styles.quickLinkTile}>
+            <Button
+              title="Japa Counter"
+              onPress={() => router.push('/devotee/japa')}
+              variant="outline"
+            />
+          </View>
 
-        <Button
-          title="Profile"
-          onPress={() => router.push('/devotee/profile')}
-          variant="outline"
-        />
+          <View style={styles.quickLinkTile}>
+            <Button
+              title="Profile"
+              onPress={() => router.push('/devotee/profile')}
+              variant="outline"
+            />
+          </View>
+        </View>
       </ScrollView>
     </>
   )
@@ -203,9 +233,40 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.md,
       backgroundColor: colors.background,
     },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    header: {
+      gap: 2,
+      paddingBottom: spacing.xs,
+    },
+    eyebrow: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    headerTitle: {
+      fontSize: fontSize.xl,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
     mutedLine: {
       fontSize: fontSize.sm,
       color: colors.muted,
+    },
+    streakBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primarySoft,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+    },
+    streakText: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
     },
     statsRow: {
       flexDirection: 'row',
@@ -215,13 +276,27 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
     },
     statValue: {
-      fontSize: fontSize.lg,
+      fontSize: fontSize.xl,
       fontWeight: '700',
       color: colors.foreground,
     },
     statLabel: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
       color: colors.muted,
+    },
+    sectionLabel: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.foreground,
+      paddingTop: spacing.xs,
+    },
+    quickLinksGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    quickLinkTile: {
+      width: '47%',
     },
   })
 }

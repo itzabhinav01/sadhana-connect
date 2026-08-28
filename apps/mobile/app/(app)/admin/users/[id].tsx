@@ -20,7 +20,7 @@ import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
-import { fontSize, spacing } from '../../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
 
 const SELECTABLE_ROLES: AppRole[] = ['devotee', 'mentor', 'super_admin']
@@ -322,8 +322,13 @@ function createStyles(colors: ThemeColors) {
       maxWidth: 420,
       gap: spacing.sm,
       backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: spacing.md,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 4,
     },
     modalTitle: {
       fontSize: fontSize.base,

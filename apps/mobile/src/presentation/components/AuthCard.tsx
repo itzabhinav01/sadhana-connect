@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, radius, spacing } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface AuthCardProps {
@@ -21,6 +21,9 @@ export function AuthCard({ title, description, children }: AuthCardProps) {
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
     >
+      <View style={styles.brand}>
+        <Text style={styles.brandMark}>Sadhana Connect</Text>
+      </View>
       <View style={styles.card}>
         <Text style={styles.title}>{title}</Text>
         {description ? <Text style={styles.description}>{description}</Text> : null}
@@ -38,11 +41,31 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.lg,
       backgroundColor: colors.background,
     },
+    brand: {
+      alignItems: 'center',
+      marginBottom: spacing.lg,
+    },
+    brandMark: {
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      color: colors.primary,
+    },
     card: {
       gap: spacing.xs,
+      width: '100%',
+      maxWidth: 420,
+      alignSelf: 'center',
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
     },
     title: {
-      fontSize: fontSize.lg,
+      fontSize: fontSize.xl,
       fontWeight: '700',
       color: colors.foreground,
     },

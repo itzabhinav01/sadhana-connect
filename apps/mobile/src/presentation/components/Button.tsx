@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, radius, spacing } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface ButtonProps {
@@ -60,13 +60,19 @@ export function Button({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     button: {
-      borderRadius: 8,
-      paddingVertical: spacing.sm + 2,
+      borderRadius: radius.lg,
+      paddingVertical: spacing.sm + 4,
+      paddingHorizontal: spacing.md,
       alignItems: 'center',
       justifyContent: 'center',
     },
     primary: {
       backgroundColor: colors.primary,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.18,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
     },
     outline: {
       backgroundColor: 'transparent',

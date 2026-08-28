@@ -23,7 +23,7 @@ import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { ExpirationPicker } from '../../../src/presentation/components/ExpirationPicker'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -434,11 +434,15 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.sm,
     },
     item: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
       padding: spacing.md,
       gap: spacing.sm,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
     },
     itemHeaderRow: {
       flexDirection: 'row',

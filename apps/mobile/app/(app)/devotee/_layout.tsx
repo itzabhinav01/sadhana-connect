@@ -3,6 +3,7 @@ import { useNotificationsRealtime } from '@sadhana-connect/notifications'
 import { Redirect, Stack } from 'expo-router'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
+import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 
 // RequireRole equivalent: a UX/navigation guard only, not a security
 // boundary. Nested inside (app)/_layout.tsx, which has already resolved
@@ -25,6 +26,7 @@ export default function DevoteeLayout() {
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.foreground,
         contentStyle: { backgroundColor: colors.background },
+        headerRight: () => <HeaderThemeToggle />,
       }}
     >
       <Stack.Screen name="index" options={{ title: 'Dashboard' }} />

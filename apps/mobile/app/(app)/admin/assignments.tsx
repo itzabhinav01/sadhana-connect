@@ -12,7 +12,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
@@ -230,11 +230,15 @@ function createStyles(colors: ThemeColors) {
       color: colors.primary,
     },
     assignmentRow: {
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 12,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
       padding: spacing.md,
       gap: spacing.xs,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
     },
     rowName: {
       fontSize: fontSize.base,

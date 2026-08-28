@@ -8,8 +8,15 @@ import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
+import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
+
+function greetingForHour(hour: number): string {
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
 
 const SUMMARY_CARDS: { label: string; key: keyof AdminDashboardSummary }[] = [
   { label: 'Total devotees', key: 'totalDevotees' },
@@ -40,17 +47,25 @@ export default function AdminHomeScreen() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <Button
-              title="Sign Out"
-              pendingTitle="…"
-              isPending={signOut.isPending}
-              onPress={handleSignOut}
-              variant="outline"
-            />
+            <View style={styles.headerActions}>
+              <HeaderThemeToggle />
+              <Button
+                title="Sign Out"
+                pendingTitle="…"
+                isPending={signOut.isPending}
+                onPress={handleSignOut}
+                variant="outline"
+              />
+            </View>
           ),
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
+          <Text style={styles.headerTitle}>Platform overview</Text>
+        </View>
+
         <Card title="Platform Summary">
           {summaryQuery.isPending ? <Text style={styles.mutedLine}>Loading…</Text> : null}
           {summaryQuery.isError ? (
@@ -124,6 +139,25 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.md,
       backgroundColor: colors.background,
     },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    header: {
+      gap: 2,
+      paddingBottom: spacing.xs,
+    },
+    eyebrow: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    headerTitle: {
+      fontSize: fontSize.xl,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
     mutedLine: {
       fontSize: fontSize.sm,
       color: colors.muted,
@@ -138,7 +172,7 @@ function createStyles(colors: ThemeColors) {
       gap: 2,
     },
     summaryValue: {
-      fontSize: fontSize.lg,
+      fontSize: fontSize.xl,
       fontWeight: '700',
       color: colors.foreground,
     },
