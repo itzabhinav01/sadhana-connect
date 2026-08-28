@@ -263,6 +263,32 @@ describe('NotificationsScreen', () => {
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/devotee/sadhana'))
   })
 
+  it('navigates to History for a data_retention notification (no single related row to deep-link to)', async () => {
+    const notification = makeNotification({
+      type: 'data_retention',
+      title: 'Old Sadhana reports will be removed soon',
+      relatedReportId: null,
+      isRead: false,
+    })
+    mockUseNotifications.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: page([notification]),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    })
+
+    const { getByRole } = await render(<NotificationsScreen />)
+    await fireEvent.press(
+      getByRole('button', { name: 'Unread: Old Sadhana reports will be removed soon' }),
+    )
+
+    expect(markReadMutate).toHaveBeenCalledWith('n1')
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/devotee/history'))
+  })
+
   it('marks an unread notification read and navigates to the announcement detail screen', async () => {
     const notification = makeNotification({
       type: 'announcement',

@@ -49,6 +49,14 @@ export function useNotificationNavigation() {
       return
     }
 
+    // data_retention (0017) also has no single related row — it's about
+    // a whole range of reports about to be purged — so it opens History,
+    // where the devotee can pick that range and export it.
+    if (notification.type === 'data_retention') {
+      navigate('/history')
+      return
+    }
+
     // Fallback for a notification whose target no longer resolves (e.g.
     // the linked report/announcement was deleted) — stay on the
     // notification center rather than navigating nowhere or erroring.

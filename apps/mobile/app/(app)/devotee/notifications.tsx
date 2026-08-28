@@ -49,9 +49,9 @@ function NotificationRow({ notification, onPress, isNavigating }: NotificationRo
 }
 
 // Mobile equivalent of web's useNotificationNavigation. mentor_comment,
-// announcement, and sadhana_reminder all resolve to existing mobile
-// routes; an unresolvable target (deleted/expired) falls through and
-// simply stays on the notifications screen, same as web.
+// announcement, sadhana_reminder, and data_retention all resolve to
+// existing mobile routes; an unresolvable target (deleted/expired) falls
+// through and simply stays on the notifications screen, same as web.
 function useNavigateToNotification() {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -78,6 +78,11 @@ function useNavigateToNotification() {
 
     if (notification.type === 'sadhana_reminder') {
       router.push('/devotee/sadhana')
+      return
+    }
+
+    if (notification.type === 'data_retention') {
+      router.push('/devotee/history')
     }
   }
 }

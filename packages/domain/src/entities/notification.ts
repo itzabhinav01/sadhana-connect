@@ -1,12 +1,12 @@
 // Matches the notifications_type_valid CHECK constraint from
-// 0001_initial_schema.sql exactly. 'sadhana_reminder' and 'system' are
-// reserved for a future phase — no producer creates them yet (Phase 17
-// v1 only implements 'mentor_comment' and 'announcement').
+// 0001_initial_schema.sql (extended by 0017 for 'data_retention') exactly.
+// 'system' is reserved for a future phase — no producer creates it yet.
 export type NotificationType =
   | 'sadhana_reminder'
   | 'mentor_comment'
   | 'announcement'
   | 'system'
+  | 'data_retention'
 
 // Named SadhanaNotification (not `Notification`) to avoid shadowing the
 // global Web Notifications API type of the same name.

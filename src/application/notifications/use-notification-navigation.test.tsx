@@ -141,6 +141,21 @@ describe('useNotificationNavigation', () => {
     expect(getReportDateByIdMock).not.toHaveBeenCalled()
   })
 
+  it('navigates to /history for a data_retention notification (no single related row to deep-link to)', async () => {
+    const { result } = renderNavigationHook()
+
+    await result.current(
+      baseNotification({
+        type: 'data_retention',
+        relatedReportId: null,
+        relatedAnnouncementId: null,
+      }),
+    )
+
+    expect(navigateMock).toHaveBeenCalledWith('/history')
+    expect(getReportDateByIdMock).not.toHaveBeenCalled()
+  })
+
   it('falls back to /notifications for a notification with no related id', async () => {
     const { result } = renderNavigationHook()
 
