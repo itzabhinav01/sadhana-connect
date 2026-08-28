@@ -34,6 +34,10 @@ export interface AdminUserRepository {
 
   setUserActive(id: string, isActive: boolean): Promise<void>
 
+  // null clears the assignment. RLS + protect_profile_restricted_columns
+  // is what actually enforces "super admin only", same as changeUserRole.
+  setUserTempleGroup(id: string, templeGroupId: string | null): Promise<void>
+
   // Phase 20C: the anonymize half of the old split delete workflow is
   // gone — deletion is now the trusted admin-account-actions Edge
   // Function's hard_delete action (see useHardDeleteUser), which

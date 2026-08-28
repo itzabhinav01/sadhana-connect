@@ -31,6 +31,14 @@ jest.mock('../../../../../../packages/admin/src/use-generate-recovery-link', () 
   useGenerateRecoveryLink: jest.fn(),
 }))
 
+jest.mock('../../../../../../packages/admin/src/use-admin-temple-groups', () => ({
+  useAdminTempleGroups: jest.fn(),
+}))
+
+jest.mock('../../../../../../packages/admin/src/use-set-user-temple-group', () => ({
+  useSetUserTempleGroup: jest.fn(),
+}))
+
 jest.mock('expo-clipboard', () => ({
   setStringAsync: jest.fn(),
 }))
@@ -62,12 +70,14 @@ jest.mock('expo-router', () => {
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 import {
   useAdminAssignments,
+  useAdminTempleGroups,
   useAdminUserDetail,
   useChangeUserRole,
   useDeactivateAssignment,
   useGenerateRecoveryLink,
   useMentorDevoteeCount,
   useSetUserActive,
+  useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
 import * as Clipboard from 'expo-clipboard'
 
@@ -80,6 +90,8 @@ const mockUseDeactivateAssignment = useDeactivateAssignment as jest.Mock
 const mockUseSetUserActive = useSetUserActive as jest.Mock
 const mockUseChangeUserRole = useChangeUserRole as jest.Mock
 const mockUseGenerateRecoveryLink = useGenerateRecoveryLink as jest.Mock
+const mockUseAdminTempleGroups = useAdminTempleGroups as jest.Mock
+const mockUseSetUserTempleGroup = useSetUserTempleGroup as jest.Mock
 const mockSetStringAsync = Clipboard.setStringAsync as jest.Mock
 
 const devoteeUser = {
@@ -107,6 +119,8 @@ describe('AdminUserDetailScreen', () => {
     mockUseSetUserActive.mockReset()
     mockUseChangeUserRole.mockReset()
     mockUseGenerateRecoveryLink.mockReset()
+    mockUseAdminTempleGroups.mockReset()
+    mockUseSetUserTempleGroup.mockReset()
     mockSetStringAsync.mockReset()
 
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 0 })
@@ -120,6 +134,16 @@ describe('AdminUserDetailScreen', () => {
       isError: false,
       reset: jest.fn(),
     })
+    mockUseAdminTempleGroups.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [
+        { id: 'g1', name: 'ISKCON Delhi', createdAt: '2026-01-01T00:00:00.000Z' },
+        { id: 'g2', name: 'ISKCON Mumbai', createdAt: '2026-01-01T00:00:00.000Z' },
+      ],
+    })
+    mockUseSetUserTempleGroup.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
   })
 
   it('shows a loading state while pending', async () => {
@@ -247,5 +271,58 @@ describe('AdminUserDetailScreen', () => {
 
     const { getByText } = await render(<AdminUserDetailScreen />)
     expect(getByText('Could not generate a recovery link.')).toBeTruthy()
+  })
+
+  it('assigns a temple group to a devotee', async () => {
+    const mockSetTempleGroup = jest.fn()
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseSetUserTempleGroup.mockReturnValue({
+      mutate: mockSetTempleGroup,
+      isPending: false,
+      isError: false,
+    })
+
+    const { getByRole } = await render(<AdminUserDetailScreen />)
+    await fireEvent.press(getByRole('button', { name: 'ISKCON Mumbai' }))
+
+    expect(mockSetTempleGroup).toHaveBeenCalledWith({ userId: 'u1', templeGroupId: 'g2' })
+  })
+
+  it('clears a temple group assignment via the None button', async () => {
+    const mockSetTempleGroup = jest.fn()
+    mockUseAdminUserDetail.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: { ...devoteeUser, templeGroupId: 'g1' },
+    })
+    mockUseSetUserTempleGroup.mockReturnValue({
+      mutate: mockSetTempleGroup,
+      isPending: false,
+      isError: false,
+    })
+
+    const { getByRole } = await render(<AdminUserDetailScreen />)
+    await fireEvent.press(getByRole('button', { name: 'None' }))
+
+    expect(mockSetTempleGroup).toHaveBeenCalledWith({ userId: 'u1', templeGroupId: null })
+  })
+
+  it('does not show a temple group panel for a super admin', async () => {
+    mockUseAdminUserDetail.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: { ...devoteeUser, role: 'super_admin' },
+    })
+
+    const { queryByText } = await render(<AdminUserDetailScreen />)
+    expect(queryByText('Temple group')).toBeNull()
+  })
+
+  it('shows an error message when updating the temple group fails', async () => {
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+    mockUseSetUserTempleGroup.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: true })
+
+    const { getByText } = await render(<AdminUserDetailScreen />)
+    expect(getByText('Something went wrong updating the temple group.')).toBeTruthy()
   })
 })

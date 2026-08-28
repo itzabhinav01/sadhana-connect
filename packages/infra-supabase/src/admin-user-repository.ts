@@ -101,4 +101,13 @@ export const supabaseAdminUserRepository: AdminUserRepository = {
 
     if (error) throw error
   },
+
+  async setUserTempleGroup(id, templeGroupId) {
+    const { error } = await getSupabaseClient()
+      .from('profiles')
+      .update({ temple_group_id: templeGroupId })
+      .eq('id', id)
+
+    if (error) throw error
+  },
 }

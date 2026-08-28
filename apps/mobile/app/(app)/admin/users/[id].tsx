@@ -2,12 +2,14 @@ import {
   MENTOR_HAS_ACTIVE_DEVOTEES_MESSAGE,
   MentorHasActiveDevoteesError,
   useAdminAssignments,
+  useAdminTempleGroups,
   useAdminUserDetail,
   useChangeUserRole,
   useDeactivateAssignment,
   useGenerateRecoveryLink,
   useMentorDevoteeCount,
   useSetUserActive,
+  useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
 import type { AppRole } from '@sadhana-connect/domain'
 import * as Clipboard from 'expo-clipboard'
@@ -73,6 +75,58 @@ function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
           </View>
         ))
       )}
+    </Card>
+  )
+}
+
+// Unblocks the announcement flow, which was otherwise unreachable: a
+// mentor can only ever publish with scope: 'temple_group' using their
+// own temple_group_id (can_publish_announcement), and a devotee only
+// sees temple_group announcements matching their own — so this screen
+// was the missing piece letting a super admin actually set it.
+function TempleGroupPanel({
+  user,
+}: {
+  user: { id: string; templeGroupId: string | null }
+}) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+  const templeGroupsQuery = useAdminTempleGroups()
+  const setTempleGroup = useSetUserTempleGroup()
+
+  return (
+    <Card title="Temple group">
+      {templeGroupsQuery.isPending ? <Text style={styles.mutedLine}>Loading…</Text> : null}
+      {templeGroupsQuery.isError ? (
+        <Text style={styles.errorText}>Something went wrong loading temple groups.</Text>
+      ) : null}
+      {templeGroupsQuery.isSuccess && templeGroupsQuery.data.length === 0 ? (
+        <Text style={styles.mutedLine}>No temple groups exist yet. Create one first.</Text>
+      ) : null}
+      {templeGroupsQuery.data && templeGroupsQuery.data.length > 0 ? (
+        <View style={styles.filterRow}>
+          <Button
+            title="None"
+            variant={user.templeGroupId === null ? 'primary' : 'outline'}
+            isPending={setTempleGroup.isPending}
+            onPress={() => setTempleGroup.mutate({ userId: user.id, templeGroupId: null })}
+          />
+          {templeGroupsQuery.data.map((group) => (
+            <Button
+              key={group.id}
+              title={group.name}
+              variant={user.templeGroupId === group.id ? 'primary' : 'outline'}
+              isPending={setTempleGroup.isPending}
+              onPress={() =>
+                setTempleGroup.mutate({ userId: user.id, templeGroupId: group.id })
+              }
+            />
+          ))}
+        </View>
+      ) : null}
+      {setTempleGroup.isError ? (
+        <Text style={styles.errorText}>Something went wrong updating the temple group.</Text>
+      ) : null}
     </Card>
   )
 }
@@ -236,6 +290,8 @@ export default function AdminUserDetailScreen() {
         <Card title="Phone number">
           <Text style={styles.mutedLine}>{user.phoneNumber ?? 'Not provided'}</Text>
         </Card>
+
+        {user.role !== 'super_admin' ? <TempleGroupPanel user={user} /> : null}
 
         {user.role === 'mentor' ? <MentorInfoPanel mentorId={user.id} /> : null}
         {user.role === 'devotee' ? <DevoteeInfoPanel devoteeId={user.id} /> : null}
