@@ -63,14 +63,14 @@ export function WeeklySummaryCard() {
                   : summaryQuery.data.averageTotalRounds.toFixed(1)}
               </dd>
             </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Reading</dt>
+            <div className="rounded-lg border-l-4 border-l-reading bg-reading-soft px-3 py-2">
+              <dt className="text-xs font-medium text-reading">Reading</dt>
               <dd className="text-lg font-semibold text-foreground">
                 {summaryQuery.data.totalReadingMinutes} min
               </dd>
             </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Hearing</dt>
+            <div className="rounded-lg border-l-4 border-l-hearing bg-hearing-soft px-3 py-2">
+              <dt className="text-xs font-medium text-hearing">Hearing</dt>
               <dd className="text-lg font-semibold text-foreground">
                 {summaryQuery.data.totalHearingMinutes} min
               </dd>

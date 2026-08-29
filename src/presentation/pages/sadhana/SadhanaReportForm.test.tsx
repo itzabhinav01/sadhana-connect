@@ -66,7 +66,7 @@ describe('SadhanaReportForm', () => {
     expect(
       screen.getByRole('button', { name: /save sadhana/i }),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toHaveValue('')
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toHaveValue('')
   })
 
   it('renders a prefilled form with "Update Sadhana" for an existing report', () => {
@@ -81,7 +81,7 @@ describe('SadhanaReportForm', () => {
     expect(
       screen.getByRole('button', { name: /update sadhana/i }),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toHaveValue('4')
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toHaveValue('4')
     expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('16')
     expect(screen.getByLabelText(/book name/i)).toHaveValue('Bhagavad Gita')
     expect(screen.getByLabelText(/^signature$/i)).toHaveValue('Test Devotee')
@@ -104,8 +104,8 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
+    await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
 
     expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('')
   })
@@ -126,8 +126,8 @@ describe('SadhanaReportForm', () => {
         />,
       )
 
-      await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-      await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+      await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
+      await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
       await user.type(screen.getByLabelText(/^total rounds$/i), totalRoundsValue)
       await user.click(screen.getByRole('button', { name: /notes & signature/i }))
       await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
@@ -154,10 +154,10 @@ describe('SadhanaReportForm', () => {
     const totalRoundsInput = screen.getByLabelText(/^total rounds$/i)
     await user.type(totalRoundsInput, '5')
 
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
+    await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
     expect(totalRoundsInput).toHaveValue('5')
 
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
     expect(totalRoundsInput).toHaveValue('5')
   })
 
@@ -171,12 +171,12 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
+    await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
     await user.type(screen.getByLabelText(/^total rounds$/i), '99')
 
-    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toHaveValue('4')
-    expect(screen.getByLabelText(/rounds till 7 am/i)).toHaveValue('8')
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toHaveValue('4')
+    expect(screen.getByLabelText(/^rounds till 7 am$/i)).toHaveValue('8')
   })
 
   it('has no cross-field validation between the rounds fields — a mismatched combination still saves', async () => {
@@ -189,8 +189,8 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
+    await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
     // Deliberately far lower than before + till (12) — must still be
     // accepted, since the fields are unrelated.
     await user.type(screen.getByLabelText(/^total rounds$/i), '1')
@@ -216,7 +216,7 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    const beforeInput = screen.getByLabelText(/rounds before 4:30 am/i)
+    const beforeInput = screen.getByLabelText(/^rounds before 4:30 am$/i)
     await user.clear(beforeInput)
     await user.type(beforeInput, '1')
 
@@ -342,8 +342,8 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
-    await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
+    await user.type(screen.getByLabelText(/^rounds before 4:30 am$/i), '4')
+    await user.type(screen.getByLabelText(/^rounds till 7 am$/i), '8')
 
     expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('12')
   })
@@ -373,7 +373,7 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toBeInTheDocument()
     expect(screen.queryByLabelText(/book name/i)).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/^signature$/i)).not.toBeInTheDocument()
   })
@@ -412,6 +412,38 @@ describe('SadhanaReportForm', () => {
     expect(screen.getByLabelText(/^total rounds$/i)).toBeInTheDocument()
     // Study is all-zero/empty — collapsed.
     expect(screen.queryByLabelText(/book name/i)).not.toBeInTheDocument()
+  })
+
+  it('adjusts Rounds before 4:30 AM with the +/- stepper buttons', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Increase Rounds before 4:30 AM' }))
+    await user.click(screen.getByRole('button', { name: 'Increase Rounds before 4:30 AM' }))
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toHaveValue('2')
+
+    await user.click(screen.getByRole('button', { name: 'Decrease Rounds before 4:30 AM' }))
+    expect(screen.getByLabelText(/^rounds before 4:30 am$/i)).toHaveValue('1')
+  })
+
+  it('fills Total Rounds from a quick-amount button', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Set Total Rounds to 16' }))
+    expect(screen.getByLabelText(/^total rounds$/i)).toHaveValue('16')
   })
 
   it('shows a confirmation once the report has saved', () => {

@@ -68,23 +68,21 @@ export function TodaySadhanaCard() {
             <p className="text-sm text-foreground">
               Today&apos;s sadhana is saved.
             </p>
-            <dl className="grid grid-cols-3 gap-4">
-              <div>
-                <dt className="text-xs text-muted-foreground">
-                  Total Rounds
-                </dt>
+            <dl className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border-l-4 border-l-chanting bg-chanting-soft px-3 py-2">
+                <dt className="text-xs font-medium text-chanting">Total Rounds</dt>
                 <dd className="text-lg font-semibold text-foreground">
                   {reportQuery.data.totalRounds}
                 </dd>
               </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Reading</dt>
+              <div className="rounded-lg border-l-4 border-l-reading bg-reading-soft px-3 py-2">
+                <dt className="text-xs font-medium text-reading">Reading</dt>
                 <dd className="text-lg font-semibold text-foreground">
                   {reportQuery.data.readingMinutes} min
                 </dd>
               </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Hearing</dt>
+              <div className="rounded-lg border-l-4 border-l-hearing bg-hearing-soft px-3 py-2">
+                <dt className="text-xs font-medium text-hearing">Hearing</dt>
                 <dd className="text-lg font-semibold text-foreground">
                   {reportQuery.data.hearingMinutes} min
                 </dd>

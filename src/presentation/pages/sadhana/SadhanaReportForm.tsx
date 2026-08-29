@@ -32,6 +32,22 @@ import {
   FormMessage,
 } from '@/presentation/components/ui/form'
 import { Input } from '@/presentation/components/ui/input'
+import { NumberFormField } from '@/presentation/components/NumberFormField'
+import { cn } from '@/shared/utils/cn'
+
+// One accent per practice category — same palette, same scoping rule as
+// apps/mobile/src/shared/theme.ts sectionAccents: color identifies which
+// part of the form you're in, never used as decoration outside it.
+const SECTION_STYLE: Record<
+  SectionKey,
+  { border: string; background: string; text: string }
+> = {
+  chanting: { border: 'border-l-chanting', background: 'bg-chanting-soft', text: 'text-chanting' },
+  study: { border: 'border-l-reading', background: 'bg-reading-soft', text: 'text-reading' },
+  rest: { border: 'border-l-rest', background: 'bg-rest-soft', text: 'text-rest' },
+  day: { border: 'border-l-schedule', background: 'bg-schedule-soft', text: 'text-schedule' },
+  notes: { border: 'border-l-hearing', background: 'bg-hearing-soft', text: 'text-hearing' },
+}
 
 interface SadhanaReportFormProps {
   date: string
@@ -211,43 +227,40 @@ export function SadhanaReportForm({
           type="multiple"
           value={openSections}
           onValueChange={(value) => setOpenSections(value as SectionKey[])}
-          className="rounded-lg border px-4"
+          className="flex flex-col gap-3"
         >
-          <AccordionItem value="chanting">
+          <AccordionItem
+            value="chanting"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.chanting.border,
+              SECTION_STYLE.chanting.background,
+            )}
+          >
             <AccordionTrigger>
-              <span className="flex items-center gap-2 text-foreground">
-                <Repeat className="size-4 text-primary" aria-hidden="true" />
-                Chanting
+              <span className="flex items-center gap-2">
+                <Repeat className={cn('size-4', SECTION_STYLE.chanting.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.chanting.text)}>
+                  Chanting
+                </span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="roundsBefore430"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rounds before 4:30 AM</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Rounds before 4:30 AM"
+                  showStepper
+                  quickAmounts={[1, 2, 4]}
                 />
 
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="roundsTill7am"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rounds till 7 AM</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Rounds till 7 AM"
+                  showStepper
+                  quickAmounts={[4, 8, 16]}
                 />
 
                 <FormField
@@ -264,49 +277,41 @@ export function SadhanaReportForm({
                   )}
                 />
 
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="totalRounds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Rounds</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        Enter the complete number of rounds chanted today — this
-                        may include rounds chanted after 7 AM that aren&apos;t
-                        reflected in the fields above.
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Total Rounds"
+                  showStepper
+                  quickAmounts={[8, 16, 25]}
+                  helpText="Enter the complete number of rounds chanted today — this may include rounds chanted after 7 AM that aren't reflected in the fields above."
                 />
               </div>
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="study">
+          <AccordionItem
+            value="study"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.study.border,
+              SECTION_STYLE.study.background,
+            )}
+          >
             <AccordionTrigger>
-              <span className="flex items-center gap-2 text-foreground">
-                <BookOpen className="size-4 text-primary" aria-hidden="true" />
-                Study
+              <span className="flex items-center gap-2">
+                <BookOpen className={cn('size-4', SECTION_STYLE.study.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.study.text)}>
+                  Study
+                </span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="readingMinutes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Reading Minutes</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Reading Minutes"
+                  quickAmounts={[10, 15, 30, 60]}
                 />
 
                 <FormField
@@ -354,11 +359,20 @@ export function SadhanaReportForm({
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="rest">
+          <AccordionItem
+            value="rest"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.rest.border,
+              SECTION_STYLE.rest.background,
+            )}
+          >
             <AccordionTrigger>
-              <span className="flex items-center gap-2 text-foreground">
-                <Moon className="size-4 text-primary" aria-hidden="true" />
-                Rest
+              <span className="flex items-center gap-2">
+                <Moon className={cn('size-4', SECTION_STYLE.rest.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.rest.text)}>
+                  Rest
+                </span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -422,11 +436,20 @@ export function SadhanaReportForm({
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="day">
+          <AccordionItem
+            value="day"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.day.border,
+              SECTION_STYLE.day.background,
+            )}
+          >
             <AccordionTrigger>
-              <span className="flex items-center gap-2 text-foreground">
-                <Briefcase className="size-4 text-primary" aria-hidden="true" />
-                Day
+              <span className="flex items-center gap-2">
+                <Briefcase className={cn('size-4', SECTION_STYLE.day.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.day.text)}>
+                  Day
+                </span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
@@ -462,11 +485,20 @@ export function SadhanaReportForm({
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="notes">
+          <AccordionItem
+            value="notes"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.notes.border,
+              SECTION_STYLE.notes.background,
+            )}
+          >
             <AccordionTrigger>
-              <span className="flex items-center gap-2 text-foreground">
-                <PenLine className="size-4 text-primary" aria-hidden="true" />
-                Notes &amp; Signature
+              <span className="flex items-center gap-2">
+                <PenLine className={cn('size-4', SECTION_STYLE.notes.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.notes.text)}>
+                  Notes &amp; Signature
+                </span>
               </span>
             </AccordionTrigger>
             <AccordionContent>
