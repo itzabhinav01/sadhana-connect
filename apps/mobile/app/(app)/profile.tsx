@@ -1,5 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { phoneNumberField, useAuth, useProfile } from '@sadhana-connect/auth'
+import {
+  phoneNumberField,
+  resetPasswordSchema,
+  useAuth,
+  useProfile,
+  useUpdatePassword,
+  type ResetPasswordInput,
+} from '@sadhana-connect/auth'
 import { RECENT_REPORTS_LOOKBACK_LIMIT, useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 import { Stack, useRouter } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
@@ -49,14 +56,25 @@ export default function ProfileScreen() {
   const streak = useSadhanaStreak()
   const recentReports = useRecentSadhanaReports()
   const updateProfile = useUpdateProfile()
+  const updatePassword = useUpdatePassword()
   const signOut = useSignOut()
   const [isEditing, setIsEditing] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
 
   const { control, handleSubmit, reset } = useForm<ProfileEditValues>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
       fullName: '',
       phoneNumber: '',
+    },
+  })
+
+  const passwordForm = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
     },
   })
 
@@ -79,6 +97,16 @@ export default function ProfileScreen() {
         onSuccess: () => setIsEditing(false),
       },
     )
+  })
+
+  const onPasswordSubmit = passwordForm.handleSubmit((values) => {
+    updatePassword.mutate(values.password, {
+      onSuccess: () => {
+        setIsChangingPassword(false)
+        setPasswordSuccess(true)
+        passwordForm.reset({ password: '', confirmPassword: '' })
+      },
+    })
   })
 
   const handleSignOut = () => {
@@ -145,16 +173,30 @@ export default function ProfileScreen() {
             <Text style={styles.value}>{ROLE_LABELS[profile.role] ?? profile.role}</Text>
           </View>
 
+          {passwordSuccess ? (
+            <View style={styles.successBox}>
+              <Text style={styles.successText}>Password updated successfully! ✅</Text>
+            </View>
+          ) : null}
+
           <View style={styles.buttonRow}>
             <Button
               title="Edit Profile"
-              variant="primary"
+              variant="outline"
               onPress={() => {
                 reset({
                   fullName: profile.fullName ?? '',
                   phoneNumber: profile.phoneNumber ?? '',
                 })
                 setIsEditing(true)
+              }}
+            />
+            <Button
+              title="Change Password"
+              variant="outline"
+              onPress={() => {
+                setPasswordSuccess(false)
+                setIsChangingPassword(true)
               }}
             />
           </View>
@@ -238,6 +280,60 @@ export default function ProfileScreen() {
             </View>
           </View>
         </Modal>
+
+        {/* Change Password Modal */}
+        <Modal
+          visible={isChangingPassword}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setIsChangingPassword(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Set New Password</Text>
+
+              <TextField
+                control={passwordForm.control}
+                name="password"
+                label="New Password"
+                placeholder="At least 8 characters"
+                secureTextEntry
+              />
+
+              <TextField
+                control={passwordForm.control}
+                name="confirmPassword"
+                label="Confirm New Password"
+                placeholder="Re-enter new password"
+                secureTextEntry
+              />
+
+              {updatePassword.isError ? (
+                <ErrorBanner
+                  message={
+                    updatePassword.error instanceof Error
+                      ? updatePassword.error.message
+                      : 'Something went wrong updating your password.'
+                  }
+                />
+              ) : null}
+
+              <View style={styles.modalActions}>
+                <Button
+                  title="Update Password"
+                  pendingTitle="Updating…"
+                  isPending={updatePassword.isPending}
+                  onPress={onPasswordSubmit}
+                />
+                <Button
+                  title="Cancel"
+                  variant="outline"
+                  onPress={() => setIsChangingPassword(false)}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </>
   )
@@ -308,7 +404,21 @@ function createStyles(colors: ThemeColors) {
       marginVertical: spacing.xs,
     },
     buttonRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
       marginTop: spacing.sm,
+      flexWrap: 'wrap',
+    },
+    successBox: {
+      backgroundColor: colors.successBackground,
+      borderRadius: radius.md,
+      padding: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    successText: {
+      fontSize: fontSize.sm,
+      color: colors.success,
+      fontFamily: fontFamily.medium,
     },
     statsRow: {
       flexDirection: 'row',

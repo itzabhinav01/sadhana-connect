@@ -306,7 +306,9 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Not authorized.' }, 403, corsHeaders)
   }
 
-  if (action !== 'get_user_email' && targetUserId === callerId) {
+  const isDestructiveAction = action === 'ban' || action === 'unban' || action === 'hard_delete'
+
+  if (isDestructiveAction && targetUserId === callerId) {
     return jsonResponse({ ok: false, error: 'Cannot target your own account.' }, 400, corsHeaders)
   }
 
@@ -329,7 +331,7 @@ Deno.serve(async (req) => {
   if (!targetProfile) {
     return jsonResponse({ ok: false, error: 'Target account does not exist.' }, 404, corsHeaders)
   }
-  if (action !== 'get_user_email' && targetProfile.role === 'super_admin') {
+  if (isDestructiveAction && targetProfile.role === 'super_admin') {
     return jsonResponse({ ok: false, error: 'Cannot target another super admin.' }, 403, corsHeaders)
   }
 

@@ -239,7 +239,9 @@ function PasswordResetPanel({ userId }: { userId: string }) {
         onPress={() => generateLink.mutate(userId, { onSuccess: setLink })}
       />
       {generateLink.isError ? (
-        <Text style={styles.errorText}>Could not generate a recovery link.</Text>
+        <Text style={styles.errorText}>
+          {generateLink.error?.message ?? 'Could not generate a recovery link.'}
+        </Text>
       ) : null}
 
       <Modal visible={link !== null} transparent animationType="fade" onRequestClose={handleClose}>

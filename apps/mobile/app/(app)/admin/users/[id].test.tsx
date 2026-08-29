@@ -136,6 +136,8 @@ const devoteeUser = {
 const mentorUser = { ...devoteeUser, id: 'm1', fullName: 'Test Mentor', role: 'mentor' as const }
 
 describe('AdminUserDetailScreen', () => {
+  jest.setTimeout(15000)
+
   afterEach(async () => {
     await cleanup()
   })

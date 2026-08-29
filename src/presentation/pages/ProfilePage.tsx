@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { phoneNumberField, useAuth, useProfile } from '@sadhana-connect/auth'
+import { phoneNumberField, resetPasswordSchema, useAuth, useProfile, useUpdatePassword, type ResetPasswordInput } from '@sadhana-connect/auth'
 import { RECENT_REPORTS_LOOKBACK_LIMIT, useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { useSignOut } from '@/application/auth/use-sign-out'
@@ -83,12 +83,20 @@ export function ProfilePage() {
   const { session } = useAuth()
   const profileQuery = useProfile()
   const updateProfile = useUpdateProfile()
+  const updatePassword = useUpdatePassword()
   const signOut = useSignOut()
   const [isEditing, setIsEditing] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
 
   const form = useForm<ProfileEditValues>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: { fullName: '', phoneNumber: '' },
+  })
+
+  const passwordForm = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { password: '', confirmPassword: '' },
   })
 
   useEffect(() => {
@@ -110,6 +118,16 @@ export function ProfilePage() {
         onSuccess: () => setIsEditing(false),
       },
     )
+  })
+
+  const onPasswordSubmit = passwordForm.handleSubmit((values) => {
+    updatePassword.mutate(values.password, {
+      onSuccess: () => {
+        setIsChangingPassword(false)
+        setPasswordSuccess(true)
+        passwordForm.reset({ password: '', confirmPassword: '' })
+      },
+    })
   })
 
   const handleSignOut = () => {
@@ -233,6 +251,108 @@ export function ProfilePage() {
                             fullName: profileQuery.data?.fullName ?? '',
                             phoneNumber: profileQuery.data?.phoneNumber ?? '',
                           })
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>
+                <h2>Security & Password</h2>
+              </CardTitle>
+              {!isChangingPassword ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setPasswordSuccess(false)
+                    setIsChangingPassword(true)
+                  }}
+                >
+                  Change Password
+                </Button>
+              ) : null}
+            </CardHeader>
+            <CardContent>
+              {passwordSuccess ? (
+                <Alert className="mb-4 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+                  <AlertDescription>Password updated successfully! ✅</AlertDescription>
+                </Alert>
+              ) : null}
+
+              {!isChangingPassword ? (
+                <p className="text-sm text-muted-foreground">
+                  Update your login password to keep your account secure.
+                </p>
+              ) : (
+                <Form {...passwordForm}>
+                  <form onSubmit={onPasswordSubmit} className="flex flex-col gap-4 max-w-md" noValidate>
+                    <FormField
+                      control={passwordForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>New Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="At least 8 characters"
+                              autoComplete="new-password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={passwordForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm New Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="Re-enter new password"
+                              autoComplete="new-password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {updatePassword.isError ? (
+                      <Alert variant="destructive">
+                        <AlertDescription>
+                          {updatePassword.error instanceof Error
+                            ? updatePassword.error.message
+                            : 'Something went wrong updating your password.'}
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+
+                    <div className="flex gap-2">
+                      <Button type="submit" size="sm" disabled={updatePassword.isPending}>
+                        {updatePassword.isPending ? 'Updating…' : 'Update Password'}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setIsChangingPassword(false)
+                          passwordForm.reset({ password: '', confirmPassword: '' })
                         }}
                       >
                         Cancel

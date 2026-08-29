@@ -24,6 +24,7 @@ import { AuthCard } from '@/presentation/pages/auth/AuthCard'
 export function ResetPasswordPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { session, isLoading } = useAuth()
   const { isRecoveryReady } = usePasswordRecovery()
   const updatePassword = useUpdatePassword()
 
@@ -58,7 +59,7 @@ export function ResetPasswordPage() {
     )
   }
 
-  if (!isRecoveryReady) {
+  if (!isRecoveryReady && !session && !isLoading) {
     return (
       <AuthCard
         title="Verifying link"

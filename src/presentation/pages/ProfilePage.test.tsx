@@ -14,6 +14,7 @@ const {
   useSadhanaStreakMock,
   useRecentSadhanaReportsMock,
   navigateMock,
+  useUpdatePasswordMock,
 } = vi.hoisted(() => ({
   useProfileMock: vi.fn(),
   useUpdateProfileMock: vi.fn(),
@@ -24,6 +25,7 @@ const {
   useSadhanaStreakMock: vi.fn(),
   useRecentSadhanaReportsMock: vi.fn(),
   navigateMock: vi.fn(),
+  useUpdatePasswordMock: vi.fn(() => ({ mutate: vi.fn(), isPending: false, isError: false })),
 }))
 
 vi.mock('@sadhana-connect/auth', async (importOriginal) => {
@@ -32,6 +34,7 @@ vi.mock('@sadhana-connect/auth', async (importOriginal) => {
     ...actual,
     useProfile: useProfileMock,
     useAuth: useAuthMock,
+    useUpdatePassword: useUpdatePasswordMock,
   }
 })
 
@@ -170,6 +173,33 @@ describe('ProfilePage', () => {
         expect.anything(),
       ),
     )
+  })
+
+  it('changes password successfully when change password form is submitted', async () => {
+    const passwordMutateMock = vi.fn((_password, options) => options?.onSuccess?.())
+    useUpdatePasswordMock.mockReturnValue({
+      mutate: passwordMutateMock,
+      isPending: false,
+      isError: false,
+    })
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: activeProfile,
+    })
+
+    const user = userEvent.setup()
+    render(<ProfilePage />)
+
+    await user.click(screen.getByRole('button', { name: /change password/i }))
+    await user.type(screen.getByLabelText(/^new password$/i), 'newsecret123')
+    await user.type(screen.getByLabelText(/^confirm new password$/i), 'newsecret123')
+    await user.click(screen.getByRole('button', { name: /update password/i }))
+
+    await waitFor(() =>
+      expect(passwordMutateMock).toHaveBeenCalledWith('newsecret123', expect.anything()),
+    )
+    expect(screen.getByText(/password updated successfully!/i)).toBeInTheDocument()
   })
 
   it('signs out and redirects to /login when "Sign out" is pressed', async () => {

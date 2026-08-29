@@ -27,6 +27,10 @@ jest.mock('../../../../../packages/sadhana/src/use-recent-sadhana-reports', () =
   RECENT_REPORTS_LOOKBACK_LIMIT: 60,
 }))
 
+jest.mock('../../../../../packages/auth/src/use-update-password', () => ({
+  useUpdatePassword: jest.fn(),
+}))
+
 jest.mock('../../../src/application/profile/use-update-profile', () => ({
   useUpdateProfile: jest.fn(),
 }))
@@ -47,7 +51,7 @@ jest.mock('expo-router', () => {
 })
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react-native'
-import { useProfile } from '@sadhana-connect/auth'
+import { useProfile, useUpdatePassword } from '@sadhana-connect/auth'
 import { useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
@@ -56,10 +60,12 @@ import ProfileScreen from './profile'
 
 const mockUseProfile = useProfile as jest.Mock
 const mockUseUpdateProfile = useUpdateProfile as jest.Mock
+const mockUseUpdatePassword = useUpdatePassword as jest.Mock
 const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
 const mockUseRecentSadhanaReports = useRecentSadhanaReports as jest.Mock
 const mockUseSignOut = useSignOut as jest.Mock
 const mockMutate = jest.fn()
+const mockPasswordMutate = jest.fn()
 
 const activeProfile = {
   id: 'user-1',
@@ -78,11 +84,18 @@ describe('ProfileScreen', () => {
   beforeEach(() => {
     mockUseProfile.mockReset()
     mockUseUpdateProfile.mockReset()
+    mockUseUpdatePassword.mockReset()
     mockMutate.mockReset()
+    mockPasswordMutate.mockReset()
     mockPush.mockReset()
     mockReplace.mockReset()
     mockUseUpdateProfile.mockReturnValue({
       mutate: mockMutate,
+      isPending: false,
+      isError: false,
+    })
+    mockUseUpdatePassword.mockReturnValue({
+      mutate: mockPasswordMutate,
       isPending: false,
       isError: false,
     })
@@ -140,6 +153,29 @@ describe('ProfileScreen', () => {
         expect.anything(),
       ),
     )
+  })
+
+  it('opens change password modal and updates password on success', async () => {
+    mockPasswordMutate.mockImplementation((_value, options) => {
+      options?.onSuccess?.()
+    })
+    mockUseProfile.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: activeProfile,
+    })
+
+    const { getByText, getByPlaceholderText } = await render(<ProfileScreen />)
+
+    await fireEvent.press(getByText('Change Password'))
+    await fireEvent.changeText(getByPlaceholderText('At least 8 characters'), 'newsecret123')
+    await fireEvent.changeText(getByPlaceholderText('Re-enter new password'), 'newsecret123')
+    await fireEvent.press(getByText('Update Password'))
+
+    await waitFor(() =>
+      expect(mockPasswordMutate).toHaveBeenCalledWith('newsecret123', expect.anything()),
+    )
+    expect(getByText('Password updated successfully! ✅')).toBeTruthy()
   })
 
   it('navigates to /devotee/settings when "Settings & Reminders" is pressed', async () => {
