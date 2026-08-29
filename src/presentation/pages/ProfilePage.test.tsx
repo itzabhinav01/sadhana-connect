@@ -4,25 +4,61 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ProfilePage } from '@/presentation/pages/ProfilePage'
 
-const { useProfileMock, useUpdatePhoneNumberMock, mutateMock } = vi.hoisted(
-  () => ({
-    useProfileMock: vi.fn(),
-    useUpdatePhoneNumberMock: vi.fn(),
-    mutateMock: vi.fn(),
-  }),
-)
+const {
+  useProfileMock,
+  useUpdatePhoneNumberMock,
+  mutateMock,
+  useAuthMock,
+  useSignOutMock,
+  signOutMutateMock,
+  useSadhanaStreakMock,
+  useRecentSadhanaReportsMock,
+  navigateMock,
+} = vi.hoisted(() => ({
+  useProfileMock: vi.fn(),
+  useUpdatePhoneNumberMock: vi.fn(),
+  mutateMock: vi.fn(),
+  useAuthMock: vi.fn(),
+  useSignOutMock: vi.fn(),
+  signOutMutateMock: vi.fn(),
+  useSadhanaStreakMock: vi.fn(),
+  useRecentSadhanaReportsMock: vi.fn(),
+  navigateMock: vi.fn(),
+}))
 
 vi.mock('@sadhana-connect/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@sadhana-connect/auth')>()
   return {
     ...actual,
     useProfile: useProfileMock,
+    useAuth: useAuthMock,
+  }
+})
+
+vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@sadhana-connect/sadhana')>()
+  return {
+    ...actual,
+    useSadhanaStreak: useSadhanaStreakMock,
+    useRecentSadhanaReports: useRecentSadhanaReportsMock,
   }
 })
 
 vi.mock('@/application/profile/use-update-phone-number', () => ({
   useUpdatePhoneNumber: useUpdatePhoneNumberMock,
 }))
+
+vi.mock('@/application/auth/use-sign-out', () => ({
+  useSignOut: useSignOutMock,
+}))
+
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  }
+})
 
 const activeProfile = {
   id: 'user-1',
@@ -38,11 +74,17 @@ describe('ProfilePage', () => {
     useProfileMock.mockReset()
     useUpdatePhoneNumberMock.mockReset()
     mutateMock.mockReset()
+    signOutMutateMock.mockReset()
+    navigateMock.mockReset()
     useUpdatePhoneNumberMock.mockReturnValue({
       mutate: mutateMock,
       isPending: false,
       isError: false,
     })
+    useAuthMock.mockReturnValue({ session: { userId: 'user-1', email: 'devotee@example.com' } })
+    useSignOutMock.mockReturnValue({ mutate: signOutMutateMock, isPending: false })
+    useSadhanaStreakMock.mockReturnValue({ data: 5 })
+    useRecentSadhanaReportsMock.mockReturnValue({ data: [{ id: 'r1' }, { id: 'r2' }] })
   })
 
   it('shows a loading state while the profile is pending', () => {
@@ -61,6 +103,33 @@ describe('ProfilePage', () => {
     expect(
       screen.getByText(/something went wrong loading your profile/i),
     ).toBeInTheDocument()
+  })
+
+  it('shows the identity header and devotee streak/report stats', () => {
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: activeProfile,
+    })
+
+    render(<ProfilePage />)
+
+    expect(screen.getByText('User One')).toBeInTheDocument()
+    expect(screen.getByText('Devotee')).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('does not show devotee stats for a mentor', () => {
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: { ...activeProfile, role: 'mentor' as const },
+    })
+
+    render(<ProfilePage />)
+
+    expect(screen.queryByText('This Week')).not.toBeInTheDocument()
   })
 
   it('shows the existing phone number with an Edit action', () => {
@@ -176,5 +245,22 @@ describe('ProfilePage', () => {
     expect(
       screen.getByText(/something went wrong saving your phone number/i),
     ).toBeInTheDocument()
+  })
+
+  it('signs out and redirects to /login when "Sign out" is pressed', async () => {
+    signOutMutateMock.mockImplementation((_arg, options) => options?.onSuccess?.())
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: activeProfile,
+    })
+
+    const user = userEvent.setup()
+    render(<ProfilePage />)
+
+    await user.click(screen.getByRole('button', { name: /sign out/i }))
+
+    expect(signOutMutateMock).toHaveBeenCalled()
+    expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
   })
 })

@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bell,
   BookOpen,
   Building2,
   ClipboardList,
@@ -68,4 +69,31 @@ export const navigationConfig: {
 export function getNavItemsForRole(role: AppRole | undefined): NavItem[] {
   if (!role) return []
   return [...navigationConfig.common, ...navigationConfig.byRole[role]]
+}
+
+// The primary-destination subset shown as a persistent bottom tab bar on
+// narrow viewports (mirrors the tab bar already shipped on apps/mobile —
+// same devotee 5 items, same rationale: thumb-reach for the handful of
+// destinations visited every day, no drawer tap required). Profile and
+// Settings stay reachable via the header's account menu instead, same
+// split as mobile. super_admin has no bottom-tab set — its 6-item nav is
+// deliberately left on the existing hamburger/drawer, matching the
+// decision already made for the mobile app's admin role.
+export function getBottomTabItemsForRole(role: AppRole | undefined): NavItem[] | null {
+  if (role === 'devotee') {
+    return [
+      { label: 'Home', href: '/', icon: Home },
+      { label: 'Sadhana', href: '/sadhana', icon: NotebookPen },
+      { label: 'History', href: '/history', icon: History },
+      { label: 'Analytics', href: '/analytics', icon: BarChart3 },
+      { label: 'Alerts', href: '/notifications', icon: Bell },
+    ]
+  }
+  if (role === 'mentor') {
+    return [
+      { label: 'Devotees', href: '/mentor', icon: Users },
+      { label: 'Announcements', href: '/mentor/announcements', icon: Megaphone },
+    ]
+  }
+  return null
 }

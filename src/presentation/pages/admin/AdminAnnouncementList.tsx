@@ -128,7 +128,7 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
               {SCOPE_LABEL[announcement.scope]}
             </span>
             {announcement.isPinned ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
                 Pinned
               </span>
             ) : null}

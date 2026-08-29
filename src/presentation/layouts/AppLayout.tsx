@@ -3,9 +3,11 @@ import { Outlet, useNavigation } from 'react-router-dom'
 import { useAuth } from '@sadhana-connect/auth'
 import { useNotificationsRealtime } from '@sadhana-connect/notifications'
 import { useProfile } from '@sadhana-connect/auth'
-import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
+import { getBottomTabItemsForRole, getNavItemsForRole } from '@/presentation/navigation/nav-config'
+import { cn } from '@/shared/utils/cn'
 import { AppHeader } from '@/presentation/layouts/AppHeader'
 import { AppSidebar } from '@/presentation/layouts/AppSidebar'
+import { BottomTabBar } from '@/presentation/layouts/BottomTabBar'
 import { OfflineBanner } from '@/presentation/layouts/OfflineBanner'
 import { UpdatePrompt } from '@/presentation/layouts/UpdatePrompt'
 
@@ -34,6 +36,7 @@ export function AppLayout() {
   }
 
   const navItems = getNavItemsForRole(profile.data.role)
+  const bottomTabItems = getBottomTabItemsForRole(profile.data.role)
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -55,7 +58,10 @@ export function AppLayout() {
           />
           <main
             id="main-content"
-            className="flex-1 overflow-x-hidden p-4 md:p-6"
+            className={cn(
+              'flex-1 overflow-x-hidden p-4 md:p-6',
+              bottomTabItems ? 'pb-20 md:pb-6' : null,
+            )}
           >
             {isRouteChunkLoading ? (
               <div
@@ -71,6 +77,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
+      {bottomTabItems ? <BottomTabBar items={bottomTabItems} /> : null}
     </div>
   )
 }

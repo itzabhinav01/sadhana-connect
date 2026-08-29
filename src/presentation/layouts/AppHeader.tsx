@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 
 import type { Profile } from '@sadhana-connect/domain/entities/profile'
 import type { NavItem } from '@/presentation/navigation/nav-config'
+import { getBottomTabItemsForRole } from '@/presentation/navigation/nav-config'
 import { AccountMenu } from '@/presentation/layouts/AccountMenu'
 import { MobileNav } from '@/presentation/layouts/MobileNav'
 import { NotificationBell } from '@/presentation/layouts/NotificationBell'
@@ -23,10 +24,15 @@ function useCurrentPageTitle(navItems: NavItem[]) {
 
 export function AppHeader({ navItems, profile, email }: AppHeaderProps) {
   const pageTitle = useCurrentPageTitle(navItems)
+  // Roles with a bottom tab bar (devotee, mentor) get their primary nav
+  // there instead — the hamburger/drawer only remains for roles without
+  // one (super_admin), matching the mobile app's same admin-keeps-a-full
+  // menu decision.
+  const hasBottomTabs = getBottomTabItemsForRole(profile.role) !== null
 
   return (
     <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
-      <MobileNav items={navItems} />
+      {hasBottomTabs ? null : <MobileNav items={navItems} />}
       <span className="text-base font-semibold md:hidden">
         Sadhana Connect
       </span>

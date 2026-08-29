@@ -167,7 +167,21 @@ describe('AppLayout', () => {
     expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
   })
 
-  it('opens the mobile navigation drawer and navigates to its links', async () => {
+  // super_admin has no bottom-tab set (see getBottomTabItemsForRole), so
+  // it's the one role that still keeps the hamburger/drawer nav — the
+  // other roles' primary nav moved to a bottom tab bar instead (below).
+  it('opens the mobile navigation drawer and navigates to its links, for a role with no bottom tabs', async () => {
+    useProfileMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        id: '1',
+        fullName: 'Test Admin',
+        role: 'super_admin',
+        templeGroupId: null,
+        isActive: true,
+      },
+    })
     const user = userEvent.setup()
     renderAppLayout()
 
@@ -184,6 +198,24 @@ describe('AppLayout', () => {
     expect(
       within(dialog).getByRole('link', { name: /profile/i }),
     ).toBeInTheDocument()
+  })
+
+  it('shows a bottom tab bar instead of the drawer for a devotee, with Profile reachable from the account menu', async () => {
+    const user = userEvent.setup()
+    renderAppLayout()
+
+    expect(
+      screen.queryByRole('button', { name: /open navigation menu/i }),
+    ).not.toBeInTheDocument()
+
+    const tabs = screen.getByRole('navigation', { name: 'Primary tabs' })
+    expect(within(tabs).getByRole('link', { name: /home/i })).toBeInTheDocument()
+    expect(within(tabs).getByRole('link', { name: /sadhana/i })).toBeInTheDocument()
+    expect(within(tabs).queryByRole('link', { name: /profile/i })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /account menu/i }))
+    expect(await screen.findByRole('menuitem', { name: /profile/i })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /settings/i })).toBeInTheDocument()
   })
 
   it('shows the notification bell for a devotee', () => {

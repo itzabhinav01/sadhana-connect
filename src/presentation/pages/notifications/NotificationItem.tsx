@@ -1,3 +1,4 @@
+import { Archive, Bell, MessageCircle, Megaphone } from 'lucide-react'
 import { useState } from 'react'
 
 import { useMarkNotificationRead } from '@sadhana-connect/notifications'
@@ -10,6 +11,16 @@ function formatNotificationDate(iso: string) {
     dateStyle: 'medium',
     timeStyle: 'short',
   })
+}
+
+// One icon per notification type — same choices as apps/mobile's
+// NOTIFICATION_TYPE_ICON, so the two platforms read as the same product.
+const TYPE_ICON: Record<SadhanaNotification['type'], typeof Bell> = {
+  mentor_comment: MessageCircle,
+  announcement: Megaphone,
+  sadhana_reminder: Bell,
+  data_retention: Archive,
+  system: Bell,
 }
 
 interface NotificationItemProps {
@@ -33,6 +44,8 @@ export function NotificationItem({ notification }: NotificationItemProps) {
     }
   }
 
+  const TypeIcon = TYPE_ICON[notification.type]
+
   return (
     <button
       type="button"
@@ -40,34 +53,39 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       disabled={isNavigating}
       aria-label={notification.isRead ? notification.title : `Unread: ${notification.title}`}
       className={cn(
-        'flex w-full flex-col gap-1 px-4 py-3 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-wait disabled:opacity-70',
+        'flex w-full items-start gap-3 px-4 py-3 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-wait disabled:opacity-70',
         !notification.isRead && 'bg-accent/40',
       )}
     >
-      <div className="flex items-center gap-2">
-        {!notification.isRead ? (
+      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <TypeIcon className="size-4" aria-hidden="true" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-center gap-2">
           <span
-            className="size-2 shrink-0 rounded-full bg-primary"
-            aria-hidden="true"
-          />
+            className={cn(
+              'text-sm text-foreground',
+              !notification.isRead && 'font-semibold',
+            )}
+          >
+            {notification.title}
+          </span>
+          {!notification.isRead ? (
+            <span
+              className="size-2 shrink-0 rounded-full bg-primary"
+              aria-hidden="true"
+            />
+          ) : null}
+        </div>
+        {notification.body ? (
+          <p className="line-clamp-2 text-sm text-muted-foreground">
+            {notification.body}
+          </p>
         ) : null}
-        <span
-          className={cn(
-            'text-sm text-foreground',
-            !notification.isRead && 'font-semibold',
-          )}
-        >
-          {notification.title}
+        <span className="text-xs text-muted-foreground">
+          {formatNotificationDate(notification.createdAt)}
         </span>
       </div>
-      {notification.body ? (
-        <p className="line-clamp-2 text-sm text-muted-foreground">
-          {notification.body}
-        </p>
-      ) : null}
-      <span className="text-xs text-muted-foreground">
-        {formatNotificationDate(notification.createdAt)}
-      </span>
     </button>
   )
 }

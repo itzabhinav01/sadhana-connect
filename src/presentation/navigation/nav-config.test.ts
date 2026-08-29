@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getNavItemsForRole } from '@/presentation/navigation/nav-config'
+import { getBottomTabItemsForRole, getNavItemsForRole } from '@/presentation/navigation/nav-config'
 
 describe('getNavItemsForRole', () => {
   it('returns the common foundation items plus the devotee Sadhana/History/Analytics/Announcements/Japa/Verse items', () => {
@@ -62,5 +62,32 @@ describe('getNavItemsForRole', () => {
   it('every item has a unique href', () => {
     const hrefs = getNavItemsForRole('devotee').map((item) => item.href)
     expect(new Set(hrefs).size).toBe(hrefs.length)
+  })
+})
+
+describe('getBottomTabItemsForRole', () => {
+  it('returns the 5 primary devotee destinations, not including Profile/Settings/Announcements', () => {
+    const labels = getBottomTabItemsForRole('devotee')?.map((item) => item.label)
+    expect(labels).toEqual(['Home', 'Sadhana', 'History', 'Analytics', 'Alerts'])
+  })
+
+  it('points the devotee Alerts tab at /notifications', () => {
+    const alerts = getBottomTabItemsForRole('devotee')?.find(
+      (item) => item.label === 'Alerts',
+    )
+    expect(alerts?.href).toBe('/notifications')
+  })
+
+  it('returns the mentor destinations', () => {
+    const labels = getBottomTabItemsForRole('mentor')?.map((item) => item.label)
+    expect(labels).toEqual(['Devotees', 'Announcements'])
+  })
+
+  it('returns null for super_admin — it keeps the drawer nav instead', () => {
+    expect(getBottomTabItemsForRole('super_admin')).toBeNull()
+  })
+
+  it('returns null when there is no role', () => {
+    expect(getBottomTabItemsForRole(undefined)).toBeNull()
   })
 })

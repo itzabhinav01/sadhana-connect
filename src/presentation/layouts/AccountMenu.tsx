@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react'
+import { LogOut, Settings, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
@@ -76,6 +76,15 @@ export function AccountMenu({ fullName, email, role }: AccountMenuProps) {
             {roleLabels[role]}
           </span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => navigate('/profile')}>
+          <User className="size-4" aria-hidden="true" />
+          Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate('/settings')}>
+          <Settings className="size-4" aria-hidden="true" />
+          Settings
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleSignOut} disabled={signOut.isPending}>
           <LogOut className="size-4" aria-hidden="true" />

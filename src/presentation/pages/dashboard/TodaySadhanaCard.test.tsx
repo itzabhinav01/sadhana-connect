@@ -167,6 +167,7 @@ describe('TodaySadhanaCard', () => {
 
     renderCard()
 
-    expect(screen.getByText(/current streak: 5 days/i)).toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
+    expect(screen.getByText('days streak')).toBeInTheDocument()
   })
 })

@@ -1,3 +1,4 @@
+import { Flame } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
@@ -8,7 +9,6 @@ import { Button } from '@/presentation/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/presentation/components/ui/card'
@@ -17,6 +17,7 @@ export function TodaySadhanaCard() {
   const today = getLocalDateIso()
   const reportQuery = useSadhanaReport(today)
   const streakQuery = useSadhanaStreak()
+  const streakValue = streakQuery.data ?? 0
 
   return (
     <Card>
@@ -24,14 +25,22 @@ export function TodaySadhanaCard() {
         <CardTitle>
           <h2>Today&apos;s Sadhana</h2>
         </CardTitle>
-        {streakQuery.data !== undefined ? (
-          <CardDescription>
-            Current streak: {streakQuery.data}{' '}
-            {streakQuery.data === 1 ? 'day' : 'days'}
-          </CardDescription>
-        ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {streakQuery.data !== undefined ? (
+          <div className="flex items-center gap-2">
+            <Flame
+              className={streakValue > 0 ? 'size-5 text-warning' : 'size-5 text-muted-foreground'}
+              aria-hidden="true"
+            />
+            <span className="text-3xl font-bold tabular-nums text-foreground">
+              {streakValue}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {streakValue === 1 ? 'day' : 'days'} streak
+            </span>
+          </div>
+        ) : null}
         {reportQuery.isPending ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : null}

@@ -129,6 +129,7 @@ describe('SadhanaReportForm', () => {
       await user.type(screen.getByLabelText(/rounds before 4:30 am/i), '4')
       await user.type(screen.getByLabelText(/rounds till 7 am/i), '8')
       await user.type(screen.getByLabelText(/^total rounds$/i), totalRoundsValue)
+      await user.click(screen.getByRole('button', { name: /notes & signature/i }))
       await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
       await user.click(screen.getByRole('button', { name: /save sadhana/i }))
 
@@ -193,6 +194,7 @@ describe('SadhanaReportForm', () => {
     // Deliberately far lower than before + till (12) — must still be
     // accepted, since the fields are unrelated.
     await user.type(screen.getByLabelText(/^total rounds$/i), '1')
+    await user.click(screen.getByRole('button', { name: /notes & signature/i }))
     await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
     await user.click(screen.getByRole('button', { name: /save sadhana/i }))
 
@@ -231,8 +233,10 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
+    await user.click(screen.getByRole('button', { name: /^rest$/i }))
     await user.type(screen.getByLabelText(/day rest/i), '500')
     await user.type(screen.getByLabelText(/total rest/i), '1')
+    await user.click(screen.getByRole('button', { name: /notes & signature/i }))
     await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
     await user.click(screen.getByRole('button', { name: /save sadhana/i }))
 
@@ -269,6 +273,7 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
+    await user.click(screen.getByRole('button', { name: /notes & signature/i }))
     await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
     await user.click(screen.getByRole('button', { name: /save sadhana/i }))
 
@@ -357,6 +362,56 @@ describe('SadhanaReportForm', () => {
     expect(
       screen.getByRole('button', { name: /save sadhana/i }),
     ).toBeInTheDocument()
+  })
+
+  it('starts a new report with only Chanting expanded', () => {
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByLabelText(/rounds before 4:30 am/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/book name/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^signature$/i)).not.toBeInTheDocument()
+  })
+
+  it('expands a section on click and shows its fields', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /study/i }))
+
+    expect(screen.getByLabelText(/book name/i)).toBeInTheDocument()
+  })
+
+  it('auto-expands only the sections that already contain data on an existing report', () => {
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={{
+          ...existingReport,
+          readingMinutes: 0,
+          bookName: null,
+          hearingMinutes: 0,
+          speakerName: null,
+        }}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    // Chanting has real data (16 rounds) — expanded.
+    expect(screen.getByLabelText(/^total rounds$/i)).toBeInTheDocument()
+    // Study is all-zero/empty — collapsed.
+    expect(screen.queryByLabelText(/book name/i)).not.toBeInTheDocument()
   })
 
   it('shows a confirmation once the report has saved', () => {

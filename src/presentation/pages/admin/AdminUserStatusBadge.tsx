@@ -10,7 +10,7 @@ const STATUS_LABEL: Record<ReturnType<typeof deriveAdminUserStatus>, string> = {
 }
 
 const STATUS_CLASSNAME: Record<ReturnType<typeof deriveAdminUserStatus>, string> = {
-  active: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
+  active: 'bg-success/15 text-success',
   disabled: 'bg-muted text-muted-foreground',
 }
 
