@@ -17,6 +17,8 @@ import { Stack, useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { useMutation } from '@tanstack/react-query'
+import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase'
 import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
@@ -262,6 +264,40 @@ function PasswordResetPanel({ userId }: { userId: string }) {
   )
 }
 
+function EmailPanel({ userId }: { userId: string }) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+  const [email, setEmail] = useState<string | null>(null)
+  const revealEmail = useMutation({
+    mutationFn: (id: string) => supabaseAdminAccountActionsRepository.getUserEmail(id),
+  })
+
+  return (
+    <Card title="Email">
+      {email ? (
+        <Text style={styles.mutedLine} selectable>
+          {email}
+        </Text>
+      ) : (
+        <Button
+          title="Reveal email"
+          pendingTitle="Loading…"
+          isPending={revealEmail.isPending}
+          variant="outline"
+          onPress={() =>
+            revealEmail.mutate(userId, {
+              onSuccess: (data) => setEmail(data),
+            })
+          }
+        />
+      )}
+      {revealEmail.isError && !email ? (
+        <Text style={styles.errorText}>Could not load email.</Text>
+      ) : null}
+    </Card>
+  )
+}
+
 export default function AdminUserDetailScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -297,6 +333,8 @@ export default function AdminUserDetailScreen() {
           </Text>
           <Text style={styles.mutedLine}>Joined {formatDate(user.createdAt)}</Text>
         </View>
+
+        <EmailPanel userId={user.id} />
 
         <Card title="Phone number">
           <Text style={styles.mutedLine}>{user.phoneNumber ?? 'Not provided'}</Text>

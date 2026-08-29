@@ -38,7 +38,7 @@ describe('buildSadhanaHistoryCsv', () => {
     expect(lines[0]).toBe(
       'Date,Rounds Before 4:30 AM,Rounds Till 7 AM,Last Round Time,Total Rounds,' +
         'Reading Minutes,Book Name,Hearing Minutes,Speaker Name,Sleep Time,Wake Up,' +
-        'Day Rest (min),Total Rest (min),Office Going,Office Return,Notes,Signature',
+        'Day Rest (min),Total Rest (hr),Office Going,Office Return,Notes,Signature',
     )
     expect(lines[1]).toBe(
       '2026-01-05,4,8,6:45 AM,16,15,Bhagavad-gītā As It Is,30,HG Example Prabhu,' +

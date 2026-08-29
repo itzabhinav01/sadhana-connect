@@ -52,7 +52,7 @@ export const sadhanaReportSchema = z.object({
   sleepTime: optionalTimeField,
   wakeTime: optionalTimeField,
   dayRestMinutes: nonNegativeIntField('Day rest minutes'),
-  totalRestMinutes: nonNegativeIntField('Total rest minutes'),
+  totalRestMinutes: nonNegativeIntField('Total rest hours'),
   officeGoingTime: optionalTimeField,
   officeReturnTime: optionalTimeField,
   notes: optionalTextField,

@@ -424,9 +424,9 @@ export function SadhanaReportForm({
                   name="totalRestMinutes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Rest (minutes)</FormLabel>
+                      <FormLabel>Total Rest (hours)</FormLabel>
                       <FormControl>
-                        <Input inputMode="numeric" {...field} />
+                        <Input inputMode="numeric" placeholder="e.g. 7" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

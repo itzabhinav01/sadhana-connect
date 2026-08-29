@@ -111,7 +111,7 @@ describe('AnalyticsScreen', () => {
     expect(getByText('30 min')).toBeTruthy()
     expect(getByText('Rest')).toBeTruthy()
     expect(getByText('20 min')).toBeTruthy()
-    expect(getByText('420 min')).toBeTruthy()
+    expect(getByText('420 hr')).toBeTruthy()
   })
 
   it('switching to a preset re-queries with the computed dates', async () => {

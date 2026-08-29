@@ -64,7 +64,8 @@ describe('AnalyticsSummaryCards', () => {
     expect(screen.getByText('32 min')).toBeInTheDocument()
     expect(screen.getByText('16 min')).toBeInTheDocument()
     expect(screen.getByText('60 min')).toBeInTheDocument()
-    expect(screen.getByText('360 min')).toBeInTheDocument()
+    expect(screen.getByText('720 hr')).toBeInTheDocument()
+    expect(screen.getByText('360 hr')).toBeInTheDocument()
   })
 
   it('keeps day rest and total rest independent in the rendered output', () => {
@@ -79,6 +80,6 @@ describe('AnalyticsSummaryCards', () => {
     )
 
     expect(screen.getByText('500 min')).toBeInTheDocument()
-    expect(screen.getByText('1 min')).toBeInTheDocument()
+    expect(screen.getByText('1 hr')).toBeInTheDocument()
   })
 })

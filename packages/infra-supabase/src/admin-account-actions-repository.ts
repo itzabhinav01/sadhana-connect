@@ -59,6 +59,17 @@ export const supabaseAdminAccountActionsRepository: AdminAccountActionsRepositor
   },
 
   async getUserEmail(targetUserId) {
+    try {
+      const { data, error } = await getSupabaseClient().rpc('get_user_email', {
+        p_target_user_id: targetUserId,
+      })
+      if (!error && typeof data === 'string' && data.length > 0) {
+        return data
+      }
+    } catch {
+      // Fall through to Edge Function invoke
+    }
+
     const result = await invoke('get_user_email', targetUserId)
     if (!result.email) {
       throw new Error('No email was returned.')

@@ -73,7 +73,7 @@ export function buildSadhanaReportExportSections(
         { label: 'Sleep Time', value: formatTime12Hour(report.sleepTime) },
         { label: 'Wake Up', value: formatTime12Hour(report.wakeTime) },
         { label: 'Day Rest', value: `${report.dayRestMinutes} min` },
-        { label: 'Total Rest', value: `${report.totalRestMinutes} min` },
+        { label: 'Total Rest', value: `${report.totalRestMinutes} hr` },
       ],
     },
     {

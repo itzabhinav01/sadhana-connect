@@ -19,7 +19,7 @@ const CSV_HEADER = [
   'Sleep Time',
   'Wake Up',
   'Day Rest (min)',
-  'Total Rest (min)',
+  'Total Rest (hr)',
   'Office Going',
   'Office Return',
   'Notes',

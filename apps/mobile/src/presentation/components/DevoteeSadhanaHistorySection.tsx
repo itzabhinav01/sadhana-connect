@@ -122,7 +122,7 @@ function ReportDetailCard({
             </Text>
           ) : null}
           <Text style={styles.detailMuted}>
-            Day rest: {report.dayRestMinutes} min · Total rest: {report.totalRestMinutes} min
+            Day rest: {report.dayRestMinutes} min · Total rest: {report.totalRestMinutes} hr
           </Text>
         </View>
       ) : null}

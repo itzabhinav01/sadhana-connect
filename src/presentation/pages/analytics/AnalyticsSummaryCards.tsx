@@ -14,6 +14,10 @@ function formatMinutes(value: number) {
   return `${Math.round(value)} min`
 }
 
+function formatHours(value: number) {
+  return `${Math.round(value)} hr`
+}
+
 function formatAverage(value: number, hasSubmittedDays: boolean, format: (v: number) => string) {
   return hasSubmittedDays ? format(value) : '—'
 }
@@ -131,7 +135,7 @@ export function AnalyticsSummaryCards({ summary }: AnalyticsSummaryCardsProps) {
                 Total rest total
               </dt>
               <dd className="text-lg font-semibold text-foreground">
-                {formatMinutes(summary.totalRestMinutes)}
+                {formatHours(summary.totalRestMinutes)}
               </dd>
             </div>
             <div>
@@ -142,7 +146,7 @@ export function AnalyticsSummaryCards({ summary }: AnalyticsSummaryCardsProps) {
                 {formatAverage(
                   summary.averageTotalRestMinutesPerSubmittedDay,
                   hasSubmittedDays,
-                  formatMinutes,
+                  formatHours,
                 )}
               </dd>
             </div>

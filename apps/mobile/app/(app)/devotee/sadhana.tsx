@@ -160,7 +160,7 @@ function SadhanaFormBody({
   const readingSummary = isPositive(readingMinutes ?? '') ? `${readingMinutes} min` : 'Not logged'
   const hearingSummary = isPositive(hearingMinutes ?? '') ? `${hearingMinutes} min` : 'Not logged'
   const restSummary = isPositive(totalRestMinutes ?? '')
-    ? `${totalRestMinutes} min total rest`
+    ? `${totalRestMinutes} hr total rest`
     : isPositive(dayRestMinutes ?? '')
       ? `${dayRestMinutes} min day rest`
       : 'Not logged'
@@ -267,7 +267,7 @@ function SadhanaFormBody({
           <DateTimeField control={control} name="sleepTime" label="Sleep Time" mode="time" clearable />
           <DateTimeField control={control} name="wakeTime" label="Wake Up" mode="time" clearable />
           <TextField control={control} name="dayRestMinutes" label="Day Rest (minutes)" keyboardType="numeric" />
-          <TextField control={control} name="totalRestMinutes" label="Total Rest (minutes)" keyboardType="numeric" />
+          <TextField control={control} name="totalRestMinutes" label="Total Rest (hours)" keyboardType="numeric" />
         </Accordion>
 
         <Accordion

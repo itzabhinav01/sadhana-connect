@@ -67,7 +67,7 @@ describe('buildSadhanaReportExportSections', () => {
       { label: 'Sleep Time', value: '10:00 PM' },
       { label: 'Wake Up', value: '4:00 AM' },
       { label: 'Day Rest', value: '20 min' },
-      { label: 'Total Rest', value: '45 min' },
+      { label: 'Total Rest', value: '45 hr' },
     ])
     expect(schedule.fields).toEqual([
       { label: 'Office Going', value: '9:30 AM' },
@@ -96,10 +96,10 @@ describe('buildSadhanaReportExportSections', () => {
     expect(values.filter((v) => v === '—')).toHaveLength(9)
   })
 
-  it('labels Total Rest and Day Rest in minutes, not hours', () => {
+  it('labels Total Rest in hours and Day Rest in minutes', () => {
     const [, , , rest] = buildSadhanaReportExportSections(makeReport())
 
     const totalRest = rest.fields.find((f) => f.label === 'Total Rest')
-    expect(totalRest?.value).toBe('45 min')
+    expect(totalRest?.value).toBe('45 hr')
   })
 })

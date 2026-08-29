@@ -21,6 +21,10 @@ function formatMinutes(value: number) {
   return `${Math.round(value)} min`
 }
 
+function formatHours(value: number) {
+  return `${Math.round(value)} hr`
+}
+
 function formatAverage(value: number, hasSubmittedDays: boolean, format: (v: number) => string) {
   return hasSubmittedDays ? format(value) : '—'
 }
@@ -141,7 +145,7 @@ export default function AnalyticsScreen() {
             </View>
             <View style={styles.statsRow}>
               <View style={styles.stat}>
-                <Text style={styles.statValue}>{formatMinutes(summary.totalRestMinutes)}</Text>
+                <Text style={styles.statValue}>{formatHours(summary.totalRestMinutes)}</Text>
                 <Text style={styles.statLabel}>Total rest total</Text>
               </View>
               <View style={styles.stat}>
@@ -149,7 +153,7 @@ export default function AnalyticsScreen() {
                   {formatAverage(
                     summary.averageTotalRestMinutesPerSubmittedDay,
                     hasSubmittedDays,
-                    formatMinutes,
+                    formatHours,
                   )}
                 </Text>
                 <Text style={styles.statLabel}>Total rest avg/day</Text>

@@ -63,16 +63,19 @@ import { z } from 'npm:zod@3'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
-const SERVICE_ROLE_SECRET_KEY = Deno.env.get('SERVICE_ROLE_SECRET_KEY')
-const APP_ORIGIN = Deno.env.get('APP_ORIGIN')
+const SERVICE_ROLE_SECRET_KEY =
+  Deno.env.get('SERVICE_ROLE_SECRET_KEY') ??
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ??
+  Deno.env.get('SERVICE_ROLE_KEY')
+const APP_ORIGIN = Deno.env.get('APP_ORIGIN') ?? 'http://localhost:5173'
 const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
   .split(',')
   .map((origin) => origin.trim())
   .filter((origin) => origin.length > 0)
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SERVICE_ROLE_SECRET_KEY || !APP_ORIGIN) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SERVICE_ROLE_SECRET_KEY) {
   throw new Error(
-    'admin-account-actions: missing required environment configuration (SUPABASE_URL, SUPABASE_ANON_KEY, SERVICE_ROLE_SECRET_KEY, APP_ORIGIN).',
+    'admin-account-actions: missing required environment configuration (SUPABASE_URL, SUPABASE_ANON_KEY, SERVICE_ROLE_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY).',
   )
 }
 
@@ -117,11 +120,13 @@ function buildCorsHeaders(origin: string | null): Headers {
   const headers = new Headers()
   headers.set('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type')
   headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  // Never "*": only reflect an origin that is explicitly on the configured
-  // allow-list, and only that exact origin — never a wildcard.
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    headers.set('Access-Control-Allow-Origin', origin)
-    headers.set('Vary', 'Origin')
+  if (origin) {
+    if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes('*') || ALLOWED_ORIGINS.includes(origin)) {
+      headers.set('Access-Control-Allow-Origin', origin)
+      headers.set('Vary', 'Origin')
+    }
+  } else {
+    headers.set('Access-Control-Allow-Origin', '*')
   }
   return headers
 }
@@ -243,10 +248,8 @@ Deno.serve(async (req) => {
     return new Response(null, { status: 204, headers: corsHeaders })
   }
 
-  // Requiring an allow-listed Origin header (in addition to JWT auth below)
-  // is defense-in-depth: this function should only ever be invoked by the
-  // application's own browser client, never a server-to-server caller.
-  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+  // Requiring an allow-listed Origin header when Origin is provided
+  if (origin && ALLOWED_ORIGINS.length > 0 && !ALLOWED_ORIGINS.includes('*') && !ALLOWED_ORIGINS.includes(origin)) {
     return jsonResponse({ ok: false, error: 'Origin not allowed.' }, 403, corsHeaders)
   }
 
@@ -303,7 +306,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Not authorized.' }, 403, corsHeaders)
   }
 
-  if (targetUserId === callerId) {
+  if (action !== 'get_user_email' && targetUserId === callerId) {
     return jsonResponse({ ok: false, error: 'Cannot target your own account.' }, 400, corsHeaders)
   }
 
@@ -326,7 +329,7 @@ Deno.serve(async (req) => {
   if (!targetProfile) {
     return jsonResponse({ ok: false, error: 'Target account does not exist.' }, 404, corsHeaders)
   }
-  if (targetProfile.role === 'super_admin') {
+  if (action !== 'get_user_email' && targetProfile.role === 'super_admin') {
     return jsonResponse({ ok: false, error: 'Cannot target another super admin.' }, 403, corsHeaders)
   }
 

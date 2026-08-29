@@ -55,7 +55,7 @@ const EXPECTED_SINGLE = [
   'Sleep Time: 10:00 PM',
   'Wake Up: 4:00 AM',
   'Day Rest: 20 min',
-  'Total Rest: 45 min',
+  'Total Rest: 45 hr',
   '',
   'Schedule',
   'Office Going: 9:30 AM',

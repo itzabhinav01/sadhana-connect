@@ -54,6 +54,12 @@ jest.mock('expo-clipboard', () => ({
   setStringAsync: jest.fn(),
 }))
 
+jest.mock('@sadhana-connect/infra-supabase', () => ({
+  supabaseAdminAccountActionsRepository: {
+    getUserEmail: jest.fn().mockResolvedValue('testuser@example.com'),
+  },
+}))
+
 jest.mock('../../../../../../packages/admin/src/use-change-user-role', () => {
   const MENTOR_HAS_ACTIVE_DEVOTEES_MESSAGE =
     'This mentor has active devotees and cannot change roles right now.'
