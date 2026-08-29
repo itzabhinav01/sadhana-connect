@@ -31,6 +31,14 @@ jest.mock('../../../../../packages/verse/src/use-verse-of-the-day', () => ({
   useVerseOfTheDay: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-profile', () => ({
+  useProfile: jest.fn(() => ({
+    data: { id: 'u1', fullName: 'Abhinav Prabhu', role: 'devotee' },
+    isPending: false,
+    isError: false,
+  })),
+}))
+
 jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))

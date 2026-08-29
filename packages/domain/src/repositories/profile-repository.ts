@@ -7,9 +7,10 @@ export interface ProfileRepository {
   // steady-state outcome.
   getProfile(userId: string): Promise<Profile | null>
 
-  // Own-row only in practice (RLS: profiles_update), for the one column
-  // this phase actually needs editable post-registration — phone_number.
-  // Not a general profile-editor; full profile editing remains the
-  // still-unbuilt future phase ProfilePage's own comment already noted.
   updatePhoneNumber(userId: string, phoneNumber: string): Promise<Profile>
+
+  updateProfile(
+    userId: string,
+    updates: { fullName?: string; phoneNumber?: string | null },
+  ): Promise<Profile>
 }

@@ -41,6 +41,7 @@ export default function AdminUsersScreen() {
       <TextInput
         style={styles.searchInput}
         placeholder="Search by name"
+        placeholderTextColor={colors.placeholder ?? colors.muted}
         value={filters.search ?? ''}
         onChangeText={(text) => setFilters({ ...filters, search: text || undefined })}
         autoCapitalize="none"

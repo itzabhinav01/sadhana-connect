@@ -39,7 +39,7 @@ export function TextField<T extends FieldValues>({
             value={value as string | undefined}
             autoCapitalize="none"
             accessibilityLabel={label}
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             {...inputProps}
           />
           {error ? <Text style={styles.errorText}>{error.message}</Text> : null}

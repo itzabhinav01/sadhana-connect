@@ -86,6 +86,8 @@ function AnnouncementForm() {
               value={value}
               onChangeText={onChange}
               multiline
+              placeholder="Enter announcement content…"
+              placeholderTextColor={colors.placeholder ?? colors.muted}
               accessibilityLabel="Content"
             />
             {error ? <Text style={styles.errorText}>{error.message}</Text> : null}
@@ -214,6 +216,8 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
             style={styles.input}
             value={draftTitle}
             onChangeText={setDraftTitle}
+            placeholder="Announcement title"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             accessibilityLabel="Edit title"
           />
           <TextInput
@@ -221,6 +225,8 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
             value={draftContent}
             onChangeText={setDraftContent}
             multiline
+            placeholder="Announcement content"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             accessibilityLabel="Edit content"
           />
           <ExpirationPicker

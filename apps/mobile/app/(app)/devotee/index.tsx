@@ -1,4 +1,5 @@
 import { useAnnouncements } from '@sadhana-connect/announcements'
+import { useProfile } from '@sadhana-connect/auth'
 import {
   buildWhatsAppShareUrl,
   useRecentSadhanaReports,
@@ -75,7 +76,10 @@ export default function DashboardScreen() {
     })
   }
 
-  // The Home tab is the one screen in the tab bar that also shows Sign
+  const profileQuery = useProfile()
+  const userName = profileQuery.data?.fullName
+
+  // The Home tab is the one screen in the tab bar that also shows Profile & Sign
   // Out in its header (every other tab just gets the ThemeToggle set at
   // the Tabs navigator level) — set via navigation.setOptions rather
   // than a <Stack.Screen> override, which only applies inside an actual
@@ -85,6 +89,11 @@ export default function DashboardScreen() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.headerActions}>
+          <Button
+            title="Profile"
+            onPress={() => router.push('/profile')}
+            variant="outline"
+          />
           <HeaderThemeToggle />
           <Button
             title="Sign Out"
@@ -97,7 +106,7 @@ export default function DashboardScreen() {
       ),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
-  }, [navigation, styles, signOut.isPending])
+  }, [navigation, styles, signOut.isPending, router])
 
   if (todayReport.isPending) {
     return <LoadingScreen />
@@ -110,7 +119,9 @@ export default function DashboardScreen() {
   return (
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
+          <Text style={styles.eyebrow}>
+            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} 🙏
+          </Text>
           <Text style={styles.headerTitle}>
             {report ? "Today's sadhana is logged" : 'Your sadhana at a glance'}
           </Text>

@@ -14,7 +14,7 @@ describe('HeaderThemeToggle', () => {
     await cleanup()
   })
 
-  it('shows "Dark" and switches to dark when currently resolved light', async () => {
+  it('shows switch to dark mode icon button and switches to dark when currently resolved light', async () => {
     const setTheme = jest.fn()
     mockUseTheme.mockReturnValue({
       colors: require('../../shared/theme').lightColors,
@@ -23,14 +23,14 @@ describe('HeaderThemeToggle', () => {
     })
 
     const { getByRole } = await render(<HeaderThemeToggle />)
-    const button = getByRole('button', { name: 'Dark' })
+    const button = getByRole('button', { name: 'Switch to dark mode' })
     expect(button).toBeTruthy()
 
     await fireEvent.press(button)
     expect(setTheme).toHaveBeenCalledWith('dark')
   })
 
-  it('shows "Light" and switches to light when currently resolved dark', async () => {
+  it('shows switch to light mode icon button and switches to light when currently resolved dark', async () => {
     const setTheme = jest.fn()
     mockUseTheme.mockReturnValue({
       colors: require('../../shared/theme').darkColors,
@@ -39,7 +39,7 @@ describe('HeaderThemeToggle', () => {
     })
 
     const { getByRole } = await render(<HeaderThemeToggle />)
-    const button = getByRole('button', { name: 'Light' })
+    const button = getByRole('button', { name: 'Switch to light mode' })
     expect(button).toBeTruthy()
 
     await fireEvent.press(button)

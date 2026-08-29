@@ -75,6 +75,7 @@ function CommentItem({ comment, sadhanaReportId, isOwnComment }: CommentItemProp
             value={draftText}
             onChangeText={setDraftText}
             multiline
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             accessibilityLabel="Edit comment"
           />
           {validationError ? <Text style={styles.errorText}>{validationError}</Text> : null}
@@ -160,6 +161,7 @@ export function CommentThread({ sadhanaReportId }: { sadhanaReportId: string }) 
           onChangeText={setText}
           multiline
           placeholder="Write a note for this devotee's report…"
+          placeholderTextColor={colors.placeholder ?? colors.muted}
           accessibilityLabel="Add a comment"
         />
         {validationError ? <Text style={styles.errorText}>{validationError}</Text> : null}

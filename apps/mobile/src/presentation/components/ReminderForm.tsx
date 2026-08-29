@@ -51,6 +51,7 @@ export function ReminderForm({ devoteeId }: { devoteeId: string }) {
           multiline
           maxLength={REMINDER_MESSAGE_MAX_LENGTH}
           placeholder="Please remember to fill in your Sadhana report."
+          placeholderTextColor={colors.placeholder ?? colors.muted}
           accessibilityLabel="Custom reminder message"
         />
       ) : null}

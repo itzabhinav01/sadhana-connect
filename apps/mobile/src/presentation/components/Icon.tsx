@@ -44,6 +44,10 @@ export type IconName =
   | 'copy-outline'
   | 'open-outline'
   | 'close-outline'
+  | 'sunny'
+  | 'sunny-outline'
+  | 'moon'
+  | 'moon-outline'
 
 interface IconProps {
   name: IconName

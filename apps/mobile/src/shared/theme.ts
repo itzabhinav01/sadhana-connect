@@ -28,6 +28,7 @@ export interface ThemeColors {
   // value even in dark mode (shadows read as "darker than the surface",
   // not literally black), used only via shadowColor with a low opacity.
   shadow: string
+  placeholder: string
 }
 
 // "Indigo Dusk" — cool indigo accent on clean neutrals. Chosen 2026-08-28
@@ -53,6 +54,7 @@ export const lightColors: ThemeColors = {
   link: '#6366f1',
   card: '#ffffff',
   shadow: '#18181b',
+  placeholder: '#9ca3af',
 }
 
 export const darkColors: ThemeColors = {
@@ -74,6 +76,7 @@ export const darkColors: ThemeColors = {
   link: '#818cf8',
   card: '#18181f',
   shadow: '#000000',
+  placeholder: '#71717a',
 }
 
 export const spacing = {

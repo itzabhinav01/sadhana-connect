@@ -11,6 +11,14 @@ jest.mock('../../../../../packages/mentor/src/use-mentor-devotees', () => ({
   useMentorDevotees: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-profile', () => ({
+  useProfile: jest.fn(() => ({
+    data: { id: 'm1', fullName: 'Mentor Prabhu', role: 'mentor' },
+    isPending: false,
+    isError: false,
+  })),
+}))
+
 jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))

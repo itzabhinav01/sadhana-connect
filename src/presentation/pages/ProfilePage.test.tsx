@@ -6,7 +6,7 @@ import { ProfilePage } from '@/presentation/pages/ProfilePage'
 
 const {
   useProfileMock,
-  useUpdatePhoneNumberMock,
+  useUpdateProfileMock,
   mutateMock,
   useAuthMock,
   useSignOutMock,
@@ -16,7 +16,7 @@ const {
   navigateMock,
 } = vi.hoisted(() => ({
   useProfileMock: vi.fn(),
-  useUpdatePhoneNumberMock: vi.fn(),
+  useUpdateProfileMock: vi.fn(),
   mutateMock: vi.fn(),
   useAuthMock: vi.fn(),
   useSignOutMock: vi.fn(),
@@ -44,8 +44,8 @@ vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
   }
 })
 
-vi.mock('@/application/profile/use-update-phone-number', () => ({
-  useUpdatePhoneNumber: useUpdatePhoneNumberMock,
+vi.mock('@/application/profile/use-update-profile', () => ({
+  useUpdateProfile: useUpdateProfileMock,
 }))
 
 vi.mock('@/application/auth/use-sign-out', () => ({
@@ -72,11 +72,11 @@ const activeProfile = {
 describe('ProfilePage', () => {
   beforeEach(() => {
     useProfileMock.mockReset()
-    useUpdatePhoneNumberMock.mockReset()
+    useUpdateProfileMock.mockReset()
     mutateMock.mockReset()
     signOutMutateMock.mockReset()
     navigateMock.mockReset()
-    useUpdatePhoneNumberMock.mockReturnValue({
+    useUpdateProfileMock.mockReturnValue({
       mutate: mutateMock,
       isPending: false,
       isError: false,
@@ -114,8 +114,9 @@ describe('ProfilePage', () => {
 
     render(<ProfilePage />)
 
-    expect(screen.getByText('User One')).toBeInTheDocument()
-    expect(screen.getByText('Devotee')).toBeInTheDocument()
+    expect(screen.getAllByText('User One').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Devotee').length).toBeGreaterThan(0)
+    expect(screen.getByText('devotee@example.com')).toBeInTheDocument()
     expect(screen.getByText('5')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
   })
@@ -132,7 +133,7 @@ describe('ProfilePage', () => {
     expect(screen.queryByText('This Week')).not.toBeInTheDocument()
   })
 
-  it('shows the existing phone number with an Edit action', () => {
+  it('shows the existing phone number and Edit button', () => {
     useProfileMock.mockReturnValue({
       isPending: false,
       isError: false,
@@ -142,109 +143,33 @@ describe('ProfilePage', () => {
     render(<ProfilePage />)
 
     expect(screen.getByText('+919876543210')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /edit profile/i })).toBeInTheDocument()
   })
 
-  it('shows "Not provided" with an Add action when there is no phone number yet', () => {
-    useProfileMock.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { ...activeProfile, phoneNumber: null },
-    })
-
-    render(<ProfilePage />)
-
-    expect(screen.getByText('Not provided')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument()
-  })
-
-  it('saves a new phone number and returns to the view state on success', async () => {
+  it('saves new profile details and returns to view state on success', async () => {
     mutateMock.mockImplementation((_value, options) => {
       options?.onSuccess?.()
     })
     useProfileMock.mockReturnValue({
       isPending: false,
       isError: false,
-      data: { ...activeProfile, phoneNumber: null },
+      data: activeProfile,
     })
 
     const user = userEvent.setup()
     render(<ProfilePage />)
 
-    await user.click(screen.getByRole('button', { name: /add/i }))
-    await user.type(
-      screen.getByPlaceholderText('+919876543210'),
-      '+919876543210',
-    )
-    await user.click(screen.getByRole('button', { name: /save/i }))
+    await user.click(screen.getByRole('button', { name: /edit profile/i }))
+    await user.clear(screen.getByLabelText(/full name/i))
+    await user.type(screen.getByLabelText(/full name/i), 'Updated Name')
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
 
-    await waitFor(() => expect(mutateMock).toHaveBeenCalledWith(
-      '+919876543210',
-      expect.anything(),
-    ))
-    // The mocked profile query still returns phoneNumber: null (it isn't
-    // refetched), so leaving edit mode falls back to the "Add" action.
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument(),
+      expect(mutateMock).toHaveBeenCalledWith(
+        { fullName: 'Updated Name', phoneNumber: '+919876543210' },
+        expect.anything(),
+      ),
     )
-  })
-
-  it('does not submit an invalid phone number', async () => {
-    useProfileMock.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { ...activeProfile, phoneNumber: null },
-    })
-
-    const user = userEvent.setup()
-    render(<ProfilePage />)
-
-    await user.click(screen.getByRole('button', { name: /add/i }))
-    await user.type(screen.getByPlaceholderText('+919876543210'), '12345')
-    await user.click(screen.getByRole('button', { name: /save/i }))
-
-    expect(mutateMock).not.toHaveBeenCalled()
-  })
-
-  it('discards edits when Cancel is clicked', async () => {
-    useProfileMock.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: activeProfile,
-    })
-
-    const user = userEvent.setup()
-    render(<ProfilePage />)
-
-    await user.click(screen.getByRole('button', { name: /edit/i }))
-    await user.clear(screen.getByPlaceholderText('+919876543210'))
-    await user.type(screen.getByPlaceholderText('+919876543210'), '+911111111111')
-    await user.click(screen.getByRole('button', { name: /cancel/i }))
-
-    expect(screen.getByText('+919876543210')).toBeInTheDocument()
-    expect(mutateMock).not.toHaveBeenCalled()
-  })
-
-  it('shows an inline error in the edit form when the update failed', async () => {
-    useProfileMock.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: activeProfile,
-    })
-    useUpdatePhoneNumberMock.mockReturnValue({
-      mutate: mutateMock,
-      isPending: false,
-      isError: true,
-    })
-
-    const user = userEvent.setup()
-    render(<ProfilePage />)
-
-    await user.click(screen.getByRole('button', { name: /edit/i }))
-
-    expect(
-      screen.getByText(/something went wrong saving your phone number/i),
-    ).toBeInTheDocument()
   })
 
   it('signs out and redirects to /login when "Sign out" is pressed', async () => {

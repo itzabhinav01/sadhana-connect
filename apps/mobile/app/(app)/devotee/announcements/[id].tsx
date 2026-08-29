@@ -73,6 +73,7 @@ function CommentItem({ comment, announcementId, isOwn, canModerate }: CommentIte
             value={draftText}
             onChangeText={setDraftText}
             multiline
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             accessibilityLabel="Edit comment"
           />
           {validationError ? <Text style={styles.errorText}>{validationError}</Text> : null}
@@ -153,6 +154,7 @@ function AnnouncementComments({
               onChangeText={onChange}
               multiline
               placeholder="Ask a question or leave a comment…"
+              placeholderTextColor={colors.placeholder ?? colors.muted}
               accessibilityLabel="Ask a question or leave a comment"
             />
             {error ? <Text style={styles.errorText}>{error.message}</Text> : null}

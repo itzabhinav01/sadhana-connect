@@ -121,6 +121,7 @@ export default function JapaCounterScreen() {
           onChangeText={handleTargetChange}
           onBlur={handleTargetBlur}
           keyboardType="numeric"
+          placeholderTextColor={colors.placeholder ?? colors.muted}
           accessibilityLabel="Daily target (rounds)"
         />
       </View>

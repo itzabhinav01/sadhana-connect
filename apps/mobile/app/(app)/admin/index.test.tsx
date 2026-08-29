@@ -11,6 +11,14 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-profile', () => ({
+  useProfile: jest.fn(() => ({
+    data: { id: 'a1', fullName: 'Super Admin', role: 'super_admin' },
+    isPending: false,
+    isError: false,
+  })),
+}))
+
 jest.mock('../../../../../packages/admin/src/use-admin-dashboard-summary', () => ({
   useAdminDashboardSummary: jest.fn(),
 }))

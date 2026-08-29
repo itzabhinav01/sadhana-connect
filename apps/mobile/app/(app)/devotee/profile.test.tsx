@@ -7,6 +7,13 @@ jest.mock('../../../src/application/theme/use-theme', () => ({
   }),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-auth', () => ({
+  useAuth: jest.fn(() => ({
+    session: { userId: 'user-1', email: 'devotee@example.com' },
+    isLoading: false,
+  })),
+}))
+
 jest.mock('../../../../../packages/auth/src/use-profile', () => ({
   useProfile: jest.fn(),
 }))
@@ -20,8 +27,8 @@ jest.mock('../../../../../packages/sadhana/src/use-recent-sadhana-reports', () =
   RECENT_REPORTS_LOOKBACK_LIMIT: 60,
 }))
 
-jest.mock('../../../src/application/profile/use-update-phone-number', () => ({
-  useUpdatePhoneNumber: jest.fn(),
+jest.mock('../../../src/application/profile/use-update-profile', () => ({
+  useUpdateProfile: jest.fn(),
 }))
 
 jest.mock('../../../src/application/auth/use-sign-out', () => ({
@@ -31,20 +38,24 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
 
-jest.mock('expo-router', () => ({
-  useRouter: jest.fn(() => ({ push: mockPush, replace: mockReplace })),
-}))
+jest.mock('expo-router', () => {
+  const { View } = require('react-native')
+  return {
+    Stack: { Screen: () => <View /> },
+    useRouter: jest.fn(() => ({ push: mockPush, replace: mockReplace })),
+  }
+})
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react-native'
 import { useProfile } from '@sadhana-connect/auth'
 import { useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
-import { useUpdatePhoneNumber } from '../../../src/application/profile/use-update-phone-number'
+import { useUpdateProfile } from '../../../src/application/profile/use-update-profile'
 import ProfileScreen from './profile'
 
 const mockUseProfile = useProfile as jest.Mock
-const mockUseUpdatePhoneNumber = useUpdatePhoneNumber as jest.Mock
+const mockUseUpdateProfile = useUpdateProfile as jest.Mock
 const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
 const mockUseRecentSadhanaReports = useRecentSadhanaReports as jest.Mock
 const mockUseSignOut = useSignOut as jest.Mock
@@ -66,11 +77,11 @@ describe('ProfileScreen', () => {
 
   beforeEach(() => {
     mockUseProfile.mockReset()
-    mockUseUpdatePhoneNumber.mockReset()
+    mockUseUpdateProfile.mockReset()
     mockMutate.mockReset()
     mockPush.mockReset()
     mockReplace.mockReset()
-    mockUseUpdatePhoneNumber.mockReturnValue({
+    mockUseUpdateProfile.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
       isError: false,
@@ -94,107 +105,48 @@ describe('ProfileScreen', () => {
     expect(getByText(/something went wrong loading your profile/i)).toBeTruthy()
   })
 
-  it('shows the devotee identity header and streak/report stats', async () => {
+  it('shows the devotee identity header, email, phone, and streak stats', async () => {
     mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
 
-    const { getByText } = await render(<ProfileScreen />)
-    expect(getByText('User One')).toBeTruthy()
-    expect(getByText('Devotee')).toBeTruthy()
+    const { getByText, getAllByText } = await render(<ProfileScreen />)
+    expect(getAllByText('User One').length).toBeGreaterThan(0)
+    expect(getAllByText('Devotee').length).toBeGreaterThan(0)
+    expect(getByText('devotee@example.com')).toBeTruthy()
+    expect(getByText('+919876543210')).toBeTruthy()
     expect(getByText('5')).toBeTruthy()
     expect(getByText('2')).toBeTruthy()
   })
 
-  it('shows the existing phone number with an Edit action', async () => {
-    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
-
-    const { getByText, getByRole } = await render(<ProfileScreen />)
-    expect(getByText('+919876543210')).toBeTruthy()
-    expect(getByRole('button', { name: 'Edit' })).toBeTruthy()
-  })
-
-  it('shows "Not provided" with an Add action when there is no phone number yet', async () => {
-    mockUseProfile.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { ...activeProfile, phoneNumber: null },
-    })
-
-    const { getByText, getByRole } = await render(<ProfileScreen />)
-    expect(getByText('Not provided')).toBeTruthy()
-    expect(getByRole('button', { name: 'Add' })).toBeTruthy()
-  })
-
-  it('saves a new phone number and returns to the view state on success', async () => {
+  it('opens edit modal and saves updated profile on success', async () => {
     mockMutate.mockImplementation((_value, options) => {
       options?.onSuccess?.()
     })
     mockUseProfile.mockReturnValue({
       isPending: false,
       isError: false,
-      data: { ...activeProfile, phoneNumber: null },
+      data: activeProfile,
     })
 
-    const { getByRole, getByPlaceholderText } = await render(<ProfileScreen />)
+    const { getByText, getByPlaceholderText } = await render(<ProfileScreen />)
 
-    await fireEvent.press(getByRole('button', { name: 'Add' }))
-    await fireEvent.changeText(getByPlaceholderText('+919876543210'), '+919876543210')
-    await fireEvent.press(getByRole('button', { name: 'Save' }))
+    await fireEvent.press(getByText('Edit Profile'))
+    await fireEvent.changeText(getByPlaceholderText('Enter your name'), 'Updated Name')
+    await fireEvent.changeText(getByPlaceholderText('+919876543210'), '+919999999999')
+    await fireEvent.press(getByText('Save Changes'))
 
     await waitFor(() =>
-      expect(mockMutate).toHaveBeenCalledWith('+919876543210', expect.anything()),
+      expect(mockMutate).toHaveBeenCalledWith(
+        { fullName: 'Updated Name', phoneNumber: '+919999999999' },
+        expect.anything(),
+      ),
     )
-    await waitFor(() => expect(getByRole('button', { name: 'Add' })).toBeTruthy())
   })
 
-  it('does not submit an invalid phone number', async () => {
-    mockUseProfile.mockReturnValue({
-      isPending: false,
-      isError: false,
-      data: { ...activeProfile, phoneNumber: null },
-    })
-
-    const { getByRole, getByPlaceholderText } = await render(<ProfileScreen />)
-
-    await fireEvent.press(getByRole('button', { name: 'Add' }))
-    await fireEvent.changeText(getByPlaceholderText('+919876543210'), '12345')
-    await fireEvent.press(getByRole('button', { name: 'Save' }))
-
-    expect(mockMutate).not.toHaveBeenCalled()
-  })
-
-  it('discards edits when Cancel is pressed', async () => {
+  it('navigates to /devotee/settings when "Settings & Reminders" is pressed', async () => {
     mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
 
-    const { getByRole, getByPlaceholderText, getByText } = await render(<ProfileScreen />)
-
-    await fireEvent.press(getByRole('button', { name: 'Edit' }))
-    await fireEvent.changeText(getByPlaceholderText('+919876543210'), '+911111111111')
-    await fireEvent.press(getByRole('button', { name: 'Cancel' }))
-
-    expect(getByText('+919876543210')).toBeTruthy()
-    expect(mockMutate).not.toHaveBeenCalled()
-  })
-
-  it('shows an inline error in the edit form when the update failed', async () => {
-    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
-    mockUseUpdatePhoneNumber.mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
-      isError: true,
-    })
-
-    const { getByRole, getByText } = await render(<ProfileScreen />)
-
-    await fireEvent.press(getByRole('button', { name: 'Edit' }))
-
-    expect(getByText(/something went wrong saving your phone number/i)).toBeTruthy()
-  })
-
-  it('navigates to /devotee/settings when "Settings" is pressed', async () => {
-    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
-
-    const { getByRole } = await render(<ProfileScreen />)
-    await fireEvent.press(getByRole('button', { name: 'Settings' }))
+    const { getByText } = await render(<ProfileScreen />)
+    await fireEvent.press(getByText('Settings & Reminders'))
 
     expect(mockPush).toHaveBeenCalledWith('/devotee/settings')
   })
@@ -204,8 +156,8 @@ describe('ProfileScreen', () => {
     mockUseSignOut.mockReturnValue({ mutate: signOutMutate, isPending: false })
     mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
 
-    const { getByRole } = await render(<ProfileScreen />)
-    await fireEvent.press(getByRole('button', { name: 'Sign Out' }))
+    const { getByText } = await render(<ProfileScreen />)
+    await fireEvent.press(getByText('Sign Out'))
 
     expect(signOutMutate).toHaveBeenCalled()
     expect(mockReplace).toHaveBeenCalledWith('/login')

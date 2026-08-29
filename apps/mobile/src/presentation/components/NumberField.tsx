@@ -56,7 +56,7 @@ export function NumberField<T extends FieldValues>({
                 value={value as string | undefined}
                 keyboardType="numeric"
                 accessibilityLabel={label}
-                placeholderTextColor={colors.muted}
+                placeholderTextColor={colors.placeholder ?? colors.muted}
               />
               {showStepper ? (
                 <Pressable

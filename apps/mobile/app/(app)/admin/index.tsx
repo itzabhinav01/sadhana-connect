@@ -1,4 +1,5 @@
 import { useAdminDashboardSummary, type AdminDashboardSummary } from '@sadhana-connect/admin'
+import { useProfile } from '@sadhana-connect/auth'
 import { Stack, useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -34,6 +35,7 @@ export default function AdminHomeScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const signOut = useSignOut()
+  const profile = useProfile()
   const summaryQuery = useAdminDashboardSummary()
 
   const handleSignOut = () => {
@@ -42,12 +44,19 @@ export default function AdminHomeScreen() {
     })
   }
 
+  const userName = profile.data?.fullName
+
   return (
     <>
       <Stack.Screen
         options={{
           headerRight: () => (
             <View style={styles.headerActions}>
+              <Button
+                title="Profile"
+                onPress={() => router.push('/profile')}
+                variant="outline"
+              />
               <HeaderThemeToggle />
               <Button
                 title="Sign Out"
@@ -62,7 +71,9 @@ export default function AdminHomeScreen() {
       />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
+          <Text style={styles.eyebrow}>
+            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} (Admin) 🙏
+          </Text>
           <Text style={styles.headerTitle}>Platform overview</Text>
         </View>
 

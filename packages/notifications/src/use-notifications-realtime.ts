@@ -32,8 +32,19 @@ export function useNotificationsRealtime() {
     if (!userId || !isDevotee) return
 
     const supabase = getSupabaseClient()
+    const topic = `notifications:${userId}`
+
+    if (typeof supabase.getChannels === 'function') {
+      const existing = supabase
+        .getChannels()
+        .find((c) => c.topic === `realtime:${topic}` || c.topic === topic)
+      if (existing) {
+        supabase.removeChannel(existing)
+      }
+    }
+
     const channel = supabase
-      .channel(`notifications:${userId}`)
+      .channel(topic)
       .on(
         'postgres_changes',
         {

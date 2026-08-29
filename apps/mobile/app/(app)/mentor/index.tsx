@@ -5,6 +5,7 @@ import {
   type MentorDevoteeFilter,
   type MentorDevoteeSummary,
 } from '@sadhana-connect/mentor'
+import { useProfile } from '@sadhana-connect/auth'
 import { useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -84,7 +85,10 @@ export default function MentorDashboardScreen() {
     })
   }
 
-  // The Devotees tab is the one screen that also shows Sign Out in its
+  const profile = useProfile()
+  const userName = profile.data?.fullName
+
+  // The Devotees tab is the one screen that also shows Profile & Sign Out in its
   // header (every other tab just gets the ThemeToggle set at the Tabs
   // navigator level) — set via navigation.setOptions rather than a
   // <Stack.Screen> override, which only applies inside an actual Stack
@@ -94,6 +98,11 @@ export default function MentorDashboardScreen() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.headerActions}>
+          <Button
+            title="Profile"
+            onPress={() => router.push('/profile')}
+            variant="outline"
+          />
           <HeaderThemeToggle />
           <Button
             title="Sign Out"
@@ -106,7 +115,7 @@ export default function MentorDashboardScreen() {
       ),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
-  }, [navigation, styles, signOut.isPending])
+  }, [navigation, styles, signOut.isPending, router])
 
   if (devoteesQuery.isPending) {
     return <LoadingScreen />
@@ -126,7 +135,9 @@ export default function MentorDashboardScreen() {
   return (
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
+          <Text style={styles.eyebrow}>
+            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} (Mentor) 🙏
+          </Text>
           <Text style={styles.headerTitle}>Your devotees at a glance</Text>
         </View>
 
@@ -171,6 +182,7 @@ export default function MentorDashboardScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Search by name"
+              placeholderTextColor={colors.placeholder ?? colors.muted}
               value={search}
               onChangeText={setSearch}
               autoCapitalize="none"

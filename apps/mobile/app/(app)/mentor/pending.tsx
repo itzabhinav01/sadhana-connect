@@ -71,6 +71,7 @@ export default function MentorPendingScreen() {
           <TextInput
             style={styles.searchInput}
             placeholder="Search by name"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             value={search}
             onChangeText={setSearch}
             autoCapitalize="none"

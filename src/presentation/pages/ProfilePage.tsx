@@ -5,12 +5,11 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { phoneNumberField } from '@sadhana-connect/auth'
-import { useAuth, useProfile } from '@sadhana-connect/auth'
+import { phoneNumberField, useAuth, useProfile } from '@sadhana-connect/auth'
 import { RECENT_REPORTS_LOOKBACK_LIMIT, useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { useSignOut } from '@/application/auth/use-sign-out'
-import { useUpdatePhoneNumber } from '@/application/profile/use-update-phone-number'
+import { useUpdateProfile } from '@/application/profile/use-update-profile'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/presentation/components/ui/avatar'
 import { Button } from '@/presentation/components/ui/button'
@@ -25,8 +24,11 @@ import {
 } from '@/presentation/components/ui/form'
 import { Input } from '@/presentation/components/ui/input'
 
-const phoneNumberFormSchema = z.object({ phoneNumber: phoneNumberField })
-type PhoneNumberFormValues = z.infer<typeof phoneNumberFormSchema>
+const profileEditSchema = z.object({
+  fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
+  phoneNumber: phoneNumberField,
+})
+type ProfileEditValues = z.infer<typeof profileEditSchema>
 
 const ROLE_LABELS: Record<AppRole, string> = {
   devotee: 'Devotee',
@@ -45,10 +47,6 @@ function getInitials(name: string) {
   return initials || '?'
 }
 
-// A devotee's own current-streak / recent-report-count stats — the same
-// two numbers already shown on the Dashboard, just reused here for
-// identity context. Not rendered for mentor/admin, who have no sadhana
-// reports of their own.
 function DevoteeStats() {
   const streak = useSadhanaStreak()
   const recentReports = useRecentSadhanaReports()
@@ -80,33 +78,38 @@ function DevoteeStats() {
   )
 }
 
-// Minimal, phone-number-only editor for the account's actual settable
-// fields (Phase 20C) — general profile editing (full name, etc.) remains
-// the still-unbuilt future phase this section was originally a
-// placeholder for.
 export function ProfilePage() {
   const navigate = useNavigate()
   const { session } = useAuth()
   const profileQuery = useProfile()
-  const updatePhoneNumber = useUpdatePhoneNumber()
+  const updateProfile = useUpdateProfile()
   const signOut = useSignOut()
   const [isEditing, setIsEditing] = useState(false)
 
-  const form = useForm<PhoneNumberFormValues>({
-    resolver: zodResolver(phoneNumberFormSchema),
-    defaultValues: { phoneNumber: '' },
+  const form = useForm<ProfileEditValues>({
+    resolver: zodResolver(profileEditSchema),
+    defaultValues: { fullName: '', phoneNumber: '' },
   })
 
   useEffect(() => {
     if (profileQuery.data) {
-      form.reset({ phoneNumber: profileQuery.data.phoneNumber ?? '' })
+      form.reset({
+        fullName: profileQuery.data.fullName ?? '',
+        phoneNumber: profileQuery.data.phoneNumber ?? '',
+      })
     }
   }, [profileQuery.data, form])
 
   const onSubmit = form.handleSubmit((values) => {
-    updatePhoneNumber.mutate(values.phoneNumber, {
-      onSuccess: () => setIsEditing(false),
-    })
+    updateProfile.mutate(
+      {
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber || null,
+      },
+      {
+        onSuccess: () => setIsEditing(false),
+      },
+    )
   })
 
   const handleSignOut = () => {
@@ -148,30 +151,60 @@ export function ProfilePage() {
           {profileQuery.data.role === 'devotee' ? <DevoteeStats /> : null}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>
-                <h2>Phone number</h2>
+                <h2>Account Details</h2>
               </CardTitle>
+              {!isEditing ? (
+                <Button type="button" size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                  Edit Profile
+                </Button>
+              ) : null}
             </CardHeader>
             <CardContent>
               {!isEditing ? (
-                <div className="flex items-center gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    {profileQuery.data.phoneNumber ?? 'Not provided'}
-                  </p>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
-                    {profileQuery.data.phoneNumber ? 'Edit' : 'Add'}
-                  </Button>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <span className="text-xs text-muted-foreground">Full Name</span>
+                    <p className="text-sm font-medium text-foreground">{profileQuery.data.fullName}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Email Address</span>
+                    <p className="text-sm font-medium text-foreground">{session?.email ?? 'Not available'}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Phone Number</span>
+                    <p className="text-sm font-medium text-foreground">
+                      {profileQuery.data.phoneNumber ?? 'Not provided'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Designation</span>
+                    <p className="text-sm font-medium text-foreground">{ROLE_LABELS[profileQuery.data.role]}</p>
+                  </div>
                 </div>
               ) : (
                 <Form {...form}>
-                  <form onSubmit={onSubmit} className="flex flex-col gap-3" noValidate>
+                  <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+                    <FormField
+                      control={form.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your full name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="phoneNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="sr-only">Phone number</FormLabel>
+                          <FormLabel>Phone Number</FormLabel>
                           <FormControl>
                             <Input type="tel" placeholder="+919876543210" {...field} />
                           </FormControl>
@@ -179,16 +212,16 @@ export function ProfilePage() {
                         </FormItem>
                       )}
                     />
-                    {updatePhoneNumber.isError ? (
+                    {updateProfile.isError ? (
                       <Alert variant="destructive">
                         <AlertDescription>
-                          Something went wrong saving your phone number. Please try again.
+                          Something went wrong saving your profile. Please try again.
                         </AlertDescription>
                       </Alert>
                     ) : null}
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" disabled={updatePhoneNumber.isPending}>
-                        {updatePhoneNumber.isPending ? 'Saving…' : 'Save'}
+                      <Button type="submit" size="sm" disabled={updateProfile.isPending}>
+                        {updateProfile.isPending ? 'Saving…' : 'Save Changes'}
                       </Button>
                       <Button
                         type="button"
@@ -196,7 +229,10 @@ export function ProfilePage() {
                         variant="outline"
                         onClick={() => {
                           setIsEditing(false)
-                          form.reset({ phoneNumber: profileQuery.data?.phoneNumber ?? '' })
+                          form.reset({
+                            fullName: profileQuery.data?.fullName ?? '',
+                            phoneNumber: profileQuery.data?.phoneNumber ?? '',
+                          })
                         }}
                       >
                         Cancel
@@ -207,10 +243,6 @@ export function ProfilePage() {
               )}
             </CardContent>
           </Card>
-
-          {session?.email ? (
-            <p className="text-sm text-muted-foreground">Signed in as {session.email}</p>
-          ) : null}
 
           <Button
             type="button"

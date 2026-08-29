@@ -49,4 +49,25 @@ export const supabaseProfileRepository: ProfileRepository = {
 
     return mapProfile(data as ProfileRow)
   },
+
+  async updateProfile(userId, updates) {
+    const patch: Record<string, unknown> = {}
+    if (updates.fullName !== undefined) {
+      patch.full_name = updates.fullName
+    }
+    if (updates.phoneNumber !== undefined) {
+      patch.phone_number = updates.phoneNumber
+    }
+
+    const { data, error } = await getSupabaseClient()
+      .from('profiles')
+      .update(patch)
+      .eq('id', userId)
+      .select(SELECT_COLUMNS)
+      .single()
+
+    if (error) throw error
+
+    return mapProfile(data as ProfileRow)
+  },
 }
