@@ -40,6 +40,13 @@
       "expo-secure-store",
       "expo-font",
       "expo-updates"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "38e0f4dd-9010-467d-acb7-0d2159338b00"
+      }
+    },
+    "owner": "itzabhinav01s-team"
   }
 }
