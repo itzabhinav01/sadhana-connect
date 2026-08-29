@@ -20,16 +20,16 @@ describe('isNavigationRequest', () => {
 describe('isSupabaseRequest', () => {
   it('matches any *.supabase.co host, regardless of path', () => {
     expect(
-      isSupabaseRequest({ url: new URL('https://snyqgzkenzsxsrrgobxy.supabase.co/auth/v1/token') }),
+      isSupabaseRequest({ url: new URL('https://example-project.supabase.co/auth/v1/token') }),
     ).toBe(true)
     expect(
       isSupabaseRequest({
-        url: new URL('https://snyqgzkenzsxsrrgobxy.supabase.co/rest/v1/sadhana_reports'),
+        url: new URL('https://example-project.supabase.co/rest/v1/sadhana_reports'),
       }),
     ).toBe(true)
     expect(
       isSupabaseRequest({
-        url: new URL('https://snyqgzkenzsxsrrgobxy.supabase.co/functions/v1/some-function'),
+        url: new URL('https://example-project.supabase.co/functions/v1/some-function'),
       }),
     ).toBe(true)
   })
