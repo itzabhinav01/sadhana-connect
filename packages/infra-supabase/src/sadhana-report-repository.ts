@@ -30,7 +30,7 @@ export interface SadhanaReportRow {
   office_going_time: string | null
   office_return_time: string | null
   notes: string | null
-  signature_text: string
+  signature_text: string | null
   created_at: string
   updated_at: string
 }

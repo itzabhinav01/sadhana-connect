@@ -21,7 +21,7 @@ export interface SadhanaReport {
   officeGoingTime: string | null // 'HH:mm'
   officeReturnTime: string | null // 'HH:mm'
   notes: string | null
-  signatureText: string
+  signatureText: string | null
   createdAt: string
   updatedAt: string
 }

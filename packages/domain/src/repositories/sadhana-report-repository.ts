@@ -38,7 +38,7 @@ export interface UpsertSadhanaReportParams {
   officeGoingTime: string | null
   officeReturnTime: string | null
   notes: string | null
-  signatureText: string
+  signatureText: string | null
 }
 
 export interface SadhanaReportRepository {

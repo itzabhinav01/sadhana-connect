@@ -55,7 +55,7 @@ function reportToRow(report: SadhanaReport): string {
     formatTime12Hour(report.officeGoingTime),
     formatTime12Hour(report.officeReturnTime),
     report.notes ?? '',
-    report.signatureText,
+    report.signatureText ?? '',
   ]
     .map(csvField)
     .join(',')

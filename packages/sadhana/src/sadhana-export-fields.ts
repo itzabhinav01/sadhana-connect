@@ -89,7 +89,7 @@ export function buildSadhanaReportExportSections(
     },
     {
       title: 'Signature',
-      fields: [{ label: null, value: report.signatureText }],
+      fields: [{ label: null, value: orDash(report.signatureText) }],
     },
   ]
 }

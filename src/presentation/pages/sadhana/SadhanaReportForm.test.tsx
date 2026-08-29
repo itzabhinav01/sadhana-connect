@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -242,7 +242,7 @@ describe('SadhanaReportForm', () => {
     expect(params.totalRestMinutes).toBe(1)
   })
 
-  it('requires a signature before submitting', async () => {
+  it('submits successfully with no signature — it is optional', async () => {
     const user = userEvent.setup()
     render(
       <SadhanaReportForm
@@ -254,10 +254,9 @@ describe('SadhanaReportForm', () => {
 
     await user.click(screen.getByRole('button', { name: /save sadhana/i }))
 
-    expect(
-      await screen.findByText(/signature is required/i),
-    ).toBeInTheDocument()
-    expect(mutateMock).not.toHaveBeenCalled()
+    await waitFor(() => expect(mutateMock).toHaveBeenCalledTimes(1))
+    const [params] = mutateMock.mock.calls[0]
+    expect(params.signatureText).toBeNull()
   })
 
   it('submits mapped upsert params on save', async () => {

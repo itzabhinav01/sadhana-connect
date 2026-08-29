@@ -88,11 +88,12 @@ describe('buildSadhanaReportExportSections', () => {
         officeGoingTime: null,
         officeReturnTime: null,
         notes: null,
+        signatureText: null,
       }),
     )
     const values = sections.flatMap((s) => s.fields.map((f) => f.value))
 
-    expect(values.filter((v) => v === '—')).toHaveLength(8)
+    expect(values.filter((v) => v === '—')).toHaveLength(9)
   })
 
   it('labels Total Rest and Day Rest in minutes, not hours', () => {

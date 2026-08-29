@@ -42,6 +42,7 @@ describe('sadhanaReportSchema', () => {
         officeGoingTime: '',
         officeReturnTime: '',
         notes: '',
+        signatureText: '',
         readingMinutes: '',
         hearingMinutes: '',
         dayRestMinutes: '',
@@ -76,14 +77,11 @@ describe('sadhanaReportSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('rejects a blank signature', () => {
+  it('accepts a blank signature', () => {
     const result = sadhanaReportSchema.safeParse(
       validInput({ signatureText: '   ' }),
     )
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      expect(result.error.issues[0]?.path).toContain('signatureText')
-    }
+    expect(result.success).toBe(true)
   })
 
   it('rejects a non-numeric rounds value', () => {

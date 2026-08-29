@@ -83,6 +83,7 @@ describe('formatSadhanaReportForWhatsApp', () => {
         wakeTime: null,
         officeGoingTime: null,
         officeReturnTime: null,
+        signatureText: null,
       }),
     )
 
@@ -95,6 +96,7 @@ describe('formatSadhanaReportForWhatsApp', () => {
     expect(lines).toContain('Wake up :- —')
     expect(lines).toContain('Office going :- —')
     expect(lines).toContain('Reaching back :- —')
+    expect(lines[lines.length - 1]).toBe('—')
   })
 
   it('separates every line with a blank line (double newline), matching the CLAUDE.md template', () => {

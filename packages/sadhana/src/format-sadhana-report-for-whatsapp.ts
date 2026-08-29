@@ -39,7 +39,7 @@ export function formatSadhanaReportForWhatsApp(report: SadhanaReport): string {
     `Office going :- ${formatTime12Hour(report.officeGoingTime)}`,
     `Reaching back :- ${formatTime12Hour(report.officeReturnTime)}`,
     'Ys',
-    report.signatureText,
+    orDash(report.signatureText),
   ]
 
   return lines.join('\n\n')

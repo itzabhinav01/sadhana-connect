@@ -78,15 +78,15 @@ describe('SadhanaFormScreen', () => {
     expect(getByRole('button', { name: 'Update Sadhana' })).toBeTruthy()
   })
 
-  it('requires a signature before submitting', async () => {
+  it('submits successfully with no signature — it is optional', async () => {
     const mutate = jest.fn()
     mockUseUpsertSadhanaReport.mockReturnValue({ mutate, isPending: false, isError: false })
 
-    const { getByRole, findByText } = await render(<SadhanaFormScreen />)
+    const { getByRole } = await render(<SadhanaFormScreen />)
     await fireEvent.press(getByRole('button', { name: 'Save Sadhana' }))
 
-    await findByText(/signature is required/i)
-    expect(mutate).not.toHaveBeenCalled()
+    expect(mutate).toHaveBeenCalledTimes(1)
+    expect(mutate.mock.calls[0][0].signatureText).toBeNull()
   })
 
   it('submits round counts independently, without deriving one from another', async () => {

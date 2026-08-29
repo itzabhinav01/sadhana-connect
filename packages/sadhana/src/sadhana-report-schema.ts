@@ -56,7 +56,7 @@ export const sadhanaReportSchema = z.object({
   officeGoingTime: optionalTimeField,
   officeReturnTime: optionalTimeField,
   notes: optionalTextField,
-  signatureText: z.string().trim().min(1, 'Signature is required'),
+  signatureText: optionalTextField,
 })
 
 export type SadhanaReportFormInput = z.infer<typeof sadhanaReportSchema>

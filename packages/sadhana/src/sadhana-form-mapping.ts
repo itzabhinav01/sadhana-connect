@@ -30,7 +30,7 @@ export function formValuesToUpsertParams(
     officeGoingTime: toNullable(values.officeGoingTime),
     officeReturnTime: toNullable(values.officeReturnTime),
     notes: toNullable(values.notes),
-    signatureText: values.signatureText,
+    signatureText: toNullable(values.signatureText),
   }
 }
 
@@ -54,7 +54,7 @@ export function reportToFormValues(
     officeGoingTime: report.officeGoingTime ?? '',
     officeReturnTime: report.officeReturnTime ?? '',
     notes: report.notes ?? '',
-    signatureText: report.signatureText,
+    signatureText: report.signatureText ?? '',
   }
 }
 

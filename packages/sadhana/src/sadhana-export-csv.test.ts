@@ -59,12 +59,13 @@ describe('buildSadhanaHistoryCsv', () => {
     expect(csv).toContain('"Read ""Bhagavad-gita,"" chapter 2"')
   })
 
-  it('writes an empty field for null book name, speaker name, and notes', () => {
+  it('writes an empty field for null book name, speaker name, notes, and signature', () => {
     const csv = buildSadhanaHistoryCsv([
-      makeReport({ bookName: null, speakerName: null, notes: null }),
+      makeReport({ bookName: null, speakerName: null, notes: null, signatureText: null }),
     ])
     const dataLine = csv.split('\r\n')[1]
     expect(dataLine.split(',')).toContain('')
+    expect(dataLine.endsWith(',')).toBe(true)
   })
 
   it('sorts oldest to newest regardless of input order', () => {
