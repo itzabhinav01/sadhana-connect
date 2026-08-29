@@ -7,15 +7,16 @@ import {
   useChangeUserRole,
   useDeactivateAssignment,
   useGenerateRecoveryLink,
+  useHardDeleteUser,
   useMentorDevoteeCount,
   useSetUserActive,
   useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
 import type { AppRole } from '@sadhana-connect/domain'
 import * as Clipboard from 'expo-clipboard'
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useMutation } from '@tanstack/react-query'
 import { supabaseAdminAccountActionsRepository } from '@sadhana-connect/infra-supabase'
@@ -300,13 +301,118 @@ function EmailPanel({ userId }: { userId: string }) {
   )
 }
 
+function LifecyclePanel({
+  user,
+  onDeleted,
+}: {
+  user: { id: string; fullName: string; isActive: boolean; role: AppRole }
+  onDeleted: () => void
+}) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+  const setActive = useSetUserActive()
+  const hardDelete = useHardDeleteUser()
+
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+
+  const handleCloseDeleteModal = () => {
+    setConfirmingDelete(false)
+    setConfirmText('')
+    hardDelete.reset()
+  }
+
+  const handleConfirmDelete = () => {
+    hardDelete.mutate(user.id, {
+      onSuccess: () => {
+        handleCloseDeleteModal()
+        onDeleted()
+      },
+    })
+  }
+
+  return (
+    <Card title="Account status">
+      <Button
+        title={user.isActive ? 'Disable account' : 'Re-enable account'}
+        variant={user.isActive ? 'outline' : 'primary'}
+        isPending={setActive.isPending}
+        onPress={() => setActive.mutate({ userId: user.id, isActive: !user.isActive })}
+      />
+
+      {user.role !== 'super_admin' ? (
+        <View style={styles.deleteSection}>
+          <Button
+            title="Delete account"
+            variant="destructive"
+            onPress={() => setConfirmingDelete(true)}
+          />
+        </View>
+      ) : null}
+
+      <Modal
+        visible={confirmingDelete}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseDeleteModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Delete Account Permanently</Text>
+            <Text style={styles.errorText}>
+              This will permanently delete this account: their profile, all mentor assignments (unlinking mentees/mentors), reports, and login are removed. This action is irreversible.
+            </Text>
+
+            <Text style={styles.inputLabel}>
+              Type <Text style={styles.boldText}>{user.fullName}</Text> to confirm:
+            </Text>
+            <TextInput
+              style={styles.confirmInput}
+              value={confirmText}
+              onChangeText={setConfirmText}
+              placeholder={user.fullName}
+              placeholderTextColor={colors.placeholder ?? colors.muted}
+              autoCapitalize="words"
+            />
+
+            {hardDelete.isError ? (
+              <Text style={styles.errorText}>
+                {hardDelete.error instanceof Error
+                  ? hardDelete.error.message
+                  : 'Something went wrong deleting this account.'}
+              </Text>
+            ) : null}
+
+            <View style={styles.actionsRow}>
+              <Button
+                title="Confirm delete"
+                pendingTitle="Deleting…"
+                variant="destructive"
+                isPending={hardDelete.isPending}
+                disabled={confirmText !== user.fullName || hardDelete.isPending}
+                onPress={handleConfirmDelete}
+              />
+              <Button
+                title="Cancel"
+                variant="outline"
+                disabled={hardDelete.isPending}
+                onPress={handleCloseDeleteModal}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </Card>
+  )
+}
+
 export default function AdminUserDetailScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const { id } = useLocalSearchParams<{ id: string }>()
   const userId = id ?? ''
   const userQuery = useAdminUserDetail(userId)
-  const setActive = useSetUserActive()
+  const router = useRouter()
 
   if (userQuery.isPending) {
     return <LoadingScreen />
@@ -351,14 +457,7 @@ export default function AdminUserDetailScreen() {
 
         {user.role !== 'super_admin' ? <RoleControl user={user} /> : null}
 
-        <Card title="Account status">
-          <Button
-            title={user.isActive ? 'Disable account' : 'Re-enable account'}
-            variant={user.isActive ? 'destructive' : 'outline'}
-            isPending={setActive.isPending}
-            onPress={() => setActive.mutate({ userId: user.id, isActive: !user.isActive })}
-          />
-        </Card>
+        <LifecyclePanel user={user} onDeleted={() => router.replace('/admin/users')} />
 
         <PasswordResetPanel userId={user.id} />
       </ScrollView>
@@ -454,6 +553,33 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.mutedBackground,
       borderRadius: 8,
       padding: spacing.sm,
+    },
+    deleteSection: {
+      marginTop: spacing.sm,
+      paddingTop: spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    inputLabel: {
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
+      color: colors.foreground,
+      marginTop: spacing.xs,
+    },
+    boldText: {
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+    },
+    confirmInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      color: colors.foreground,
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
+      backgroundColor: colors.background,
     },
   })
 }

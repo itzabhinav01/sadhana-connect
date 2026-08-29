@@ -5,7 +5,7 @@ import {
 } from '@sadhana-connect/mentor'
 import { useLocalSearchParams, useNavigation } from 'expo-router'
 import { useLayoutEffect, useMemo } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Card } from '../../../../src/presentation/components/Card'
@@ -14,9 +14,10 @@ import {
   ReadOnlyReportRow,
 } from '../../../../src/presentation/components/DevoteeSadhanaHistorySection'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
+import { Icon } from '../../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
 import { ReminderForm } from '../../../../src/presentation/components/ReminderForm'
-import { fontSize, spacing } from '../../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -66,9 +67,16 @@ export default function MentorDevoteeDetailScreen() {
 
   const profile = profileQuery.data
 
+  const handleOpenWhatsApp = () => {
+    if (!profile.phoneNumber) return
+    const cleanNumber = profile.phoneNumber.replace(/[^0-9]/g, '')
+    Linking.openURL(`https://wa.me/${cleanNumber}`)
+  }
+
   return (
-      <ScrollView contentContainerStyle={styles.content}>
-        <View>
+    <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <View style={styles.headerInfo}>
           <Text style={styles.heading} accessibilityRole="header">
             {profile.fullName}
           </Text>
@@ -80,27 +88,40 @@ export default function MentorDevoteeDetailScreen() {
           <Text style={styles.rowMuted}>Phone: {profile.phoneNumber ?? 'Not provided'}</Text>
         </View>
 
-        <Card title="Today's Sadhana">
-          {todayReportQuery.isPending ? <Text style={styles.rowMuted}>Loading…</Text> : null}
-          {todayReportQuery.isError ? (
-            <ErrorBanner message="Something went wrong loading today's report." />
-          ) : null}
-          {todayReportQuery.isSuccess && todayReportQuery.data === null ? (
-            <Text style={styles.rowMuted}>Not submitted yet today.</Text>
-          ) : null}
-          {todayReportQuery.isSuccess && todayReportQuery.data ? (
-            <ReadOnlyReportRow report={todayReportQuery.data} showComments />
-          ) : null}
-        </Card>
+        {profile.phoneNumber ? (
+          <Pressable
+            style={styles.whatsappButton}
+            onPress={handleOpenWhatsApp}
+            accessibilityRole="button"
+            accessibilityLabel={`Chat with ${profile.fullName} on WhatsApp`}
+          >
+            <Icon name="logo-whatsapp" size={20} color="#ffffff" />
+            <Text style={styles.whatsappButtonText}>Chat on WhatsApp</Text>
+          </Pressable>
+        ) : null}
+      </View>
 
-        <DevoteeSadhanaHistorySection
-          devoteeId={devoteeId}
-          devoteeName={profile.fullName}
-          showComments
-        />
+      <Card title="Today's Sadhana">
+        {todayReportQuery.isPending ? <Text style={styles.rowMuted}>Loading…</Text> : null}
+        {todayReportQuery.isError ? (
+          <ErrorBanner message="Something went wrong loading today's report." />
+        ) : null}
+        {todayReportQuery.isSuccess && todayReportQuery.data === null ? (
+          <Text style={styles.rowMuted}>Not submitted yet today.</Text>
+        ) : null}
+        {todayReportQuery.isSuccess && todayReportQuery.data ? (
+          <ReadOnlyReportRow report={todayReportQuery.data} showComments />
+        ) : null}
+      </Card>
 
-        <ReminderForm devoteeId={devoteeId} />
-      </ScrollView>
+      <DevoteeSadhanaHistorySection
+        devoteeId={devoteeId}
+        devoteeName={profile.fullName}
+        showComments
+      />
+
+      <ReminderForm devoteeId={devoteeId} />
+    </ScrollView>
   )
 }
 
@@ -118,14 +139,39 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.lg,
       backgroundColor: colors.background,
     },
+    header: {
+      gap: spacing.sm,
+    },
+    headerInfo: {
+      gap: 2,
+    },
     heading: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     rowMuted: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
+    },
+    whatsappButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+      backgroundColor: '#25D366',
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      marginTop: spacing.xs,
+    },
+    whatsappButtonText: {
+      color: '#ffffff',
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
     },
   })
 }

@@ -1,9 +1,11 @@
+import { MessageCircle } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
 import { useDevoteeAssignedSince } from '@sadhana-connect/mentor'
 import { useDevoteeProfile } from '@sadhana-connect/mentor'
 import { useDevoteeTodayReport } from '@sadhana-connect/mentor'
 import { formatIsoDateLong } from '@sadhana-connect/shared'
+import { Button } from '@/presentation/components/ui/button'
 import {
   Card,
   CardContent,
@@ -31,6 +33,12 @@ export function MentorDevoteeDetailPage() {
   const todayReportQuery = useDevoteeTodayReport(devoteeId)
   const assignedSinceQuery = useDevoteeAssignedSince(devoteeId)
 
+  const handleOpenWhatsApp = () => {
+    if (!profileQuery.data?.phoneNumber) return
+    const cleanNumber = profileQuery.data.phoneNumber.replace(/[^0-9]/g, '')
+    window.open(`https://wa.me/${cleanNumber}`, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {profileQuery.isPending ? (
@@ -53,19 +61,32 @@ export function MentorDevoteeDetailPage() {
 
       {profileQuery.isSuccess && profileQuery.data ? (
         <>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              {profileQuery.data.fullName}
-            </h1>
-            {assignedSinceQuery.data ? (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">
+                {profileQuery.data.fullName}
+              </h1>
+              {assignedSinceQuery.data ? (
+                <p className="text-muted-foreground">
+                  Assigned since{' '}
+                  {formatDisplayDate(assignedSinceQuery.data.slice(0, 10))}
+                </p>
+              ) : null}
               <p className="text-muted-foreground">
-                Assigned since{' '}
-                {formatDisplayDate(assignedSinceQuery.data.slice(0, 10))}
+                Phone: {profileQuery.data.phoneNumber ?? 'Not provided'}
               </p>
+            </div>
+
+            {profileQuery.data.phoneNumber ? (
+              <Button
+                type="button"
+                onClick={handleOpenWhatsApp}
+                className="bg-[#25D366] text-white hover:bg-[#20bd5a] flex items-center gap-2 self-start"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                Chat on WhatsApp
+              </Button>
             ) : null}
-            <p className="text-muted-foreground">
-              Phone: {profileQuery.data.phoneNumber ?? 'Not provided'}
-            </p>
           </div>
 
           <Card>

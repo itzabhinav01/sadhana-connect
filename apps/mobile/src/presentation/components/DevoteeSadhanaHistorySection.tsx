@@ -21,7 +21,7 @@ import * as FileSystem from 'expo-file-system'
 import * as Print from 'expo-print'
 import * as Sharing from 'expo-sharing'
 import { useMemo, useState } from 'react'
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, spacing, fontFamily, radius } from '../../shared/theme'
@@ -31,6 +31,7 @@ import { Card } from './Card'
 import { CommentThread } from './CommentThread'
 import { DateRangeFields } from './DateRangeFields'
 import { ErrorBanner } from './ErrorBanner'
+import { Icon } from './Icon'
 
 type RangeOption = '7' | '14' | '30' | 'custom'
 
@@ -338,51 +339,91 @@ export function DevoteeSadhanaHistorySection({
       </Modal>
 
       <Card title="Sadhana History">
-        <View style={styles.filterRow}>
-          {QUICK_OPTIONS.map((quickOption) => (
-            <Button
-              key={quickOption.value}
-              title={quickOption.label}
-              variant={option === quickOption.value ? 'primary' : 'outline'}
-              onPress={() => setOption(quickOption.value)}
+        {/* 1. Time Period Range Selector */}
+        <View style={styles.sectionControlBlock}>
+          <View style={styles.sectionLabelRow}>
+            <Icon name="calendar-outline" size={14} color={colors.primary} />
+            <Text style={styles.sectionControlLabel}>Select Time Period</Text>
+          </View>
+          <View style={styles.filterRow}>
+            {QUICK_OPTIONS.map((quickOption) => (
+              <Button
+                key={quickOption.value}
+                title={quickOption.label}
+                variant={option === quickOption.value ? 'primary' : 'outline'}
+                onPress={() => setOption(quickOption.value)}
+              />
+            ))}
+          </View>
+
+          {option === 'custom' ? (
+            <DateRangeFields
+              fromDate={customRange.fromDate}
+              toDate={customRange.toDate}
+              onFromDateChange={(fromDate) => setCustomRange({ ...customRange, fromDate })}
+              onToDateChange={(toDate) => setCustomRange({ ...customRange, toDate })}
             />
-          ))}
+          ) : null}
         </View>
 
-        {option === 'custom' ? (
-          <DateRangeFields
-            fromDate={customRange.fromDate}
-            toDate={customRange.toDate}
-            onFromDateChange={(fromDate) => setCustomRange({ ...customRange, fromDate })}
-            onToDateChange={(toDate) => setCustomRange({ ...customRange, toDate })}
-          />
-        ) : null}
+        <View style={styles.sectionDivider} />
 
-        {/* Action Buttons */}
-        <View style={styles.filterRow}>
-          <Button
-            title="Preview Report"
-            variant="outline"
-            onPress={handleOpenPreview}
-            disabled={!validation.valid}
-          />
-          <Button
-            title="Export PDF"
-            variant="outline"
-            pendingTitle="Exporting…"
-            isPending={isExportingPdf}
-            onPress={handleExportPdf}
-            disabled={!validation.valid || isExportingPdf}
-          />
-          <Button
-            title="Export CSV"
-            variant="outline"
-            pendingTitle="Exporting…"
-            isPending={isExportingCsv}
-            onPress={handleExportCsv}
-            disabled={!validation.valid || isExportingCsv}
-          />
+        {/* 2. Report Actions & Downloads */}
+        <View style={styles.sectionControlBlock}>
+          <View style={styles.sectionLabelRow}>
+            <Icon name="document-text-outline" size={14} color={colors.primary} />
+            <Text style={styles.sectionControlLabel}>Report & Export Actions</Text>
+          </View>
+
+          <View style={styles.actionButtonsContainer}>
+            <Pressable
+              style={[styles.previewButton, !validation.valid ? styles.disabledButton : null]}
+              onPress={handleOpenPreview}
+              disabled={!validation.valid}
+              accessibilityRole="button"
+              accessibilityLabel="Preview Report"
+            >
+              <Icon name="eye-outline" size={18} color={colors.primary} />
+              <Text style={styles.previewButtonText}>Preview Report</Text>
+            </Pressable>
+
+            <View style={styles.exportRow}>
+              <Pressable
+                style={[
+                  styles.exportButton,
+                  !validation.valid || isExportingPdf ? styles.disabledButton : null,
+                ]}
+                onPress={handleExportPdf}
+                disabled={!validation.valid || isExportingPdf}
+                accessibilityRole="button"
+                accessibilityLabel="Export PDF"
+              >
+                <Icon name="download-outline" size={15} color={colors.foreground} />
+                <Text style={styles.exportButtonText}>
+                  {isExportingPdf ? 'Exporting…' : 'Export PDF'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.exportButton,
+                  !validation.valid || isExportingCsv ? styles.disabledButton : null,
+                ]}
+                onPress={handleExportCsv}
+                disabled={!validation.valid || isExportingCsv}
+                accessibilityRole="button"
+                accessibilityLabel="Export CSV"
+              >
+                <Icon name="stats-chart-outline" size={15} color={colors.foreground} />
+                <Text style={styles.exportButtonText}>
+                  {isExportingCsv ? 'Exporting…' : 'Export CSV'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
+
+        <View style={styles.sectionDivider} />
 
         {!validation.valid ? <Text style={styles.errorText}>{validation.error}</Text> : null}
         {exportError ? (
@@ -421,6 +462,76 @@ export function DevoteeSadhanaHistorySection({
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    sectionControlBlock: {
+      gap: spacing.xs,
+    },
+    sectionLabelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginBottom: 2,
+    },
+    sectionControlLabel: {
+      fontSize: fontSize.xs,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+      color: colors.muted,
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+    },
+    sectionDivider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginVertical: spacing.xs,
+    },
+    actionButtonsContainer: {
+      gap: spacing.xs,
+    },
+    previewButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+      backgroundColor: colors.primarySoft,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      borderRadius: radius.md,
+      paddingVertical: spacing.sm + 2,
+      paddingHorizontal: spacing.md,
+    },
+    previewButtonText: {
+      color: colors.primary,
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+    },
+    exportRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    exportButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+    },
+    exportButtonText: {
+      color: colors.foreground,
+      fontSize: fontSize.xs + 1,
+      fontFamily: fontFamily.medium,
+      fontWeight: '500',
+    },
+    disabledButton: {
+      opacity: 0.5,
+    },
     filterRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',

@@ -76,11 +76,18 @@ jest.mock('../../../../../../packages/admin/src/use-change-user-role', () => {
   }
 })
 
+jest.mock('../../../../../../packages/admin/src/use-hard-delete-user', () => ({
+  useHardDeleteUser: jest.fn(),
+}))
+
+const mockReplace = jest.fn()
+
 jest.mock('expo-router', () => {
   const { View } = require('react-native')
   return {
     Stack: { Screen: () => <View /> },
     useLocalSearchParams: jest.fn(() => ({ id: 'u1' })),
+    useRouter: () => ({ replace: mockReplace }),
   }
 })
 
@@ -93,6 +100,7 @@ import {
   useChangeUserRole,
   useDeactivateAssignment,
   useGenerateRecoveryLink,
+  useHardDeleteUser,
   useMentorDevoteeCount,
   useSetUserActive,
   useSetUserTempleGroup,
@@ -120,6 +128,7 @@ const mockUseChangeUserRole = useChangeUserRole as jest.Mock
 const mockUseGenerateRecoveryLink = useGenerateRecoveryLink as jest.Mock
 const mockUseAdminTempleGroups = useAdminTempleGroups as jest.Mock
 const mockUseSetUserTempleGroup = useSetUserTempleGroup as jest.Mock
+const mockUseHardDeleteUser = useHardDeleteUser as jest.Mock
 const mockUseDevoteeReportHistory = useDevoteeReportHistory as jest.Mock
 const mockSetStringAsync = Clipboard.setStringAsync as jest.Mock
 
@@ -152,13 +161,16 @@ describe('AdminUserDetailScreen', () => {
     mockUseGenerateRecoveryLink.mockReset()
     mockUseAdminTempleGroups.mockReset()
     mockUseSetUserTempleGroup.mockReset()
+    mockUseHardDeleteUser.mockReset()
     mockUseDevoteeReportHistory.mockReset()
     mockSetStringAsync.mockReset()
+    mockReplace.mockReset()
 
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 0 })
     mockUseAdminAssignments.mockReturnValue({ isPending: false, data: [] })
     mockUseDeactivateAssignment.mockReturnValue({ mutate: jest.fn(), isPending: false })
     mockUseSetUserActive.mockReturnValue({ mutate: jest.fn(), isPending: false })
+    mockUseHardDeleteUser.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false, reset: jest.fn() })
     mockUseChangeUserRole.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: false })
     mockUseGenerateRecoveryLink.mockReturnValue({
       mutate: jest.fn(),
@@ -378,5 +390,27 @@ describe('AdminUserDetailScreen', () => {
 
     const { getByText } = await renderScreen()
     expect(getByText('Something went wrong updating the temple group.')).toBeTruthy()
+  })
+
+  it('opens delete account modal and deletes user when name is confirmed', async () => {
+    const mockHardDelete = jest.fn((_id, options) => options?.onSuccess?.())
+    mockUseHardDeleteUser.mockReturnValue({
+      mutate: mockHardDelete,
+      isPending: false,
+      isError: false,
+      reset: jest.fn(),
+    })
+    mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
+
+    const { getByRole, getByPlaceholderText, getByText } = await renderScreen()
+
+    await fireEvent.press(getByRole('button', { name: 'Delete account' }))
+    expect(getByText('Delete Account Permanently')).toBeTruthy()
+
+    await fireEvent.changeText(getByPlaceholderText('Test Devotee'), 'Test Devotee')
+    await fireEvent.press(getByRole('button', { name: 'Confirm delete' }))
+
+    expect(mockHardDelete).toHaveBeenCalledWith('u1', expect.anything())
+    expect(mockReplace).toHaveBeenCalledWith('/admin/users')
   })
 })

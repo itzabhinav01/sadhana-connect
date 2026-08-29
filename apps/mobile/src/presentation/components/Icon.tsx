@@ -48,6 +48,11 @@ export type IconName =
   | 'sunny-outline'
   | 'moon'
   | 'moon-outline'
+  | 'logo-whatsapp'
+  | 'eye-outline'
+  | 'document-text-outline'
+  | 'download-outline'
+  | 'calendar-outline'
 
 interface IconProps {
   name: IconName

@@ -248,4 +248,21 @@ describe('MentorDevoteeDetailScreen', () => {
     expect(getByText('No comments yet.')).toBeTruthy()
     expect(getByRole('button', { name: 'Hide comments' })).toBeTruthy()
   })
+
+  it('renders "Chat on WhatsApp" button and opens wa.me link when pressed', async () => {
+    const openURLSpy = jest.spyOn(require('react-native').Linking, 'openURL').mockResolvedValue(true)
+    mockUseDevoteeProfile.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: { ...activeProfile, phoneNumber: '+919876543210' },
+    })
+
+    const { getByRole } = await renderScreen()
+    const whatsappButton = getByRole('button', { name: /chat with devotee one on whatsapp/i })
+    expect(whatsappButton).toBeTruthy()
+
+    await fireEvent.press(whatsappButton)
+    expect(openURLSpy).toHaveBeenCalledWith('https://wa.me/919876543210')
+  })
 })

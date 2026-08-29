@@ -1,4 +1,4 @@
-import { Eye, FileSpreadsheet, Printer } from 'lucide-react'
+import { Calendar, Eye, FileSpreadsheet, Printer } from 'lucide-react'
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useQueryClient } from '@tanstack/react-query'
@@ -185,10 +185,11 @@ export function DevoteeSadhanaHistorySection({
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={handleOpenPreview}
                 disabled={!validation.valid}
+                className="font-medium"
               >
                 <Eye className="size-4 mr-1.5" aria-hidden="true" />
                 Preview PDF
@@ -216,31 +217,42 @@ export function DevoteeSadhanaHistorySection({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {QUICK_OPTIONS.map((quickOption) => (
-              <Button
-                key={quickOption.value}
-                type="button"
-                variant={option === quickOption.value ? 'default' : 'outline'}
-                size="sm"
-                aria-pressed={option === quickOption.value}
-                onClick={() => setOption(quickOption.value)}
-              >
-                {quickOption.label}
-              </Button>
-            ))}
+        <CardContent className="flex flex-col gap-5">
+          {/* Time Period Filter Group */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Calendar className="size-3.5" aria-hidden="true" />
+              <span>Select Time Period</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_OPTIONS.map((quickOption) => (
+                <Button
+                  key={quickOption.value}
+                  type="button"
+                  variant={option === quickOption.value ? 'default' : 'outline'}
+                  size="sm"
+                  aria-pressed={option === quickOption.value}
+                  onClick={() => setOption(quickOption.value)}
+                >
+                  {quickOption.label}
+                </Button>
+              ))}
+            </div>
+
+            {option === 'custom' ? (
+              <div className="pt-1">
+                <DateRangeInputs
+                  idPrefix="devotee-history"
+                  fromDate={customRange.fromDate}
+                  toDate={customRange.toDate}
+                  onFromDateChange={(fromDate) => setCustomRange({ ...customRange, fromDate })}
+                  onToDateChange={(toDate) => setCustomRange({ ...customRange, toDate })}
+                />
+              </div>
+            ) : null}
           </div>
 
-          {option === 'custom' ? (
-            <DateRangeInputs
-              idPrefix="devotee-history"
-              fromDate={customRange.fromDate}
-              toDate={customRange.toDate}
-              onFromDateChange={(fromDate) => setCustomRange({ ...customRange, fromDate })}
-              onToDateChange={(toDate) => setCustomRange({ ...customRange, toDate })}
-            />
-          ) : null}
+          <div className="h-px bg-border w-full" />
 
           {!validation.valid ? (
             <p role="alert" className="text-sm text-destructive">
