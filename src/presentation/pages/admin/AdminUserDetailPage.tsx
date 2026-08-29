@@ -6,6 +6,7 @@ import {
   useDeactivateAssignment,
   useMentorDevoteeCount,
 } from '@sadhana-connect/admin'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
 import { AdminUserEmailReveal } from '@/presentation/pages/admin/AdminUserEmailReveal'
@@ -15,7 +16,7 @@ import { AdminUserRoleControl } from '@/presentation/pages/admin/AdminUserRoleCo
 import { AdminUserStatusBadge } from '@/presentation/pages/admin/AdminUserStatusBadge'
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 export function AdminUserDetailPage() {

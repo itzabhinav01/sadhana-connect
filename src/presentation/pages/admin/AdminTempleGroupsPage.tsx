@@ -8,11 +8,12 @@ import {
   useRenameTempleGroup,
 } from '@sadhana-connect/admin'
 import type { TempleGroup } from '@sadhana-connect/domain'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 export function AdminTempleGroupsPage() {

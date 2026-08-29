@@ -42,6 +42,47 @@ export function formatIsoDateAsDdMmYyyy(dateIso: string): string {
   return `${day}-${month}-${year}`
 }
 
+const LONG_MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+// 'D Month YYYY' (e.g. '28 August 2026') for a given year/month/day —
+// deliberately not locale-dependent: Intl's day/month/year ordering varies
+// by browser locale, and this app wants one consistent, readable order
+// everywhere it displays a date.
+function formatLongDate(year: number, month: number, day: number): string {
+  return `${day} ${LONG_MONTH_NAMES[month - 1]} ${year}`
+}
+
+// 'YYYY-MM-DD' -> '28 August 2026', by string manipulation only (no Date
+// object) — same timezone-parsing-pitfall rationale as
+// formatIsoDateAsDdMmYyyy above. Used for on-screen display of plain
+// calendar dates (report dates, assignment dates) across both platforms.
+export function formatIsoDateLong(dateIso: string): string {
+  const [year, month, day] = dateIso.split('-').map(Number)
+  return formatLongDate(year, month, day)
+}
+
+// A JS Date (e.g. a parsed timestamptz such as created_at) -> '28 August
+// 2026', in the browser's local time zone. For real instants (not plain
+// calendar-date strings) constructing a Date and reading its local
+// components is the correct, timezone-safe approach — see
+// getLocalDateIso's own reasoning above.
+export function formatDateLong(date: Date): string {
+  return formatLongDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+}
+
 // Days since the Unix epoch for a 'YYYY-MM-DD' string, computed from the
 // date's own Y/M/D components via Date.UTC rather than local-timezone
 // parsing — so the same date string always maps to the same day number no

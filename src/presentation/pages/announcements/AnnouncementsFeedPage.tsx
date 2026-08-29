@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom'
 
 import { useAnnouncements } from '@sadhana-connect/announcements'
 import type { Announcement } from '@sadhana-connect/domain'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 
 function formatDisplayDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 // Devotee-facing community feed (section 7). Reuses useAnnouncements()

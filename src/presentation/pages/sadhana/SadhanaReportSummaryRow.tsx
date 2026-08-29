@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 
 import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
+import { formatIsoDateLong } from '@sadhana-connect/shared'
 import { SadhanaReportComments } from '@/presentation/pages/sadhana/SadhanaReportComments'
 
 function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
+  return formatIsoDateLong(iso)
 }
 
 function formatTime(time: string | null) {

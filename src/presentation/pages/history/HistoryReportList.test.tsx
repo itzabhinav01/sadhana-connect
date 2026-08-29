@@ -139,7 +139,7 @@ describe('HistoryReportList', () => {
 
     // Each row now renders two links: the date link and the Share to
     // WhatsApp link (Phase 15) — 2 reports x 2 links each.
-    const dateLinks = screen.getAllByRole('link', { name: /01\/1[45]\/2026/ })
+    const dateLinks = screen.getAllByRole('link', { name: /1[45] January 2026/ })
     expect(dateLinks).toHaveLength(2)
     expect(dateLinks[0]).toHaveAttribute('href', '/sadhana?date=2026-01-15')
     expect(dateLinks[1]).toHaveAttribute('href', '/sadhana?date=2026-01-14')

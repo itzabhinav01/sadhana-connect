@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 
 import type { MentorDevoteeSummary } from '@sadhana-connect/mentor'
+import { formatIsoDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 
 function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
+  return formatIsoDateLong(iso)
 }
 
 function StatusBadge({ hasSubmittedToday }: { hasSubmittedToday: boolean }) {

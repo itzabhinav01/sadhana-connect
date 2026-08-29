@@ -6,7 +6,7 @@ import {
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
 import { useDevoteeReportHistory } from '@sadhana-connect/sadhana'
-import { buildDateRangeList } from '@sadhana-connect/shared'
+import { buildDateRangeList, formatIsoDateLong } from '@sadhana-connect/shared'
 import {
   Card,
   CardContent,
@@ -28,8 +28,7 @@ const QUICK_OPTIONS: { value: RangeOption; label: string }[] = [
 ]
 
 function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
+  return formatIsoDateLong(iso)
 }
 
 interface DevoteeSadhanaHistorySectionProps {

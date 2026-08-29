@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import type { SadhanaReportHistoryEntry } from '@sadhana-connect/domain/entities/sadhana-report'
+import { formatIsoDateLong } from '@sadhana-connect/shared'
 import { MentorReportCommentSection } from '@/presentation/pages/mentor/MentorReportCommentSection'
 
 function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
+  return formatIsoDateLong(iso)
 }
 
 interface MentorDevoteeReportRowProps {

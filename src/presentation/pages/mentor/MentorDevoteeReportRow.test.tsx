@@ -71,7 +71,7 @@ describe('MentorDevoteeReportRow', () => {
   it('displays the date, rounds, reading, and hearing minutes', () => {
     render(<MentorDevoteeReportRow report={report} />)
 
-    expect(screen.getByText('01/15/2026')).toBeInTheDocument()
+    expect(screen.getByText('15 January 2026')).toBeInTheDocument()
     expect(screen.getByText(/16 rounds/)).toBeInTheDocument()
     expect(screen.getByText(/20m reading/)).toBeInTheDocument()
     expect(screen.getByText(/30m hearing/)).toBeInTheDocument()

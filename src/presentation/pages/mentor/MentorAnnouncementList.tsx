@@ -14,6 +14,7 @@ import {
 } from '@sadhana-connect/announcements'
 import { useAuth } from '@sadhana-connect/auth'
 import type { Announcement } from '@sadhana-connect/domain'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
@@ -27,7 +28,7 @@ import {
 import { Textarea } from '@/presentation/components/ui/textarea'
 
 function formatDisplayDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 interface MentorAnnouncementListProps {

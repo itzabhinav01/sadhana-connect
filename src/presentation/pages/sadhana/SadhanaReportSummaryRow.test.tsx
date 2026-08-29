@@ -58,7 +58,7 @@ describe('SadhanaReportSummaryRow', () => {
   it('links to the dated Sadhana page', () => {
     renderRow({})
 
-    expect(screen.getByRole('link', { name: /01\/15\/2026/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /15 January 2026/ })).toHaveAttribute(
       'href',
       '/sadhana?date=2026-01-15',
     )
@@ -119,7 +119,7 @@ describe('SadhanaReportSummaryRow', () => {
   it('shows the formatted date', () => {
     renderRow({})
 
-    expect(screen.getByText('01/15/2026')).toBeInTheDocument()
+    expect(screen.getByText('15 January 2026')).toBeInTheDocument()
   })
 
   it('compact variant shows only total rounds', () => {

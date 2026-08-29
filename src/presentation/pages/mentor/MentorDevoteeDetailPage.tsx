@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useDevoteeAssignedSince } from '@sadhana-connect/mentor'
 import { useDevoteeProfile } from '@sadhana-connect/mentor'
 import { useDevoteeTodayReport } from '@sadhana-connect/mentor'
+import { formatIsoDateLong } from '@sadhana-connect/shared'
 import {
   Card,
   CardContent,
@@ -13,8 +14,7 @@ import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/D
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
 
 function formatDisplayDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  return `${month}/${day}/${year}`
+  return formatIsoDateLong(iso)
 }
 
 // If the mentor manually changes the URL to a devotee that isn't (or is

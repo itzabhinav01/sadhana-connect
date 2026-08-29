@@ -1,9 +1,10 @@
 import { useDeactivateAssignment } from '@sadhana-connect/admin'
 import type { AdminMentorAssignment } from '@sadhana-connect/domain'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 interface AdminAssignmentListProps {

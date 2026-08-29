@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
 
 import type { AdminUser, MentorDevoteeCount } from '@sadhana-connect/domain'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { AdminUserStatusBadge } from '@/presentation/pages/admin/AdminUserStatusBadge'
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  return formatDateLong(new Date(iso))
 }
 
 interface AdminMentorListProps {

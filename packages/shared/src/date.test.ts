@@ -4,7 +4,9 @@ import {
   addDaysIso,
   buildDateRangeList,
   daysSinceEpoch,
+  formatDateLong,
   formatIsoDateAsDdMmYyyy,
+  formatIsoDateLong,
   getLocalDateIso,
 } from './date'
 
@@ -79,6 +81,23 @@ describe('formatIsoDateAsDdMmYyyy', () => {
 
   it('preserves leading zeros in day and month', () => {
     expect(formatIsoDateAsDdMmYyyy('2026-01-05')).toBe('05-01-2026')
+  })
+})
+
+describe('formatIsoDateLong', () => {
+  it('formats a date as D Month YYYY', () => {
+    expect(formatIsoDateLong('2026-08-28')).toBe('28 August 2026')
+  })
+
+  it('does not pad the day with a leading zero', () => {
+    expect(formatIsoDateLong('2026-01-05')).toBe('5 January 2026')
+  })
+})
+
+describe('formatDateLong', () => {
+  it('formats a Date as D Month YYYY using local components', () => {
+    const date = new Date(2026, 7, 28) // Aug 28, 2026, local time
+    expect(formatDateLong(date)).toBe('28 August 2026')
   })
 })
 

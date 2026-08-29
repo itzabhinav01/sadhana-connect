@@ -4,13 +4,16 @@ import { useState } from 'react'
 import { useMarkNotificationRead } from '@sadhana-connect/notifications'
 import { useNotificationNavigation } from '@/application/notifications/use-notification-navigation'
 import type { SadhanaNotification } from '@sadhana-connect/domain/entities/notification'
+import { formatDateLong } from '@sadhana-connect/shared'
 import { cn } from '@/shared/utils/cn'
 
 function formatNotificationDate(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  const date = new Date(iso)
+  const time = date.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
   })
+  return `${formatDateLong(date)}, ${time}`
 }
 
 // One icon per notification type — same choices as apps/mobile's
