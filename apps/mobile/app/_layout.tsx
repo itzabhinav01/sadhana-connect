@@ -18,6 +18,7 @@ import { ThemeProvider } from '../src/application/theme/theme-provider'
 import { useTheme } from '../src/application/theme/use-theme'
 import { dailySadhanaNotificationService } from '../src/infrastructure/notifications/daily-sadhana-notification-service'
 import { secureSessionStorage } from '../src/infrastructure/local-storage/secure-session-storage'
+import { useAppUpdates } from '../src/presentation/hooks/use-app-updates'
 import { env } from '../src/shared/config/env'
 import { fontFamily } from '../src/shared/theme'
 
@@ -81,15 +82,13 @@ export default function RootLayout() {
   })
 
   const router = useRouter()
+  useAppUpdates({ checkOnMount: true, promptUserOnUpdate: true })
 
   useEffect(() => {
     if (fontsLoaded) {
       applyDefaultFontOnce()
     }
     if (fontError) {
-      // eslint-disable-next-line no-console -- worth surfacing in the
-      // Metro/logcat log even though it's not user-facing; the app
-      // itself degrades to the system font rather than failing to load.
       console.warn('Poppins failed to load, falling back to the system font:', fontError)
     }
   }, [fontsLoaded, fontError])

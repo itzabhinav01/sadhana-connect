@@ -6,6 +6,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import type { Theme } from '../../../src/application/theme/theme-context'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
+import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { DailySadhanaReminderSection } from '../../../src/presentation/components/DailySadhanaReminderSection'
 import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
@@ -37,6 +38,8 @@ export default function SettingsScreen() {
       </Card>
 
       <DailySadhanaReminderSection />
+
+      <AppUpdateSection />
 
       <Card title="App Info">
         <View style={styles.row}>

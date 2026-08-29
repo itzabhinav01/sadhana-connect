@@ -1,4 +1,4 @@
-import { Download, FileSpreadsheet, Printer, X } from 'lucide-react'
+import { FileSpreadsheet, Printer } from 'lucide-react'
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'

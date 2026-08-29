@@ -17,7 +17,7 @@ import {
 import { useAuth } from '@sadhana-connect/auth'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
 import { useQueryClient } from '@tanstack/react-query'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as Print from 'expo-print'
 import * as Sharing from 'expo-sharing'
 import { useMemo, useState } from 'react'

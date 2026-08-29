@@ -3,6 +3,14 @@
     "name": "Sadhana Connect",
     "slug": "sadhana-connect",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "scheme": "sadhanaconnect",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,7 +38,8 @@
       "expo-notifications",
       "expo-sharing",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-updates"
     ]
   }
 }

@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   type ResetPasswordInput,
   resetPasswordSchema,
+  useAuth,
 } from '@sadhana-connect/auth'
 import { usePasswordRecovery } from '@sadhana-connect/auth'
 import { useUpdatePassword } from '@sadhana-connect/auth'
