@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useSadhanaReport } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { SadhanaReportForm } from '@/presentation/pages/sadhana/SadhanaReportForm'
+import { DailySadhanaReminderCard } from '@/presentation/components/shared/DailySadhanaReminderCard'
 
 function isValidDateParam(value: string | null): value is string {
   return value !== null && /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -58,13 +59,16 @@ export function SadhanaFormPage() {
       ) : null}
 
       {reportQuery.isSuccess ? (
-        <SadhanaReportForm
-          key={date}
-          date={date}
-          existingReport={reportQuery.data}
-          onDateChange={handleDateChange}
-          prefillRounds={prefillRounds}
-        />
+        <>
+          <SadhanaReportForm
+            key={date}
+            date={date}
+            existingReport={reportQuery.data}
+            onDateChange={handleDateChange}
+            prefillRounds={prefillRounds}
+          />
+          <DailySadhanaReminderCard />
+        </>
       ) : null}
     </div>
   )

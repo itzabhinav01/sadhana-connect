@@ -22,6 +22,10 @@ vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
   }
 })
 
+vi.mock('@/presentation/components/shared/DailySadhanaReminderCard', () => ({
+  DailySadhanaReminderCard: () => <div data-testid="daily-reminder-card" />,
+}))
+
 function renderPage(initialPath = '/sadhana') {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>

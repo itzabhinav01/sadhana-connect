@@ -9,6 +9,13 @@ jest.mock('../../../src/application/theme/use-theme', () => ({
   }),
 }))
 
+jest.mock('../../../src/presentation/components/DailySadhanaReminderSection', () => {
+  const { Text } = require('react-native')
+  return {
+    DailySadhanaReminderSection: () => <Text>Daily Sadhana Reminder Section</Text>,
+  }
+})
+
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 
 import SettingsScreen from './settings'
@@ -19,11 +26,12 @@ describe('SettingsScreen', () => {
     mockSetTheme.mockReset()
   })
 
-  it('shows the three appearance options and the current app version', async () => {
+  it('shows appearance options, reminder section, and current app version', async () => {
     const { getByRole, getByText } = await render(<SettingsScreen />)
     expect(getByRole('button', { name: 'Light' })).toBeTruthy()
     expect(getByRole('button', { name: 'Dark' })).toBeTruthy()
     expect(getByRole('button', { name: 'System' })).toBeTruthy()
+    expect(getByText('Daily Sadhana Reminder Section')).toBeTruthy()
     expect(getByText('Version')).toBeTruthy()
   })
 
