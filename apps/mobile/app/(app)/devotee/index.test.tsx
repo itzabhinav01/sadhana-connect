@@ -23,8 +23,12 @@ jest.mock('../../../../../packages/sadhana/src/use-recent-sadhana-reports', () =
   useRecentSadhanaReports: jest.fn(),
 }))
 
-jest.mock('../../../../../packages/notifications/src/use-unread-notification-count', () => ({
-  useUnreadNotificationCount: jest.fn(),
+jest.mock('../../../../../packages/announcements/src/use-announcements', () => ({
+  useAnnouncements: jest.fn(),
+}))
+
+jest.mock('../../../../../packages/verse/src/use-verse-of-the-day', () => ({
+  useVerseOfTheDay: jest.fn(),
 }))
 
 jest.mock('../../../src/application/auth/use-sign-out', () => ({
@@ -32,17 +36,15 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
 }))
 
 const mockPush = jest.fn()
+const mockSetOptions = jest.fn()
 
-jest.mock('expo-router', () => {
-  const { View } = require('react-native')
-  return {
-    Stack: { Screen: () => <View /> },
-    useRouter: jest.fn(() => ({ push: mockPush, replace: jest.fn() })),
-  }
-})
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({ push: mockPush, replace: jest.fn() })),
+  useNavigation: jest.fn(() => ({ setOptions: mockSetOptions })),
+}))
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
-import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
+import { useAnnouncements } from '@sadhana-connect/announcements'
 import {
   buildWhatsAppShareUrl,
   useRecentSadhanaReports,
@@ -50,6 +52,7 @@ import {
   useSadhanaStreak,
   useWeeklySadhanaSummary,
 } from '@sadhana-connect/sadhana'
+import { useVerseOfTheDay } from '@sadhana-connect/verse'
 import { Linking } from 'react-native'
 
 import DashboardScreen from './index'
@@ -82,7 +85,8 @@ const mockUseSadhanaReport = useSadhanaReport as jest.Mock
 const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
 const mockUseWeeklySadhanaSummary = useWeeklySadhanaSummary as jest.Mock
 const mockUseRecentSadhanaReports = useRecentSadhanaReports as jest.Mock
-const mockUseUnreadNotificationCount = useUnreadNotificationCount as jest.Mock
+const mockUseAnnouncements = useAnnouncements as jest.Mock
+const mockUseVerseOfTheDay = useVerseOfTheDay as jest.Mock
 
 describe('DashboardScreen', () => {
   afterEach(async () => {
@@ -93,7 +97,8 @@ describe('DashboardScreen', () => {
     mockUseSadhanaStreak.mockReturnValue({ data: 0 })
     mockUseWeeklySadhanaSummary.mockReturnValue({ data: undefined })
     mockUseRecentSadhanaReports.mockReturnValue({ data: [] })
-    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
+    mockUseAnnouncements.mockReturnValue({ data: [] })
+    mockUseVerseOfTheDay.mockReturnValue({ data: undefined })
     mockPush.mockReset()
   })
 
@@ -112,7 +117,7 @@ describe('DashboardScreen', () => {
     expect(getByRole('button', { name: 'Fill Sadhana' })).toBeTruthy()
   })
 
-  it("shows today's totals and an Edit action when a report exists", async () => {
+  it("shows today's rounds and an Edit action when a report exists", async () => {
     mockUseSadhanaReport.mockReturnValue({
       isPending: false,
       data: {
@@ -125,7 +130,7 @@ describe('DashboardScreen', () => {
     mockUseSadhanaStreak.mockReturnValue({ data: 3 })
 
     const { getByRole, getByText } = await render(<DashboardScreen />)
-    expect(getByText('Current streak: 3 days')).toBeTruthy()
+    expect(getByText(/^3\s*days$/)).toBeTruthy()
     expect(getByText('16')).toBeTruthy()
     expect(getByRole('button', { name: 'Edit Sadhana' })).toBeTruthy()
   })
@@ -160,31 +165,60 @@ describe('DashboardScreen', () => {
     expect(openURLSpy).toHaveBeenCalledWith(buildWhatsAppShareUrl(fullTodayReport))
   })
 
-  it('shows a plain "Notifications" label when there are no unread notifications', async () => {
+  it('navigates to /devotee/history when "View History" is pressed', async () => {
     mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
-    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
 
     const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(getByRole('button', { name: 'View History' }))
 
-    expect(getByRole('button', { name: 'Notifications' })).toBeTruthy()
+    expect(mockPush).toHaveBeenCalledWith('/devotee/history')
   })
 
-  it('shows the unread count in the Notifications label when there are unread notifications', async () => {
+  it('shows the empty state when there are no announcements yet', async () => {
     mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
-    mockUseUnreadNotificationCount.mockReturnValue({ data: 3 })
+    mockUseAnnouncements.mockReturnValue({ data: [] })
 
-    const { getByRole } = await render(<DashboardScreen />)
-
-    expect(getByRole('button', { name: 'Notifications (3)' })).toBeTruthy()
+    const { getByText } = await render(<DashboardScreen />)
+    expect(getByText('No announcements yet.')).toBeTruthy()
   })
 
-  it('navigates to /devotee/notifications when "Notifications" is pressed', async () => {
+  it('shows a preview of the latest announcement with a Pinned chip when pinned', async () => {
     mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
-    mockUseUnreadNotificationCount.mockReturnValue({ data: 0 })
+    mockUseAnnouncements.mockReturnValue({
+      data: [{ id: 'a1', title: 'Temple closed Monday', content: 'Details here.', isPinned: true }],
+    })
+
+    const { getByText } = await render(<DashboardScreen />)
+    expect(getByText('Temple closed Monday')).toBeTruthy()
+    expect(getByText('Pinned')).toBeTruthy()
+  })
+
+  it('navigates to /devotee/announcements when "View all" is pressed', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
 
     const { getByRole } = await render(<DashboardScreen />)
-    await fireEvent.press(getByRole('button', { name: 'Notifications' }))
+    await fireEvent.press(getByRole('button', { name: 'View all' }))
 
-    expect(mockPush).toHaveBeenCalledWith('/devotee/notifications')
+    expect(mockPush).toHaveBeenCalledWith('/devotee/announcements')
+  })
+
+  it('shows the Verse of the Day citation when available', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+    mockUseVerseOfTheDay.mockReturnValue({
+      data: { chapter: 2, verseNumber: '47', content: { translation: 'You have a right to perform your duty.' } },
+    })
+
+    const { getByText } = await render(<DashboardScreen />)
+    expect(getByText(/2\.47/)).toBeTruthy()
+    expect(getByText('You have a right to perform your duty.')).toBeTruthy()
+  })
+
+  it('navigates to /devotee/verse when "Read more" is pressed', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+
+    const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Read more' }))
+
+    expect(mockPush).toHaveBeenCalledWith('/devotee/verse')
   })
 })

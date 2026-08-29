@@ -3,7 +3,7 @@ import { Controller, type Control, type FieldValues, type Path } from 'react-hoo
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface TextFieldProps<T extends FieldValues> {
@@ -57,6 +57,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     input: {

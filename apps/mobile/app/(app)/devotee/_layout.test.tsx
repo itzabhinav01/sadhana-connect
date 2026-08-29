@@ -15,15 +15,22 @@ jest.mock('../../../../../packages/notifications/src/use-notifications-realtime'
   useNotificationsRealtime: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/notifications/src/use-unread-notification-count', () => ({
+  useUnreadNotificationCount: jest.fn(() => ({ data: 0 })),
+}))
+
 jest.mock('expo-router', () => ({
   Redirect: ({ href }: { href: string }) => {
     const { Text } = require('react-native')
     return <Text>redirect:{href}</Text>
   },
-  Stack: () => {
-    const { Text } = require('react-native')
-    return <Text>devotee-stack</Text>
-  },
+  Tabs: Object.assign(
+    () => {
+      const { Text } = require('react-native')
+      return <Text>devotee-tabs</Text>
+    },
+    { Screen: () => null },
+  ),
 }))
 
 import { render } from '@testing-library/react-native'
@@ -50,9 +57,9 @@ describe('DevoteeLayout (RequireRole equivalent)', () => {
     expect(getByText('redirect:/')).toBeTruthy()
   })
 
-  it('renders the devotee stack for a devotee profile', async () => {
+  it('renders the devotee tab bar for a devotee profile', async () => {
     mockUseProfile.mockReturnValue({ data: { role: 'devotee' } })
     const { getByText } = await render(<DevoteeLayout />)
-    expect(getByText('devotee-stack')).toBeTruthy()
+    expect(getByText('devotee-tabs')).toBeTruthy()
   })
 })

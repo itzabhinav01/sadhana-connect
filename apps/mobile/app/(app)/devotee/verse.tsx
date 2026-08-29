@@ -12,7 +12,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 const COPIED_FEEDBACK_MS = 2000
@@ -53,33 +53,36 @@ export default function VerseOfTheDayScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.heading} accessibilityRole="header">
-        {formatVerseCitation(verse)}
-      </Text>
-      <Text style={styles.mutedLine}>{AUTHOR_NAME}</Text>
+      <View style={styles.card}>
+        <Text style={styles.heading} accessibilityRole="header">
+          {formatVerseCitation(verse)}
+        </Text>
+        <Text style={styles.mutedLine}>{AUTHOR_NAME}</Text>
 
-      {verse.content ? (
-        <>
-          <View style={styles.block}>
-            <Text style={styles.blockLabel}>Sanskrit</Text>
-            <Text style={styles.sanskritText}>{verse.content.sanskritTransliteration}</Text>
-          </View>
-          <View style={styles.block}>
-            <Text style={styles.blockLabel}>Translation</Text>
-            <Text style={styles.translationText}>{verse.content.translation}</Text>
-          </View>
-        </>
-      ) : null}
+        {verse.content ? (
+          <>
+            <View style={styles.block}>
+              <Text style={styles.blockLabel}>Sanskrit</Text>
+              <Text style={styles.sanskritText}>{verse.content.sanskritTransliteration}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.block}>
+              <Text style={styles.blockLabel}>Translation</Text>
+              <Text style={styles.translationText}>{verse.content.translation}</Text>
+            </View>
+          </>
+        ) : null}
+      </View>
 
       <View style={styles.actions}>
         <Button
           title="Read on VedaBase"
-          variant="outline"
+          variant="text"
           onPress={() => Linking.openURL(verse.sourceUrl)}
         />
         <Button
           title={isCopied ? 'Copied' : 'Copy Citation'}
-          variant="outline"
+          variant="text"
           onPress={handleCopy}
         />
       </View>
@@ -101,14 +104,31 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.lg,
       backgroundColor: colors.background,
     },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      gap: spacing.md,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
+    },
     heading: {
-      fontSize: fontSize.lg,
+      fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
     },
     block: {
       gap: spacing.xs,
@@ -116,20 +136,28 @@ function createStyles(colors: ThemeColors) {
     blockLabel: {
       fontSize: fontSize.sm,
       fontWeight: '600',
-      color: colors.foreground,
+      fontFamily: fontFamily.semiBold,
+      color: colors.primary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     sanskritText: {
-      fontSize: fontSize.base,
+      fontSize: fontSize.lg,
       fontStyle: 'italic',
+      fontFamily: fontFamily.medium,
+      lineHeight: fontSize.lg * 1.4,
       color: colors.foreground,
     },
     translationText: {
       fontSize: fontSize.base,
-      lineHeight: fontSize.base * 1.5,
+      fontFamily: fontFamily.regular,
+      lineHeight: fontSize.base * 1.6,
       color: colors.foreground,
     },
     actions: {
-      gap: spacing.sm,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.md,
     },
   })
 }

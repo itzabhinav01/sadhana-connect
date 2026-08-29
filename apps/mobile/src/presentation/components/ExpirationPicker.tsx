@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react'
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 
@@ -94,6 +94,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     presetRow: {

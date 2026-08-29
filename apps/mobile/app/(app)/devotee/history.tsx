@@ -28,7 +28,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { DateRangeFields } from '../../../src/presentation/components/DateRangeFields'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 interface HistoryFilters {
@@ -217,10 +217,12 @@ function createStyles(colors: ThemeColors) {
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     errorLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.destructive,
     },
     emptyState: {

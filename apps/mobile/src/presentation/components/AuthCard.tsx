@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, radius, spacing } from '../../shared/theme'
+import { fontSize, radius, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface AuthCardProps {
@@ -48,6 +48,7 @@ function createStyles(colors: ThemeColors) {
     brandMark: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.primary,
     },
     card: {
@@ -67,6 +68,7 @@ function createStyles(colors: ThemeColors) {
     title: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     description: {

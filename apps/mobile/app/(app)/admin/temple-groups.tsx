@@ -13,7 +13,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
@@ -82,14 +82,14 @@ function TempleGroupRow({ group }: { group: TempleGroup }) {
               <Text style={styles.mutedLine}>Delete?</Text>
               <Button
                 title="Confirm"
-                variant="outline"
+                variant="destructive"
                 isPending={deleteGroup.isPending}
                 onPress={() => deleteGroup.mutate(group.id)}
               />
-              <Button title="Cancel" variant="outline" onPress={() => setConfirmingDelete(false)} />
+              <Button title="Cancel" variant="text" onPress={() => setConfirmingDelete(false)} />
             </>
           ) : (
-            <Button title="Delete" variant="outline" onPress={() => setConfirmingDelete(true)} />
+            <Button title="Delete" variant="destructive" onPress={() => setConfirmingDelete(true)} />
           )}
         </View>
       ) : null}
@@ -192,6 +192,7 @@ function createStyles(colors: ThemeColors) {
     rowName: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     editBlock: {

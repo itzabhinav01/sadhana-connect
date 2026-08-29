@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, radius, spacing } from '../../shared/theme'
+import { fontSize, radius, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface CardProps {
@@ -39,6 +39,7 @@ function createStyles(colors: ThemeColors) {
     title: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
       letterSpacing: 0.2,
     },

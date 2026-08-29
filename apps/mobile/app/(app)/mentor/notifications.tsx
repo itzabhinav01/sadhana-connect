@@ -1,14 +1,7 @@
-import { useQueryClient } from '@tanstack/react-query'
 import type { SadhanaNotification } from '@sadhana-connect/domain'
-import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
-import {
-  useMarkAllNotificationsRead,
-  useMarkNotificationRead,
-  useNotifications,
-} from '@sadhana-connect/notifications'
-import { useAuth } from '@sadhana-connect/auth'
+import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from '@sadhana-connect/notifications'
 import { useRouter } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
@@ -33,16 +26,14 @@ const NOTIFICATION_TYPE_ICON: Record<SadhanaNotification['type'], IconName> = {
 interface NotificationRowProps {
   notification: SadhanaNotification
   onPress: (notification: SadhanaNotification) => void
-  isNavigating: boolean
 }
 
-function NotificationRow({ notification, onPress, isNavigating }: NotificationRowProps) {
+function NotificationRow({ notification, onPress }: NotificationRowProps) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   return (
     <Pressable
       onPress={() => onPress(notification)}
-      disabled={isNavigating}
       accessibilityRole="button"
       accessibilityLabel={
         notification.isRead ? notification.title : `Unread: ${notification.title}`
@@ -66,73 +57,38 @@ function NotificationRow({ notification, onPress, isNavigating }: NotificationRo
   )
 }
 
-// Mobile equivalent of web's useNotificationNavigation. mentor_comment,
-// announcement, sadhana_reminder, and data_retention all resolve to
-// existing mobile routes; an unresolvable target (deleted/expired) falls
-// through and simply stays on the notifications screen, same as web.
-function useNavigateToNotification() {
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const { session } = useAuth()
-  const userId = session?.userId ?? null
-
-  return async function navigateToNotification(notification: SadhanaNotification): Promise<void> {
-    if (notification.type === 'mentor_comment' && notification.relatedReportId) {
-      const reportId = notification.relatedReportId
-      const reportDate = await queryClient.fetchQuery({
-        queryKey: ['sadhana-report', 'date-by-id', userId, reportId],
-        queryFn: () => supabaseSadhanaReportRepository.getReportDateById(reportId),
-      })
-      if (reportDate) {
-        router.push({ pathname: '/devotee/sadhana', params: { date: reportDate } })
-        return
-      }
-    }
-
-    if (notification.type === 'announcement' && notification.relatedAnnouncementId) {
-      router.push(`/devotee/announcements/${notification.relatedAnnouncementId}`)
-      return
-    }
-
-    if (notification.type === 'sadhana_reminder') {
-      router.push('/devotee/sadhana')
-      return
-    }
-
-    if (notification.type === 'data_retention') {
-      router.push('/devotee/history')
-    }
-  }
-}
-
-export default function NotificationsScreen() {
+// Same generic, RLS-scoped notification feed devotee/notifications.tsx
+// uses (useNotifications() reads whatever rows exist for the signed-in
+// user, regardless of role) — this is the mentor's Alerts tab per the
+// approved 3-tab navigation. mentor_comment and sadhana_reminder are
+// devotee-targeted notification types and won't appear in a mentor's own
+// feed; only `announcement` has a resolvable mentor-side destination
+// today, so every other type falls through and stays on this screen,
+// same "unresolvable target" pattern as the devotee screen.
+export default function MentorNotificationsScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+  const router = useRouter()
   const notificationsQuery = useNotifications()
   const markRead = useMarkNotificationRead()
   const markAllRead = useMarkAllNotificationsRead()
-  const navigateToNotification = useNavigateToNotification()
-  const [isNavigating, setIsNavigating] = useState(false)
 
   const notifications = notificationsQuery.data?.pages.flatMap((page) => page.notifications) ?? []
   const hasUnread = notifications.some((notification) => !notification.isRead)
 
-  const handlePress = async (notification: SadhanaNotification) => {
+  const handlePress = (notification: SadhanaNotification) => {
     if (!notification.isRead) {
       markRead.mutate(notification.id)
     }
-    setIsNavigating(true)
-    try {
-      await navigateToNotification(notification)
-    } finally {
-      setIsNavigating(false)
+    if (notification.type === 'announcement') {
+      router.push('/mentor/announcements')
     }
   }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.heading}>Notifications</Text>
+        <Text style={styles.heading}>Alerts</Text>
         <Button
           title="Mark all read"
           pendingTitle="Marking…"
@@ -156,12 +112,7 @@ export default function NotificationsScreen() {
       ) : null}
 
       {notifications.map((notification) => (
-        <NotificationRow
-          key={notification.id}
-          notification={notification}
-          onPress={handlePress}
-          isNavigating={isNavigating}
-        />
+        <NotificationRow key={notification.id} notification={notification} onPress={handlePress} />
       ))}
 
       {notificationsQuery.hasNextPage ? (

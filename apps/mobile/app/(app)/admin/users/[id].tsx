@@ -23,7 +23,7 @@ import { Card } from '../../../../src/presentation/components/Card'
 import { DevoteeSadhanaHistorySection } from '../../../../src/presentation/components/DevoteeSadhanaHistorySection'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
-import { fontSize, radius, spacing } from '../../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
 
 const SELECTABLE_ROLES: AppRole[] = ['devotee', 'mentor', 'super_admin']
@@ -70,7 +70,7 @@ function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
               <Text style={styles.mutedLine}>{assignment.mentorName}</Text>
               <Button
                 title="Remove"
-                variant="outline"
+                variant="destructive"
                 isPending={deactivate.isPending}
                 onPress={() => deactivate.mutate(assignment.id)}
               />
@@ -306,7 +306,7 @@ export default function AdminUserDetailScreen() {
         <Card title="Account status">
           <Button
             title={user.isActive ? 'Disable account' : 'Re-enable account'}
-            variant="outline"
+            variant={user.isActive ? 'destructive' : 'outline'}
             isPending={setActive.isPending}
             onPress={() => setActive.mutate({ userId: user.id, isActive: !user.isActive })}
           />
@@ -335,6 +335,7 @@ function createStyles(colors: ThemeColors) {
     heading: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     mutedLine: {
@@ -353,11 +354,13 @@ function createStyles(colors: ThemeColors) {
     badgeActive: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     badgeDisabled: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.muted,
     },
     mentorRow: {
@@ -394,6 +397,7 @@ function createStyles(colors: ThemeColors) {
     modalTitle: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     modalLink: {

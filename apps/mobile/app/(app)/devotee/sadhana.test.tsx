@@ -97,6 +97,7 @@ describe('SadhanaFormScreen', () => {
     await fireEvent.changeText(getByLabelText('Rounds before 4:30 AM'), '5')
     await fireEvent.changeText(getByLabelText('Rounds till 7 AM'), '3')
     await fireEvent.changeText(getByLabelText('Total Rounds'), '20')
+    await fireEvent.press(getByRole('button', { name: 'Details' }))
     await fireEvent.changeText(getByLabelText('Signature'), 'Devotee')
     await fireEvent.press(getByRole('button', { name: 'Save Sadhana' }))
 
@@ -137,5 +138,58 @@ describe('SadhanaFormScreen', () => {
     const { getByLabelText } = await render(<SadhanaFormScreen />)
 
     expect(getByLabelText('Total Rounds').props.value).toBe('')
+  })
+
+  it('starts a new report with only Chanting expanded', async () => {
+    const { getByLabelText, queryByLabelText } = await render(<SadhanaFormScreen />)
+
+    expect(getByLabelText('Total Rounds')).toBeTruthy()
+    expect(queryByLabelText('Reading Minutes')).toBeNull()
+    expect(queryByLabelText('Signature')).toBeNull()
+  })
+
+  it('expands a collapsed section on tap and shows its fields', async () => {
+    const { getByRole, getByLabelText } = await render(<SadhanaFormScreen />)
+
+    await fireEvent.press(getByRole('button', { name: /Reading/ }))
+
+    expect(getByLabelText('Reading Minutes')).toBeTruthy()
+    expect(getByLabelText('Book Name')).toBeTruthy()
+  })
+
+  it('auto-expands only the sections that already contain data on an existing report', async () => {
+    mockUseSadhanaReport.mockReturnValue({
+      isPending: false,
+      data: {
+        id: 'r1',
+        profileId: 'u1',
+        reportDate: '2026-08-01',
+        roundsBefore430: 4,
+        roundsTill7am: 4,
+        lastRoundTime: null,
+        totalRounds: 16,
+        readingMinutes: 0,
+        bookName: null,
+        hearingMinutes: 0,
+        speakerName: null,
+        sleepTime: null,
+        wakeTime: null,
+        dayRestMinutes: 0,
+        totalRestMinutes: 0,
+        officeGoingTime: null,
+        officeReturnTime: null,
+        notes: null,
+        signatureText: 'Devotee',
+        createdAt: '',
+        updatedAt: '',
+      },
+    })
+
+    const { getByLabelText, queryByLabelText } = await render(<SadhanaFormScreen />)
+
+    // Chanting has real data (16 rounds) — expanded.
+    expect(getByLabelText('Total Rounds')).toBeTruthy()
+    // Reading is all-zero/empty — collapsed.
+    expect(queryByLabelText('Reading Minutes')).toBeNull()
   })
 })

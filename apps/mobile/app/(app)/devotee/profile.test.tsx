@@ -11,18 +11,43 @@ jest.mock('../../../../../packages/auth/src/use-profile', () => ({
   useProfile: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/sadhana/src/use-sadhana-streak', () => ({
+  useSadhanaStreak: jest.fn(),
+}))
+
+jest.mock('../../../../../packages/sadhana/src/use-recent-sadhana-reports', () => ({
+  useRecentSadhanaReports: jest.fn(),
+  RECENT_REPORTS_LOOKBACK_LIMIT: 60,
+}))
+
 jest.mock('../../../src/application/profile/use-update-phone-number', () => ({
   useUpdatePhoneNumber: jest.fn(),
 }))
 
+jest.mock('../../../src/application/auth/use-sign-out', () => ({
+  useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
+}))
+
+const mockPush = jest.fn()
+const mockReplace = jest.fn()
+
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({ push: mockPush, replace: mockReplace })),
+}))
+
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react-native'
 import { useProfile } from '@sadhana-connect/auth'
+import { useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
 
+import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { useUpdatePhoneNumber } from '../../../src/application/profile/use-update-phone-number'
 import ProfileScreen from './profile'
 
 const mockUseProfile = useProfile as jest.Mock
 const mockUseUpdatePhoneNumber = useUpdatePhoneNumber as jest.Mock
+const mockUseSadhanaStreak = useSadhanaStreak as jest.Mock
+const mockUseRecentSadhanaReports = useRecentSadhanaReports as jest.Mock
+const mockUseSignOut = useSignOut as jest.Mock
 const mockMutate = jest.fn()
 
 const activeProfile = {
@@ -43,11 +68,16 @@ describe('ProfileScreen', () => {
     mockUseProfile.mockReset()
     mockUseUpdatePhoneNumber.mockReset()
     mockMutate.mockReset()
+    mockPush.mockReset()
+    mockReplace.mockReset()
     mockUseUpdatePhoneNumber.mockReturnValue({
       mutate: mockMutate,
       isPending: false,
       isError: false,
     })
+    mockUseSadhanaStreak.mockReturnValue({ data: 5 })
+    mockUseRecentSadhanaReports.mockReturnValue({ data: [{ id: 'r1' }, { id: 'r2' }] })
+    mockUseSignOut.mockReturnValue({ mutate: jest.fn(), isPending: false })
   })
 
   it('shows a loading state while the profile is pending', async () => {
@@ -62,6 +92,16 @@ describe('ProfileScreen', () => {
 
     const { getByText } = await render(<ProfileScreen />)
     expect(getByText(/something went wrong loading your profile/i)).toBeTruthy()
+  })
+
+  it('shows the devotee identity header and streak/report stats', async () => {
+    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
+
+    const { getByText } = await render(<ProfileScreen />)
+    expect(getByText('User One')).toBeTruthy()
+    expect(getByText('Devotee')).toBeTruthy()
+    expect(getByText('5')).toBeTruthy()
+    expect(getByText('2')).toBeTruthy()
   })
 
   it('shows the existing phone number with an Edit action', async () => {
@@ -148,5 +188,26 @@ describe('ProfileScreen', () => {
     await fireEvent.press(getByRole('button', { name: 'Edit' }))
 
     expect(getByText(/something went wrong saving your phone number/i)).toBeTruthy()
+  })
+
+  it('navigates to /devotee/settings when "Settings" is pressed', async () => {
+    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
+
+    const { getByRole } = await render(<ProfileScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Settings' }))
+
+    expect(mockPush).toHaveBeenCalledWith('/devotee/settings')
+  })
+
+  it('signs out and redirects to /login when "Sign Out" is pressed', async () => {
+    const signOutMutate = jest.fn((_arg, options) => options?.onSuccess?.())
+    mockUseSignOut.mockReturnValue({ mutate: signOutMutate, isPending: false })
+    mockUseProfile.mockReturnValue({ isPending: false, isError: false, data: activeProfile })
+
+    const { getByRole } = await render(<ProfileScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Sign Out' }))
+
+    expect(signOutMutate).toHaveBeenCalled()
+    expect(mockReplace).toHaveBeenCalledWith('/login')
   })
 })

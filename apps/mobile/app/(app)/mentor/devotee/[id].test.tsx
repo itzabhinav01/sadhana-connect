@@ -43,13 +43,10 @@ jest.mock('../../../../../../packages/notifications/src/use-send-reminder', () =
   ReminderRateLimitedError: class ReminderRateLimitedError extends Error {},
 }))
 
-jest.mock('expo-router', () => {
-  const { View } = require('react-native')
-  return {
-    Stack: { Screen: () => <View /> },
-    useLocalSearchParams: jest.fn(() => ({ id: 'd1' })),
-  }
-})
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: jest.fn(() => ({ id: 'd1' })),
+  useNavigation: jest.fn(() => ({ setOptions: jest.fn() })),
+}))
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 import {

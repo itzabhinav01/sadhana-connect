@@ -17,7 +17,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
-import { fontSize, spacing } from '../../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
 
 function formatTimestamp(iso: string) {
@@ -80,7 +80,7 @@ function CommentItem({ comment, announcementId, isOwn, canModerate }: CommentIte
             <Button title="Save" isPending={updateComment.isPending} onPress={handleSave} />
             <Button
               title="Cancel"
-              variant="outline"
+              variant="text"
               onPress={() => {
                 setIsEditing(false)
                 setDraftText(comment.commentText)
@@ -100,7 +100,7 @@ function CommentItem({ comment, announcementId, isOwn, canModerate }: CommentIte
           ) : null}
           <Button
             title="Delete"
-            variant="outline"
+            variant="destructive"
             isPending={deleteComment.isPending}
             onPress={() => deleteComment.mutate(comment.id)}
           />
@@ -218,8 +218,10 @@ export default function AnnouncementDetailScreen() {
 
       {announcement ? (
         <>
-          <Text style={styles.title}>{announcement.title}</Text>
-          <Text style={styles.body}>{announcement.content}</Text>
+          <View style={styles.announcementCard}>
+            <Text style={styles.title}>{announcement.title}</Text>
+            <Text style={styles.body}>{announcement.content}</Text>
+          </View>
           <AnnouncementComments
             announcementId={announcement.id}
             announcementAuthorId={announcement.authorId}
@@ -239,35 +241,51 @@ function createStyles(colors: ThemeColors) {
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     errorLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.destructive,
+    },
+    announcementCard: {
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      gap: spacing.sm,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 2,
     },
     title: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     body: {
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     container: {
       gap: spacing.sm,
       backgroundColor: colors.mutedBackground,
-      borderRadius: 8,
+      borderRadius: radius.md,
       padding: spacing.sm,
     },
     heading: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     item: {
       backgroundColor: colors.background,
-      borderRadius: 8,
+      borderRadius: radius.md,
       padding: spacing.sm,
       gap: spacing.xs,
     },
@@ -279,14 +297,17 @@ function createStyles(colors: ThemeColors) {
     itemName: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     itemTimestamp: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     itemText: {
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     editBlock: {
@@ -299,6 +320,7 @@ function createStyles(colors: ThemeColors) {
     },
     errorText: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.destructive,
     },
     addForm: {
@@ -307,10 +329,11 @@ function createStyles(colors: ThemeColors) {
     textArea: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 8,
+      borderRadius: radius.md,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
       minHeight: 72,
       textAlignVertical: 'top',

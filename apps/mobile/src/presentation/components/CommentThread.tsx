@@ -11,7 +11,7 @@ import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 import { ErrorBanner } from './ErrorBanner'
@@ -199,6 +199,7 @@ function createStyles(colors: ThemeColors) {
     itemName: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     itemTimestamp: {

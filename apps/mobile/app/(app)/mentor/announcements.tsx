@@ -20,11 +20,12 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
+import { Chip } from '../../../src/presentation/components/Chip'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { ExpirationPicker } from '../../../src/presentation/components/ExpirationPicker'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -198,13 +199,13 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
         <Text style={styles.itemTitle}>
           {isEditing ? 'Editing Announcement' : announcement.title}
         </Text>
-        {announcement.isPinned ? <Text style={styles.badge}>Pinned</Text> : null}
-        {!announcement.isPublished ? <Text style={styles.badge}>Draft</Text> : null}
-        <Text style={styles.badge}>
-          {announcement.expiresAt
-            ? `Expires ${formatDisplayDate(announcement.expiresAt)}`
-            : 'Permanent'}
-        </Text>
+        {announcement.isPinned ? <Chip label="Pinned" tone="accent" /> : null}
+        {!announcement.isPublished ? <Chip label="Draft" tone="warning" /> : null}
+        <Chip
+          label={
+            announcement.expiresAt ? `Expires ${formatDisplayDate(announcement.expiresAt)}` : 'Permanent'
+          }
+        />
       </View>
 
       {isEditing ? (
@@ -231,7 +232,7 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
           {validationError ? <Text style={styles.errorText}>{validationError}</Text> : null}
           <View style={styles.actionsRow}>
             <Button title="Save" isPending={updateAnnouncement.isPending} onPress={handleSave} />
-            <Button title="Cancel" variant="outline" onPress={handleCancelEdit} />
+            <Button title="Cancel" variant="text" onPress={handleCancelEdit} />
           </View>
         </View>
       ) : (
@@ -261,11 +262,11 @@ function AnnouncementItem({ announcement }: { announcement: Announcement }) {
               </Text>
               <Button
                 title="Confirm delete"
-                variant="outline"
+                variant="destructive"
                 isPending={deleteAnnouncement.isPending}
                 onPress={() => deleteAnnouncement.mutate(announcement.id)}
               />
-              <Button title="Cancel" variant="outline" onPress={() => setConfirmingDelete(false)} />
+              <Button title="Cancel" variant="text" onPress={() => setConfirmingDelete(false)} />
             </>
           ) : (
             <Button title="Delete" variant="outline" onPress={() => setConfirmingDelete(true)} />
@@ -321,6 +322,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     input: {
@@ -330,6 +332,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     textArea: {
@@ -339,12 +342,14 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
       minHeight: 96,
       textAlignVertical: 'top',
     },
     errorText: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.destructive,
     },
     actionsRow: {
@@ -373,23 +378,17 @@ function createStyles(colors: ThemeColors) {
     itemTitle: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
-    },
-    badge: {
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      color: colors.muted,
-      backgroundColor: colors.mutedBackground,
-      borderRadius: 999,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
     },
     itemContent: {
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     itemMuted: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     editBlock: {

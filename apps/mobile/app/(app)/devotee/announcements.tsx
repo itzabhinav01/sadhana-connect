@@ -5,7 +5,8 @@ import { useMemo } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { Chip } from '../../../src/presentation/components/Chip'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -26,7 +27,7 @@ function AnnouncementFeedCard({ announcement }: { announcement: Announcement }) 
     >
       <View style={styles.cardHeaderRow}>
         <Text style={styles.cardTitle}>{announcement.title}</Text>
-        {announcement.isPinned ? <Text style={styles.badge}>Pinned</Text> : null}
+        {announcement.isPinned ? <Chip label="Pinned" tone="accent" /> : null}
       </View>
       <Text style={styles.cardContent} numberOfLines={3}>
         {announcement.content}
@@ -79,10 +80,12 @@ function createStyles(colors: ThemeColors) {
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     errorLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.destructive,
     },
     card: {
@@ -105,20 +108,13 @@ function createStyles(colors: ThemeColors) {
     cardTitle: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     cardContent: {
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
-    },
-    badge: {
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      color: colors.muted,
-      backgroundColor: colors.mutedBackground,
-      borderRadius: 999,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
     },
   })
 }

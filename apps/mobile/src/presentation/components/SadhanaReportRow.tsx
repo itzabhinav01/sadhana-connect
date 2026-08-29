@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react'
 import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
 interface SadhanaReportRowProps {
@@ -125,6 +125,7 @@ function createStyles(colors: ThemeColors) {
     date: {
       fontSize: fontSize.base,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     summary: {

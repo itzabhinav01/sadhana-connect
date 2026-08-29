@@ -1,4 +1,4 @@
-import { useUnreadNotificationCount } from '@sadhana-connect/notifications'
+import { useAnnouncements } from '@sadhana-connect/announcements'
 import {
   buildWhatsAppShareUrl,
   useRecentSadhanaReports,
@@ -6,22 +6,25 @@ import {
   useSadhanaStreak,
   useWeeklySadhanaSummary,
 } from '@sadhana-connect/sadhana'
+import { formatVerseCitation, useVerseOfTheDay } from '@sadhana-connect/verse'
 import { getLocalDateIso } from '@sadhana-connect/shared'
-import { Stack, useRouter } from 'expo-router'
-import { useMemo } from 'react'
+import { useNavigation, useRouter } from 'expo-router'
+import { useLayoutEffect, useMemo } from 'react'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
+import { Chip } from '../../../src/presentation/components/Chip'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
+import { Icon } from '../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
-const RECENT_REPORTS_DISPLAY_COUNT = 5
+const RECENT_REPORTS_DISPLAY_COUNT = 3
 
 function greetingForHour(hour: number): string {
   if (hour < 12) return 'Good morning'
@@ -29,8 +32,30 @@ function greetingForHour(hour: number): string {
   return 'Good evening'
 }
 
+function WeekStrip({ chartData, colors }: { chartData: { date: string; hasReport: boolean }[]; colors: ThemeColors }) {
+  return (
+    <View style={weekStripStyles.row}>
+      {chartData.map((day) => (
+        <View
+          key={day.date}
+          style={[
+            weekStripStyles.dot,
+            { backgroundColor: day.hasReport ? colors.primary : colors.mutedBackground },
+          ]}
+        />
+      ))}
+    </View>
+  )
+}
+
+const weekStripStyles = StyleSheet.create({
+  row: { flexDirection: 'row', gap: spacing.xs },
+  dot: { flex: 1, height: 8, borderRadius: radius.full },
+})
+
 export default function DashboardScreen() {
   const router = useRouter()
+  const navigation = useNavigation()
   const signOut = useSignOut()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -40,7 +65,8 @@ export default function DashboardScreen() {
   const streak = useSadhanaStreak()
   const weeklySummary = useWeeklySadhanaSummary()
   const recentReports = useRecentSadhanaReports()
-  const unreadCount = useUnreadNotificationCount()
+  const announcementsQuery = useAnnouncements()
+  const verseQuery = useVerseOfTheDay()
 
   const handleSignOut = () => {
     signOut.mutate(undefined, {
@@ -48,49 +74,73 @@ export default function DashboardScreen() {
     })
   }
 
+  // The Home tab is the one screen in the tab bar that also shows Sign
+  // Out in its header (every other tab just gets the ThemeToggle set at
+  // the Tabs navigator level) — set via navigation.setOptions rather
+  // than a <Stack.Screen> override, which only applies inside an actual
+  // Stack navigator and is a no-op here now that this route is hosted by
+  // a Tabs layout.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <HeaderThemeToggle />
+          <Button
+            title="Sign Out"
+            pendingTitle="…"
+            isPending={signOut.isPending}
+            onPress={handleSignOut}
+            variant="outline"
+          />
+        </View>
+      ),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
+  }, [navigation, styles, signOut.isPending])
+
   if (todayReport.isPending) {
     return <LoadingScreen />
   }
 
   const report = todayReport.data
+  const streakValue = streak.data ?? 0
+  const latestAnnouncement = announcementsQuery.data?.[0]
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <HeaderThemeToggle />
-              <Button
-                title="Sign Out"
-                pendingTitle="…"
-                isPending={signOut.isPending}
-                onPress={handleSignOut}
-                variant="outline"
-              />
-            </View>
-          ),
-        }}
-      />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
-          <Text style={styles.headerTitle}>Your sadhana at a glance</Text>
+          <Text style={styles.headerTitle}>
+            {report ? "Today's sadhana is logged" : 'Your sadhana at a glance'}
+          </Text>
         </View>
 
         <Card title="Today's Sadhana">
-          <View style={styles.streakBadge}>
-            <Text style={styles.streakText}>
-              Current streak: {streak.data ?? 0} day{streak.data === 1 ? '' : 's'}
-            </Text>
+          <View style={styles.heroRow}>
+            <View style={styles.heroStat}>
+              <View style={styles.heroLabelRow}>
+                <Icon
+                  name={streakValue > 0 ? 'flame' : 'flame-outline'}
+                  size={16}
+                  color={streakValue > 0 ? colors.warning : colors.muted}
+                />
+                <Text style={styles.heroLabel}>Streak</Text>
+              </View>
+              <Text style={styles.heroValue}>
+                {streakValue}
+                <Text style={styles.heroUnit}> {streakValue === 1 ? 'day' : 'days'}</Text>
+              </Text>
+            </View>
+            <View style={styles.heroDivider} />
+            <View style={styles.heroStat}>
+              <Text style={styles.heroLabel}>Rounds today</Text>
+              <Text style={styles.heroValue}>{report ? report.totalRounds : '—'}</Text>
+            </View>
           </View>
+
           {report ? (
             <>
               <View style={styles.statsRow}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{report.totalRounds}</Text>
-                  <Text style={styles.statLabel}>Rounds</Text>
-                </View>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{report.readingMinutes}</Text>
                   <Text style={styles.statLabel}>Reading (min)</Text>
@@ -100,16 +150,18 @@ export default function DashboardScreen() {
                   <Text style={styles.statLabel}>Hearing (min)</Text>
                 </View>
               </View>
-              <Button
-                title="Edit Sadhana"
-                onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
-                variant="outline"
-              />
-              <Button
-                title="Share to WhatsApp"
-                onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
-                variant="outline"
-              />
+              <View style={styles.actionsRow}>
+                <Button
+                  title="Edit Sadhana"
+                  onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
+                  variant="outline"
+                />
+                <Button
+                  title="Share to WhatsApp"
+                  onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
+                  variant="outline"
+                />
+              </View>
             </>
           ) : (
             <>
@@ -122,12 +174,10 @@ export default function DashboardScreen() {
           )}
         </Card>
 
-        <Card title="Weekly Summary">
+        <Card title="Weekly Progress">
           {weeklySummary.data ? (
             <>
-              <Text style={styles.mutedLine}>
-                {weeklySummary.data.startDate} – {weeklySummary.data.endDate}
-              </Text>
+              <WeekStrip chartData={weeklySummary.data.chartData} colors={colors} />
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{weeklySummary.data.totalReports}/7</Text>
@@ -146,10 +196,6 @@ export default function DashboardScreen() {
                   <Text style={styles.statLabel}>Avg Rounds</Text>
                 </View>
               </View>
-              <Text style={styles.mutedLine}>
-                Reading: {weeklySummary.data.totalReadingMinutes} min · Hearing:{' '}
-                {weeklySummary.data.totalHearingMinutes} min
-              </Text>
             </>
           ) : (
             <Text style={styles.mutedLine}>Loading…</Text>
@@ -164,65 +210,42 @@ export default function DashboardScreen() {
           ) : (
             <Text style={styles.mutedLine}>No reports yet — your submissions will show up here.</Text>
           )}
-          <Button
-            title="View History"
-            onPress={() => router.push('/devotee/history')}
-            variant="outline"
-          />
+          <Button title="View History" onPress={() => router.push('/devotee/history')} variant="text" />
         </Card>
 
-        <Text style={styles.sectionLabel}>Explore</Text>
-        <View style={styles.quickLinksGrid}>
-          <View style={styles.quickLinkTile}>
-            <Button
-              title={unreadCount.data ? `Notifications (${unreadCount.data})` : 'Notifications'}
-              onPress={() => router.push('/devotee/notifications')}
-              variant="outline"
-            />
-          </View>
+        <Card title="Announcements">
+          {latestAnnouncement ? (
+            <>
+              <View style={styles.announcementHeader}>
+                <Text style={styles.announcementTitle}>{latestAnnouncement.title}</Text>
+                {latestAnnouncement.isPinned ? <Chip label="Pinned" tone="accent" /> : null}
+              </View>
+              <Text style={styles.mutedLine} numberOfLines={2}>
+                {latestAnnouncement.content}
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.mutedLine}>No announcements yet.</Text>
+          )}
+          <Button title="View all" onPress={() => router.push('/devotee/announcements')} variant="text" />
+        </Card>
 
-          <View style={styles.quickLinkTile}>
-            <Button
-              title="Announcements"
-              onPress={() => router.push('/devotee/announcements')}
-              variant="outline"
-            />
-          </View>
-
-          <View style={styles.quickLinkTile}>
-            <Button
-              title="Verse of the Day"
-              onPress={() => router.push('/devotee/verse')}
-              variant="outline"
-            />
-          </View>
-
-          <View style={styles.quickLinkTile}>
-            <Button
-              title="Analytics"
-              onPress={() => router.push('/devotee/analytics')}
-              variant="outline"
-            />
-          </View>
-
-          <View style={styles.quickLinkTile}>
-            <Button
-              title="Japa Counter"
-              onPress={() => router.push('/devotee/japa')}
-              variant="outline"
-            />
-          </View>
-
-          <View style={styles.quickLinkTile}>
-            <Button
-              title="Profile"
-              onPress={() => router.push('/devotee/profile')}
-              variant="outline"
-            />
-          </View>
-        </View>
+        <Card title="Verse of the Day">
+          {verseQuery.data ? (
+            <>
+              <Text style={styles.verseCitation}>{formatVerseCitation(verseQuery.data)}</Text>
+              {verseQuery.data.content ? (
+                <Text style={styles.mutedLine} numberOfLines={2}>
+                  {verseQuery.data.content.translation}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <Text style={styles.mutedLine}>Not available yet.</Text>
+          )}
+          <Button title="Read more" onPress={() => router.push('/devotee/verse')} variant="text" />
+        </Card>
       </ScrollView>
-    </>
   )
 }
 
@@ -245,28 +268,56 @@ function createStyles(colors: ThemeColors) {
     eyebrow: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     headerTitle: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
-    streakBadge: {
-      alignSelf: 'flex-start',
-      backgroundColor: colors.primarySoft,
-      borderRadius: radius.full,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.xs,
+    heroRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
     },
-    streakText: {
+    heroStat: {
+      flex: 1,
+      gap: 4,
+    },
+    heroDivider: {
+      width: 1,
+      alignSelf: 'stretch',
+      backgroundColor: colors.border,
+      marginHorizontal: spacing.md,
+    },
+    heroLabelRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    heroLabel: {
       fontSize: fontSize.sm,
-      fontWeight: '600',
-      color: colors.primary,
+      fontFamily: fontFamily.medium,
+      fontWeight: '500',
+      color: colors.muted,
+    },
+    heroValue: {
+      fontSize: fontSize.display,
+      fontFamily: fontFamily.bold,
+      fontWeight: '700',
+      color: colors.foreground,
+    },
+    heroUnit: {
+      fontSize: fontSize.base,
+      fontFamily: fontFamily.medium,
+      fontWeight: '500',
+      color: colors.muted,
     },
     statsRow: {
       flexDirection: 'row',
@@ -278,25 +329,36 @@ function createStyles(colors: ThemeColors) {
     statValue: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     statLabel: {
       fontSize: fontSize.xs,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
-    sectionLabel: {
-      fontSize: fontSize.sm,
-      fontWeight: '600',
-      color: colors.foreground,
-      paddingTop: spacing.xs,
-    },
-    quickLinksGrid: {
+    actionsRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: spacing.sm,
     },
-    quickLinkTile: {
-      width: '47%',
+    announcementHeader: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    announcementTitle: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+      color: colors.foreground,
+    },
+    verseCitation: {
+      fontSize: fontSize.base,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+      color: colors.foreground,
     },
   })
 }

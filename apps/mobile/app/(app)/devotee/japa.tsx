@@ -8,7 +8,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { useJapaCounter } from '../../../src/application/japa/use-japa-counter'
 import { Button } from '../../../src/presentation/components/Button'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 export default function JapaCounterScreen() {
@@ -105,8 +105,8 @@ export default function JapaCounterScreen() {
         {confirmingReset ? (
           <>
             <Text style={styles.mutedLine}>Reset today&apos;s count?</Text>
-            <Button title="Confirm" variant="outline" onPress={handleReset} />
-            <Button title="Cancel" variant="outline" onPress={() => setConfirmingReset(false)} />
+            <Button title="Confirm" variant="destructive" onPress={handleReset} />
+            <Button title="Cancel" variant="text" onPress={() => setConfirmingReset(false)} />
           </>
         ) : (
           <Button title="Reset" variant="outline" onPress={() => setConfirmingReset(true)} />
@@ -139,11 +139,13 @@ function createStyles(colors: ThemeColors) {
     heading: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
       alignSelf: 'flex-start',
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     progressBlock: {
@@ -153,6 +155,7 @@ function createStyles(colors: ThemeColors) {
     progressText: {
       fontSize: fontSize.base,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     tapButton: {
@@ -172,10 +175,12 @@ function createStyles(colors: ThemeColors) {
     tapButtonCount: {
       fontSize: 48,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.primary,
     },
     tapButtonLabel: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     controlsRow: {
@@ -193,6 +198,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     targetInput: {
@@ -202,6 +208,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
       width: 80,
       textAlign: 'center',

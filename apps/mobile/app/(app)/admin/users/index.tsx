@@ -7,7 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
-import { fontSize, radius, spacing } from '../../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
 
 const ROLE_OPTIONS: { label: string; value: AppRole | undefined }[] = [
@@ -152,16 +152,19 @@ function createStyles(colors: ThemeColors) {
     rowName: {
       fontSize: fontSize.base,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     badgeActive: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     badgeDisabled: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.muted,
     },
   })

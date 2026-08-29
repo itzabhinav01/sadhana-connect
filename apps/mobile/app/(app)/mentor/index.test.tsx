@@ -16,14 +16,12 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
 }))
 
 const mockPush = jest.fn()
+const mockSetOptions = jest.fn()
 
-jest.mock('expo-router', () => {
-  const { View } = require('react-native')
-  return {
-    Stack: { Screen: () => <View /> },
-    useRouter: jest.fn(() => ({ push: mockPush, replace: jest.fn() })),
-  }
-})
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({ push: mockPush, replace: jest.fn() })),
+  useNavigation: jest.fn(() => ({ setOptions: mockSetOptions })),
+}))
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 import { useMentorDevotees } from '@sadhana-connect/mentor'

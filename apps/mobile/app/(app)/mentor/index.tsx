@@ -5,8 +5,8 @@ import {
   type MentorDevoteeFilter,
   type MentorDevoteeSummary,
 } from '@sadhana-connect/mentor'
-import { Stack, useRouter } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useNavigation, useRouter } from 'expo-router'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
@@ -16,7 +16,7 @@ import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
@@ -70,6 +70,7 @@ function DevoteeSummaryRow({ summary }: { summary: MentorDevoteeSummary }) {
 export default function MentorDashboardScreen() {
   const signOut = useSignOut()
   const router = useRouter()
+  const navigation = useNavigation()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [filter, setFilter] = useState<MentorDevoteeFilter>('all')
@@ -82,6 +83,30 @@ export default function MentorDashboardScreen() {
       onSuccess: () => router.replace('/login'),
     })
   }
+
+  // The Devotees tab is the one screen that also shows Sign Out in its
+  // header (every other tab just gets the ThemeToggle set at the Tabs
+  // navigator level) — set via navigation.setOptions rather than a
+  // <Stack.Screen> override, which only applies inside an actual Stack
+  // navigator and is a no-op here now that this route is hosted by a
+  // Tabs layout.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <HeaderThemeToggle />
+          <Button
+            title="Sign Out"
+            pendingTitle="…"
+            isPending={signOut.isPending}
+            onPress={handleSignOut}
+            variant="outline"
+          />
+        </View>
+      ),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
+  }, [navigation, styles, signOut.isPending])
 
   if (devoteesQuery.isPending) {
     return <LoadingScreen />
@@ -99,23 +124,6 @@ export default function MentorDashboardScreen() {
   const pendingToday = totalAssigned - submittedToday
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <HeaderThemeToggle />
-              <Button
-                title="Sign Out"
-                pendingTitle="…"
-                isPending={signOut.isPending}
-                onPress={handleSignOut}
-                variant="outline"
-              />
-            </View>
-          ),
-        }}
-      />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{greetingForHour(new Date().getHours())}</Text>
@@ -185,7 +193,6 @@ export default function MentorDashboardScreen() {
           onPress={() => router.push('/mentor/announcements')}
         />
       </ScrollView>
-    </>
   )
 }
 
@@ -208,11 +215,13 @@ function createStyles(colors: ThemeColors) {
     eyebrow: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     headerTitle: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     statsRow: {
@@ -225,6 +234,7 @@ function createStyles(colors: ThemeColors) {
     statValue: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     filterRow: {
@@ -239,6 +249,7 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     row: {
@@ -260,21 +271,25 @@ function createStyles(colors: ThemeColors) {
     rowName: {
       fontSize: fontSize.base,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     rowMuted: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     badgeSubmitted: {
       fontSize: fontSize.sm,
       fontWeight: '600',
-      color: colors.primary,
+      fontFamily: fontFamily.semiBold,
+      color: colors.success,
     },
     badgePending: {
       fontSize: fontSize.sm,
       fontWeight: '600',
-      color: colors.muted,
+      fontFamily: fontFamily.semiBold,
+      color: colors.warning,
     },
   })
 }

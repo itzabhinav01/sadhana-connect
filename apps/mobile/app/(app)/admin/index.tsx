@@ -9,7 +9,7 @@ import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function greetingForHour(hour: number): string {
@@ -151,11 +151,13 @@ function createStyles(colors: ThemeColors) {
     eyebrow: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     headerTitle: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     mutedLine: {
@@ -174,6 +176,7 @@ function createStyles(colors: ThemeColors) {
     summaryValue: {
       fontSize: fontSize.xl,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
   })

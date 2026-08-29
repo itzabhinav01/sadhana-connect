@@ -3,7 +3,7 @@ import { Controller, type Control, type FieldValues, type Path } from 'react-hoo
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing } from '../../shared/theme'
+import { fontSize, spacing, fontFamily, touchTarget } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 
@@ -98,6 +98,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     inputRow: {
@@ -119,8 +120,8 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.destructive,
     },
     stepperButton: {
-      width: 40,
-      height: 40,
+      width: touchTarget,
+      height: touchTarget,
       borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
@@ -130,6 +131,7 @@ function createStyles(colors: ThemeColors) {
     stepperButtonText: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     presetRow: {

@@ -7,7 +7,8 @@ import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
-import { fontSize, spacing } from '../../../src/shared/theme'
+import { Sparkline } from '../../../src/presentation/components/Sparkline'
+import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 const PRESETS = [
@@ -56,6 +57,12 @@ export default function AnalyticsScreen() {
       ) : (
         <>
           <Card title="Rounds">
+            <Sparkline
+              data={summary.roundsChartData.map((point) => ({
+                value: point.totalRounds,
+                hasData: point.hasReport,
+              }))}
+            />
             <View style={styles.statsRow}>
               <View style={styles.stat}>
                 <Text style={styles.statValue}>{summary.totalRounds}</Text>
@@ -169,6 +176,7 @@ function createStyles(colors: ThemeColors) {
     },
     mutedLine: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     statsRow: {
@@ -182,10 +190,12 @@ function createStyles(colors: ThemeColors) {
     statValue: {
       fontSize: fontSize.lg,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     statLabel: {
       fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
       textAlign: 'center',
     },

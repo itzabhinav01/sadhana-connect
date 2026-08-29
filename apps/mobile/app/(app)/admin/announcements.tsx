@@ -23,7 +23,7 @@ import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { ExpirationPicker } from '../../../src/presentation/components/ExpirationPicker'
 import { TextField } from '../../../src/presentation/components/TextField'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDisplayDate(iso: string) {
@@ -303,7 +303,7 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
           {validationError ? <Text style={styles.errorText}>{validationError}</Text> : null}
           <View style={styles.actionsRow}>
             <Button title="Save" isPending={updateAnnouncement.isPending} onPress={handleSave} />
-            <Button title="Cancel" variant="outline" onPress={handleCancelEdit} />
+            <Button title="Cancel" variant="text" onPress={handleCancelEdit} />
           </View>
         </View>
       ) : (
@@ -339,14 +339,14 @@ function AdminAnnouncementItem({ announcement }: { announcement: Announcement })
               </Text>
               <Button
                 title="Confirm delete"
-                variant="outline"
+                variant="destructive"
                 isPending={deleteAnnouncement.isPending}
                 onPress={() => deleteAnnouncement.mutate(announcement.id)}
               />
-              <Button title="Cancel" variant="outline" onPress={() => setConfirmingDelete(false)} />
+              <Button title="Cancel" variant="text" onPress={() => setConfirmingDelete(false)} />
             </>
           ) : (
-            <Button title="Delete" variant="outline" onPress={() => setConfirmingDelete(true)} />
+            <Button title="Delete" variant="destructive" onPress={() => setConfirmingDelete(true)} />
           )}
         </View>
       ) : null}
@@ -396,6 +396,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     input: {
@@ -453,11 +454,13 @@ function createStyles(colors: ThemeColors) {
     itemTitle: {
       fontSize: fontSize.base,
       fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
     badge: {
       fontSize: fontSize.sm,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.muted,
       backgroundColor: colors.mutedBackground,
       borderRadius: 999,

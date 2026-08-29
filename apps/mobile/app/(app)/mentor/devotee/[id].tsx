@@ -3,8 +3,8 @@ import {
   useDevoteeProfile,
   useDevoteeTodayReport,
 } from '@sadhana-connect/mentor'
-import { Stack, useLocalSearchParams } from 'expo-router'
-import { useMemo } from 'react'
+import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { useLayoutEffect, useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../../src/application/theme/use-theme'
@@ -29,10 +29,20 @@ export default function MentorDevoteeDetailScreen() {
   const styles = useMemo(() => createStyles(colors), [colors])
   const { id } = useLocalSearchParams<{ id: string }>()
   const devoteeId = id ?? ''
+  const navigation = useNavigation()
 
   const profileQuery = useDevoteeProfile(devoteeId)
   const todayReportQuery = useDevoteeTodayReport(devoteeId)
   const assignedSinceQuery = useDevoteeAssignedSince(devoteeId)
+
+  // This route is a hidden (href: null) screen inside the mentor Tabs
+  // layout, not a Stack screen, so <Stack.Screen> can't set its title —
+  // navigation.setOptions is the navigator-agnostic equivalent.
+  useLayoutEffect(() => {
+    if (profileQuery.data) {
+      navigation.setOptions({ title: profileQuery.data.fullName })
+    }
+  }, [navigation, profileQuery.data])
 
   if (profileQuery.isPending) {
     return <LoadingScreen />
@@ -57,8 +67,6 @@ export default function MentorDevoteeDetailScreen() {
   const profile = profileQuery.data
 
   return (
-    <>
-      <Stack.Screen options={{ title: profile.fullName }} />
       <ScrollView contentContainerStyle={styles.content}>
         <View>
           <Text style={styles.heading} accessibilityRole="header">
@@ -89,7 +97,6 @@ export default function MentorDevoteeDetailScreen() {
 
         <ReminderForm devoteeId={devoteeId} />
       </ScrollView>
-    </>
   )
 }
 

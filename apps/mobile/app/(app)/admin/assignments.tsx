@@ -12,7 +12,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
-import { fontSize, radius, spacing } from '../../../src/shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
 function formatDate(iso: string) {
@@ -163,7 +163,7 @@ export default function AdminAssignmentsScreen() {
           {assignment.isActive ? (
             <Button
               title="Deactivate"
-              variant="outline"
+              variant="destructive"
               isPending={deactivate.isPending}
               onPress={() => deactivate.mutate(assignment.id)}
             />
@@ -189,6 +189,7 @@ function createStyles(colors: ThemeColors) {
     label: {
       fontSize: fontSize.sm,
       fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     input: {
@@ -243,6 +244,7 @@ function createStyles(colors: ThemeColors) {
     rowName: {
       fontSize: fontSize.base,
       fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
   })
