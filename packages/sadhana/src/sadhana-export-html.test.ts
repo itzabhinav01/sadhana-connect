@@ -126,4 +126,15 @@ describe('buildSadhanaHistoryHtml', () => {
     expect(html).not.toContain('Line <two>')
     expect(html).toContain('Line &lt;two&gt;')
   })
+
+  it('includes devotee name in header when provided', () => {
+    const html = buildSadhanaHistoryHtml(
+      [makeReport()],
+      '2026-01-01',
+      '2026-01-31',
+      'HG Devotee Prabhu',
+    )
+
+    expect(html).toContain('Devotee: HG Devotee Prabhu')
+  })
 })

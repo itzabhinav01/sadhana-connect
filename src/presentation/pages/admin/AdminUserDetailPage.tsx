@@ -55,7 +55,9 @@ export function AdminUserDetailPage() {
       </div>
 
       {user.role === 'mentor' ? <MentorInfoPanel mentorId={user.id} /> : null}
-      {user.role === 'devotee' ? <DevoteeInfoPanel devoteeId={user.id} /> : null}
+      {user.role === 'devotee' ? (
+        <DevoteeInfoPanel devoteeId={user.id} devoteeName={user.fullName} />
+      ) : null}
 
       {/* Phase 20C: there is no durable "anonymized" state to guard
           against anymore — a deleted account is a genuinely deleted row,
@@ -88,7 +90,13 @@ function MentorInfoPanel({ mentorId }: { mentorId: string }) {
 // rather than assuming a single "the" mentor. Adding a mentor happens
 // on the Assignments page (AdminAssignmentForm), which already searches
 // across every devotee/mentor, not just this one.
-function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
+function DevoteeInfoPanel({
+  devoteeId,
+  devoteeName,
+}: {
+  devoteeId: string
+  devoteeName?: string
+}) {
   const assignmentsQuery = useAdminAssignments({ devoteeId })
   const activeAssignments = assignmentsQuery.data?.filter((assignment) => assignment.isActive) ?? []
   const deactivate = useDeactivateAssignment()
@@ -124,7 +132,7 @@ function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
         )}
       </div>
 
-      <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
+      <DevoteeSadhanaHistorySection devoteeId={devoteeId} devoteeName={devoteeName} />
     </div>
   )
 }

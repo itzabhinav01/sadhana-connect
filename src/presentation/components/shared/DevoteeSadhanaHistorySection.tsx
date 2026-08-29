@@ -1,22 +1,34 @@
+import { Eye, FileSpreadsheet, Printer } from 'lucide-react'
 import { useState } from 'react'
+import { flushSync } from 'react-dom'
+import { useQueryClient } from '@tanstack/react-query'
 
+import { useAuth } from '@sadhana-connect/auth'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import {
+  buildSadhanaHistoryCsv,
+  buildSadhanaRangeExportFilename,
   getLastNDaysRange,
+  sadhanaQueryKeys,
+  useDevoteeReportHistory,
   validateDateRange,
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
-import { useDevoteeReportHistory } from '@sadhana-connect/sadhana'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
 import { buildDateRangeList, formatIsoDateLong } from '@sadhana-connect/shared'
+import { Button } from '@/presentation/components/ui/button'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/presentation/components/ui/card'
-import { Button } from '@/presentation/components/ui/button'
 import { DateRangeInputs } from '@/presentation/components/shared/DateRangeInputs'
+import { SadhanaReportPreviewModal } from '@/presentation/components/shared/SadhanaReportPreviewModal'
 import { SendReminderForm } from '@/presentation/components/shared/SendReminderForm'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
+import { SadhanaExportPrintView } from '@/presentation/pages/sadhana/SadhanaExportPrintView'
+import { downloadTextFile } from '@/shared/utils/download-text-file'
 
 type RangeOption = '7' | '14' | '30' | 'custom'
 
@@ -33,6 +45,7 @@ function formatDisplayDate(iso: string) {
 
 interface DevoteeSadhanaHistorySectionProps {
   devoteeId: string
+  devoteeName?: string
 }
 
 // Shared by MentorDevoteeDetailPage and AdminUserDetailPage (Phase 20B) —
@@ -42,9 +55,27 @@ interface DevoteeSadhanaHistorySectionProps {
 // component. Missed days are computed client-side by diffing the full
 // calendar range against the report_date values actually returned — no
 // new query, same technique History/Analytics already use for gap days.
-export function DevoteeSadhanaHistorySection({ devoteeId }: DevoteeSadhanaHistorySectionProps) {
+export function DevoteeSadhanaHistorySection({
+  devoteeId,
+  devoteeName,
+}: DevoteeSadhanaHistorySectionProps) {
+  const queryClient = useQueryClient()
+  const { session } = useAuth()
+  const viewerUserId = session?.userId ?? null
+
   const [option, setOption] = useState<RangeOption>('7')
   const [customRange, setCustomRange] = useState<SadhanaDateRange>(() => getLastNDaysRange(7))
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [previewReports, setPreviewReports] = useState<SadhanaReport[]>([])
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false)
+  const [exportError, setExportError] = useState(false)
+  const [rangePrintTarget, setRangePrintTarget] = useState<{
+    reports: SadhanaReport[]
+    fromDate: string
+    toDate: string
+  } | null>(null)
 
   const range = option === 'custom' ? customRange : getLastNDaysRange(Number(option))
   const validation = validateDateRange(range.fromDate, range.toDate)
@@ -57,13 +88,133 @@ export function DevoteeSadhanaHistorySection({ devoteeId }: DevoteeSadhanaHistor
   const filledDates = new Set(historyQuery.data?.map((report) => report.reportDate) ?? [])
   const missedDates = allDates.filter((date) => !filledDates.has(date))
 
+  async function fetchFullRangeReports(): Promise<SadhanaReport[]> {
+    return queryClient.fetchQuery({
+      queryKey: sadhanaQueryKeys.devoteeFullHistory(
+        viewerUserId,
+        devoteeId,
+        range.fromDate,
+        range.toDate,
+      ),
+      queryFn: () =>
+        supabaseSadhanaReportRepository.listFullReportsInRange(
+          devoteeId,
+          range.fromDate,
+          range.toDate,
+        ),
+    })
+  }
+
+  async function handleOpenPreview() {
+    setExportError(false)
+    setIsPreviewOpen(true)
+    setIsLoadingPreview(true)
+    try {
+      const reports = await fetchFullRangeReports()
+      setPreviewReports(reports)
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsLoadingPreview(false)
+    }
+  }
+
+  async function handleExportPdf() {
+    setExportError(false)
+    setIsExportingPdf(true)
+    try {
+      const reports = await fetchFullRangeReports()
+      flushSync(() =>
+        setRangePrintTarget({ reports, fromDate: range.fromDate, toDate: range.toDate }),
+      )
+      window.print()
+      flushSync(() => setRangePrintTarget(null))
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingPdf(false)
+    }
+  }
+
+  async function handleExportCsv() {
+    setExportError(false)
+    setIsExportingCsv(true)
+    try {
+      const reports = await fetchFullRangeReports()
+      downloadTextFile(
+        buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'csv'),
+        buildSadhanaHistoryCsv(reports),
+      )
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingCsv(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
+      {rangePrintTarget ? (
+        <SadhanaExportPrintView
+          mode="range"
+          reports={rangePrintTarget.reports}
+          fromDate={rangePrintTarget.fromDate}
+          toDate={rangePrintTarget.toDate}
+          devoteeName={devoteeName}
+        />
+      ) : null}
+
+      <SadhanaReportPreviewModal
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        devoteeName={devoteeName}
+        fromDate={range.fromDate}
+        toDate={range.toDate}
+        reports={previewReports}
+        isPending={isLoadingPreview}
+        onPrintPdf={handleExportPdf}
+        onDownloadCsv={handleExportCsv}
+      />
+
       <Card>
         <CardHeader>
-          <CardTitle>
-            <h2>Sadhana History</h2>
-          </CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>
+              <h2>Sadhana History</h2>
+            </CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleOpenPreview}
+                disabled={!validation.valid}
+              >
+                <Eye className="size-4 mr-1.5" aria-hidden="true" />
+                Preview PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleExportPdf}
+                disabled={!validation.valid || isExportingPdf}
+              >
+                <Printer className="size-4 mr-1.5" aria-hidden="true" />
+                {isExportingPdf ? 'Preparing…' : 'Export PDF'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleExportCsv}
+                disabled={!validation.valid || isExportingCsv}
+              >
+                <FileSpreadsheet className="size-4 mr-1.5" aria-hidden="true" />
+                {isExportingCsv ? 'Exporting…' : 'Export CSV'}
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
@@ -94,6 +245,12 @@ export function DevoteeSadhanaHistorySection({ devoteeId }: DevoteeSadhanaHistor
           {!validation.valid ? (
             <p role="alert" className="text-sm text-destructive">
               {validation.error}
+            </p>
+          ) : null}
+
+          {exportError ? (
+            <p role="alert" className="text-sm text-destructive">
+              Something went wrong exporting Sadhana reports. Please try again.
             </p>
           ) : null}
 

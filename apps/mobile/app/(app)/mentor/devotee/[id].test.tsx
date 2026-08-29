@@ -49,6 +49,7 @@ jest.mock('expo-router', () => ({
 }))
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   useDevoteeAssignedSince,
   useDevoteeProfile,
@@ -59,6 +60,15 @@ import { useAddComment, useSadhanaReportComments } from '@sadhana-connect/commen
 import { useSendReminder } from '@sadhana-connect/notifications'
 
 import MentorDevoteeDetailScreen from './[id]'
+
+function renderScreen() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MentorDevoteeDetailScreen />
+    </QueryClientProvider>,
+  )
+}
 
 const mockUseDevoteeProfile = useDevoteeProfile as jest.Mock
 const mockUseDevoteeTodayReport = useDevoteeTodayReport as jest.Mock
@@ -110,7 +120,7 @@ describe('MentorDevoteeDetailScreen', () => {
   it('shows a loading state while the profile is pending', async () => {
     mockUseDevoteeProfile.mockReturnValue(idlePending)
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Loading…')).toBeTruthy()
   })
 
@@ -122,14 +132,14 @@ describe('MentorDevoteeDetailScreen', () => {
       data: undefined,
     })
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText(/something went wrong loading this devotee/i)).toBeTruthy()
   })
 
   it('shows the generic "not available" state when the profile is null', async () => {
     mockUseDevoteeProfile.mockReturnValue(idleSuccessEmpty)
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText("This devotee isn't available.")).toBeTruthy()
   })
 
@@ -147,7 +157,7 @@ describe('MentorDevoteeDetailScreen', () => {
       data: '2025-01-01T00:00:00.000Z',
     })
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Devotee One')).toBeTruthy()
     expect(getByText(/Assigned since/)).toBeTruthy()
     expect(getByText('Not submitted yet today.')).toBeTruthy()
@@ -167,7 +177,7 @@ describe('MentorDevoteeDetailScreen', () => {
       data: { id: 'r1', reportDate: '2026-01-15', totalRounds: 16, readingMinutes: 20, hearingMinutes: 10 },
     })
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText(/16 rounds · 20m reading · 10m hearing/)).toBeTruthy()
   })
 
@@ -185,7 +195,7 @@ describe('MentorDevoteeDetailScreen', () => {
       data: [{ id: 'r1', reportDate: '2026-01-15', totalRounds: 16, readingMinutes: 20, hearingMinutes: 10 }],
     })
 
-    const { getByRole, getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByRole, getByText } = await renderScreen()
     expect(getByText(/Missed \d+ of 7 days/)).toBeTruthy()
 
     await fireEvent.press(getByRole('button', { name: 'Last month' }))
@@ -207,7 +217,7 @@ describe('MentorDevoteeDetailScreen', () => {
       data: activeProfile,
     })
 
-    const { getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Send a reminder')).toBeTruthy()
   })
 
@@ -231,7 +241,7 @@ describe('MentorDevoteeDetailScreen', () => {
       data: [],
     })
 
-    const { getByRole, getByText } = await render(<MentorDevoteeDetailScreen />)
+    const { getByRole, getByText } = await renderScreen()
 
     await fireEvent.press(getByRole('button', { name: 'Comments' }))
 

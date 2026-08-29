@@ -19,7 +19,10 @@ jest.mock('../../../../../packages/auth/src/use-auth', () => ({
 }))
 
 jest.mock('../../../../../packages/infra-supabase/src/sadhana-report-repository', () => ({
-  supabaseSadhanaReportRepository: { listReportsInRange: jest.fn() },
+  supabaseSadhanaReportRepository: {
+    listReportsInRange: jest.fn(),
+    listFullReportsInRange: jest.fn(),
+  },
 }))
 
 const mockFetchQuery = jest.fn()

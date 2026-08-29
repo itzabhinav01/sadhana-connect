@@ -10,12 +10,18 @@ const {
   useDevoteeReportHistoryMock,
   useDevoteeAssignedSinceMock,
   useSendReminderMock,
+  useAuthMock,
 } = vi.hoisted(() => ({
   useDevoteeProfileMock: vi.fn(),
   useDevoteeTodayReportMock: vi.fn(),
   useDevoteeReportHistoryMock: vi.fn(),
   useDevoteeAssignedSinceMock: vi.fn(),
   useSendReminderMock: vi.fn(),
+  useAuthMock: vi.fn(),
+}))
+
+vi.mock('@sadhana-connect/auth', () => ({
+  useAuth: useAuthMock,
 }))
 
 vi.mock('@sadhana-connect/mentor', () => ({
@@ -37,13 +43,18 @@ vi.mock('@sadhana-connect/notifications', async () => {
   return { ...actual, useSendReminder: useSendReminderMock }
 })
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
 function renderAt(path: string) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/mentor/devotee/:id" element={<MentorDevoteeDetailPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/mentor/devotee/:id" element={<MentorDevoteeDetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
@@ -53,6 +64,11 @@ const idleSuccessList = { isPending: false, isError: false, isSuccess: true, dat
 
 describe('MentorDevoteeDetailPage', () => {
   beforeEach(() => {
+    useAuthMock.mockReset()
+    useAuthMock.mockReturnValue({
+      session: { userId: 'mentor-1', email: 'mentor@example.com', emailConfirmedAt: null },
+      isLoading: false,
+    })
     useDevoteeProfileMock.mockReset()
     useDevoteeTodayReportMock.mockReset()
     useDevoteeReportHistoryMock.mockReset()

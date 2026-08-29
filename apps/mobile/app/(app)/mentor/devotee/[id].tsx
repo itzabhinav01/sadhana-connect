@@ -93,7 +93,11 @@ export default function MentorDevoteeDetailScreen() {
           ) : null}
         </Card>
 
-        <DevoteeSadhanaHistorySection devoteeId={devoteeId} showComments />
+        <DevoteeSadhanaHistorySection
+          devoteeId={devoteeId}
+          devoteeName={profile.fullName}
+          showComments
+        />
 
         <ReminderForm devoteeId={devoteeId} />
       </ScrollView>

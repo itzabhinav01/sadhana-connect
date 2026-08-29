@@ -10,7 +10,7 @@ import {
 // PostgREST for each query shape, since that string is what actually
 // determines payload size over the wire — not an implementation detail.
 
-describe('SADHANA_REPORT_SELECT_COLUMNS (getReportByDate/upsertReport/listRecentReports/listReports — unchanged)', () => {
+describe('SADHANA_REPORT_SELECT_COLUMNS (getReportByDate/upsertReport/listRecentReports/listReports/listFullReportsInRange)', () => {
   const fullColumns = SADHANA_REPORT_SELECT_COLUMNS.split(',').map((c) => c.trim())
 
   it('still selects every field — deliberately NOT narrowed', () => {

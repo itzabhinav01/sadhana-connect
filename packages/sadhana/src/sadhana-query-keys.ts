@@ -42,4 +42,16 @@ export const sadhanaQueryKeys = {
     startDate: string,
     endDate: string,
   ) => ['sadhana-report', 'devotee-history', viewerUserId, devoteeId, startDate, endDate] as const,
+  // Full reports queries (all columns) for range exports and in-app previews
+  fullRangeAll: ['sadhana-report', 'full-range'] as const,
+  fullRange: (userId: string | null, startDate: string, endDate: string) =>
+    ['sadhana-report', 'full-range', userId, startDate, endDate] as const,
+  devoteeFullHistoryAll: ['sadhana-report', 'devotee-full-history'] as const,
+  devoteeFullHistory: (
+    viewerUserId: string | null,
+    devoteeId: string,
+    startDate: string,
+    endDate: string,
+  ) =>
+    ['sadhana-report', 'devotee-full-history', viewerUserId, devoteeId, startDate, endDate] as const,
 }

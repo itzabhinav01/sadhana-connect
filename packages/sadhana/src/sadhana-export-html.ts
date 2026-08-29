@@ -72,6 +72,7 @@ export function buildSadhanaHistoryHtml(
   reports: SadhanaReport[],
   fromDate: string,
   toDate: string,
+  devoteeName?: string,
 ): string {
   const sorted = [...reports].sort((a, b) => a.reportDate.localeCompare(b.reportDate))
 
@@ -87,6 +88,10 @@ export function buildSadhanaHistoryHtml(
           )
           .join('')
 
+  const devoteeHeader = devoteeName
+    ? `<p style="margin: 0 0 4px; font-weight: bold; font-size: 15px;">Devotee: ${escapeHtml(devoteeName)}</p>`
+    : ''
+
   return `<!doctype html>
 <html>
   <head>
@@ -95,6 +100,7 @@ export function buildSadhanaHistoryHtml(
   </head>
   <body>
     <h1>Sadhana Reports</h1>
+    ${devoteeHeader}
     <p>Date Range: ${escapeHtml(formatIsoDateAsDdMmYyyy(fromDate))} to ${escapeHtml(formatIsoDateAsDdMmYyyy(toDate))}</p>
     ${bodyHtml}
   </body>

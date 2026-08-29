@@ -50,7 +50,13 @@ function MentorInfoPanel({ mentorId }: { mentorId: string }) {
   )
 }
 
-function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
+function DevoteeInfoPanel({
+  devoteeId,
+  devoteeName,
+}: {
+  devoteeId: string
+  devoteeName?: string
+}) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const assignmentsQuery = useAdminAssignments({ devoteeId })
@@ -79,7 +85,7 @@ function DevoteeInfoPanel({ devoteeId }: { devoteeId: string }) {
         )}
       </Card>
 
-      <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
+      <DevoteeSadhanaHistorySection devoteeId={devoteeId} devoteeName={devoteeName} />
     </>
   )
 }
@@ -299,7 +305,9 @@ export default function AdminUserDetailScreen() {
         {user.role !== 'super_admin' ? <TempleGroupPanel user={user} /> : null}
 
         {user.role === 'mentor' ? <MentorInfoPanel mentorId={user.id} /> : null}
-        {user.role === 'devotee' ? <DevoteeInfoPanel devoteeId={user.id} /> : null}
+        {user.role === 'devotee' ? (
+          <DevoteeInfoPanel devoteeId={user.id} devoteeName={user.fullName} />
+        ) : null}
 
         {user.role !== 'super_admin' ? <RoleControl user={user} /> : null}
 

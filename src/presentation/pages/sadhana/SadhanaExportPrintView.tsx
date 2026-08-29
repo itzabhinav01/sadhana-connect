@@ -2,11 +2,11 @@ import { buildSadhanaReportExportSections } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 
-type SadhanaExportPrintViewProps =
-  | { mode: 'single'; report: SadhanaReport }
-  | { mode: 'range'; reports: SadhanaReport[]; fromDate: string; toDate: string }
+export type SadhanaExportPrintViewProps =
+  | { mode: 'single'; report: SadhanaReport; devoteeName?: string }
+  | { mode: 'range'; reports: SadhanaReport[]; fromDate: string; toDate: string; devoteeName?: string }
 
-const NO_REPORTS_MESSAGE = 'No Sadhana reports were submitted in this date range.'
+export const NO_REPORTS_MESSAGE = 'No Sadhana reports were submitted in this date range.'
 
 // break-inside-avoid keeps a single field-section (e.g. "Chanting") from
 // splitting across a page boundary where it fits on one page; it is
@@ -14,7 +14,7 @@ const NO_REPORTS_MESSAGE = 'No Sadhana reports were submitted in this date range
 // report that genuinely doesn't fit can still flow onto the next page
 // instead of being forced there wholesale and leaving a large blank gap
 // (approved product decision, Phase 16 — "avoid huge blank areas").
-function ReportSections({ report }: { report: SadhanaReport }) {
+export function ReportSections({ report }: { report: SadhanaReport }) {
   return (
     <>
       <h2 className="text-base font-semibold">
@@ -70,6 +70,9 @@ export function SadhanaExportPrintView(props: SadhanaExportPrintViewProps) {
       {props.mode === 'single' ? (
         <>
           <h1 className="text-xl font-bold">Sadhana Report</h1>
+          {props.devoteeName ? (
+            <p className="mt-1 text-sm font-semibold">Devotee: {props.devoteeName}</p>
+          ) : null}
           <div className="mt-4 break-inside-avoid">
             <ReportSections report={props.report} />
           </div>
@@ -77,6 +80,9 @@ export function SadhanaExportPrintView(props: SadhanaExportPrintViewProps) {
       ) : (
         <>
           <h1 className="text-xl font-bold">Sadhana Reports</h1>
+          {props.devoteeName ? (
+            <p className="mt-1 text-sm font-semibold">Devotee: {props.devoteeName}</p>
+          ) : null}
           <p className="mt-1 text-sm">
             Date Range: {formatIsoDateAsDdMmYyyy(props.fromDate)} to{' '}
             {formatIsoDateAsDdMmYyyy(props.toDate)}

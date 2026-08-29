@@ -94,7 +94,10 @@ export function MentorDevoteeDetailPage() {
             </CardContent>
           </Card>
 
-          <DevoteeSadhanaHistorySection devoteeId={devoteeId} />
+          <DevoteeSadhanaHistorySection
+            devoteeId={devoteeId}
+            devoteeName={profileQuery.data.fullName}
+          />
         </>
       ) : null}
     </div>

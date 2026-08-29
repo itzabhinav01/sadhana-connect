@@ -214,6 +214,17 @@ cp .env.example .env
   `index.html` (`<title>`) and `vite.config.ts` (the `VitePWA` manifest
   block) — both currently say "Sadhana Connect."
 
+## Uf supabse gets paused due to inactivity for 7 days
+If a free-tier Supabase project goes inactive for 7 days, Supabase automatically **pauses** it (the compute/database is suspended, but nothing is deleted — your schema, data, and all settings are preserved).
+
+To restart it:
+1. Log into the Supabase Dashboard and open the paused project — it'll show a **"Paused"** status with a **"Restore project"** (or similar) button.
+2. Click it and wait a few minutes while Supabase spins the database back up.
+3. Once it's back to "Active," the app should work exactly as before — no changes needed to your `.env`, API keys, or Edge Function secrets, since the project ref and all credentials stay the same across a pause/restore cycle.
+
+A couple of things worth knowing:
+- If a paused project stays paused for a long stretch without being restored (on the order of a few months), Supabase can eventually delete it entirely — so don't let a paused project sit untouched indefinitely.
+- To avoid this happening at all, you'd either upgrade off the free tier (paid plans don't auto-pause), or keep the project "active" by having something hit it periodically (e.g., a scheduled request every few days) so it never crosses the 7-day inactivity threshold.
 ---
 
 ## Mobile app (optional, more advanced)

@@ -271,4 +271,18 @@ export const supabaseSadhanaReportRepository: SadhanaReportRepository = {
 
     return (data as SadhanaReportHistoryRow[]).map(mapHistoryRow)
   },
+
+  async listFullReportsInRange(profileId, startDate, endDate) {
+    const { data, error } = await getSupabaseClient()
+      .from('sadhana_reports')
+      .select(SELECT_COLUMNS)
+      .eq('profile_id', profileId)
+      .gte('report_date', startDate)
+      .lte('report_date', endDate)
+      .order('report_date', { ascending: true })
+
+    if (error) throw error
+
+    return (data as SadhanaReportRow[]).map(mapSadhanaReportRow)
+  },
 }

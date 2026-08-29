@@ -104,4 +104,13 @@ export interface SadhanaReportRepository {
     startDate: string,
     endDate: string,
   ): Promise<SadhanaReportHistoryEntry[]>
+
+  // Inclusive date range, ordered by report_date ascending — returns full
+  // SadhanaReport rows with all fields. Used by devotee, mentor, and admin
+  // range exports (PDF, CSV, text) and in-app preview dialogs.
+  listFullReportsInRange(
+    profileId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<SadhanaReport[]>
 }

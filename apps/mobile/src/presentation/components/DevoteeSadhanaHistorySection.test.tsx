@@ -7,6 +7,29 @@ jest.mock('../../application/theme/use-theme', () => ({
   }),
 }))
 
+jest.mock('../../../../../packages/auth/src/use-auth', () => ({
+  useAuth: jest.fn(() => ({
+    session: { userId: 'mentor-1', email: 'mentor@example.com', emailConfirmedAt: null },
+    isLoading: false,
+  })),
+}))
+
+jest.mock('../../../../../packages/infra-supabase/src/sadhana-report-repository', () => ({
+  supabaseSadhanaReportRepository: {
+    listFullReportsInRange: jest.fn().mockResolvedValue([]),
+  },
+}))
+
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query')
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      fetchQuery: jest.fn().mockResolvedValue([]),
+    }),
+  }
+})
+
 jest.mock('../../../../../packages/sadhana/src/use-devotee-report-history', () => ({
   useDevoteeReportHistory: jest.fn(),
 }))
@@ -80,6 +103,13 @@ describe('DevoteeSadhanaHistorySection', () => {
 
     const { getByText } = await render(<DevoteeSadhanaHistorySection devoteeId="d1" />)
     expect(getByText(/Missed \d+ of 7 days/)).toBeTruthy()
+  })
+
+  it('renders Preview Report and export buttons', async () => {
+    const { getByRole } = await render(<DevoteeSadhanaHistorySection devoteeId="d1" />)
+    expect(getByRole('button', { name: 'Preview Report' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Export PDF' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Export CSV' })).toBeTruthy()
   })
 
   it('hides the comments toggle when showComments is false (default)', async () => {

@@ -18,6 +18,7 @@ const {
   useChangeUserRoleMock,
   useDevoteeReportHistoryMock,
   useSendReminderMock,
+  useAuthMock,
 } = vi.hoisted(() => ({
   useAdminUserDetailMock: vi.fn(),
   useAdminAssignmentsMock: vi.fn(),
@@ -30,6 +31,11 @@ const {
   useChangeUserRoleMock: vi.fn(),
   useDevoteeReportHistoryMock: vi.fn(),
   useSendReminderMock: vi.fn(),
+  useAuthMock: vi.fn(),
+}))
+
+vi.mock('@sadhana-connect/auth', () => ({
+  useAuth: useAuthMock,
 }))
 
 vi.mock('@sadhana-connect/admin', async () => {
@@ -77,18 +83,27 @@ const activeUser: AdminUser = {
   createdAt: '2026-01-01T00:00:00.000Z',
 }
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
 function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={['/admin/users/user-1']}>
-      <Routes>
-        <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/admin/users/user-1']}>
+        <Routes>
+          <Route path="/admin/users/:id" element={<AdminUserDetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
 describe('AdminUserDetailPage', () => {
   beforeEach(() => {
+    useAuthMock.mockReturnValue({
+      session: { userId: 'admin-1', email: 'admin@example.com', emailConfirmedAt: null },
+      isLoading: false,
+    })
     useAdminAssignmentsMock.mockReturnValue({ isPending: false, data: [] })
     useDeactivateAssignmentMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useMentorDevoteeCountMock.mockReturnValue({ isPending: false, data: 0 })

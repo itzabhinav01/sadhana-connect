@@ -31,8 +31,11 @@ vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
 }))
 
-vi.mock('@sadhana-connect/infra-supabase/sadhana-report-repository', () => ({
-  supabaseSadhanaReportRepository: { listReportsInRange: listReportsInRangeMock },
+vi.mock('@sadhana-connect/infra-supabase', () => ({
+  supabaseSadhanaReportRepository: {
+    listReportsInRange: listReportsInRangeMock,
+    listFullReportsInRange: listReportsInRangeMock,
+  },
 }))
 
 vi.mock('@/shared/utils/download-text-file', () => ({
@@ -189,7 +192,7 @@ describe('HistoryPage', () => {
       expect(screen.getByText('From date must be before To date.')).toBeInTheDocument()
     })
 
-    it('Export Text fetches the range via listReportsInRange and downloads the exact formatted text', async () => {
+    it('Export Text fetches the range via listFullReportsInRange and downloads the exact formatted text', async () => {
       const report = makeReport()
       listReportsInRangeMock.mockResolvedValue([report])
       const user = userEvent.setup()

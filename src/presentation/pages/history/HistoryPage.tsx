@@ -11,7 +11,7 @@ import {
 } from '@sadhana-connect/sadhana'
 import { sadhanaQueryKeys } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
-import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase/sadhana-report-repository'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
 import { downloadTextFile } from '@/shared/utils/download-text-file'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
@@ -56,15 +56,13 @@ export function HistoryPage() {
     : { valid: false, error: 'Choose a specific date range (not All time) to export.' }
   const canExportRange = hasConcreteRange && rangeValidation.valid
 
-  // Reuses the exact same range query key/repository call as Analytics
-  // and the weekly summary (Phase 7/9) — if either is already cached for
-  // this exact range, this resolves instantly with no network request.
+  // Fetches full reports with all columns for the range export.
   async function fetchRangeReports(): Promise<SadhanaReport[]> {
     if (!userId) throw new Error('HistoryPage: no authenticated user')
     return queryClient.fetchQuery({
-      queryKey: sadhanaQueryKeys.range(userId, exportFromDate, exportToDate),
+      queryKey: sadhanaQueryKeys.fullRange(userId, exportFromDate, exportToDate),
       queryFn: () =>
-        supabaseSadhanaReportRepository.listReportsInRange(
+        supabaseSadhanaReportRepository.listFullReportsInRange(
           userId,
           exportFromDate,
           exportToDate,

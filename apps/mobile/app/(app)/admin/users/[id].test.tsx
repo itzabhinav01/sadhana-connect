@@ -79,6 +79,7 @@ jest.mock('expo-router', () => {
 })
 
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   useAdminAssignments,
   useAdminTempleGroups,
@@ -94,6 +95,15 @@ import { useDevoteeReportHistory } from '@sadhana-connect/sadhana'
 import * as Clipboard from 'expo-clipboard'
 
 import AdminUserDetailScreen from './[id]'
+
+function renderScreen() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AdminUserDetailScreen />
+    </QueryClientProvider>,
+  )
+}
 
 const mockUseAdminUserDetail = useAdminUserDetail as jest.Mock
 const mockUseMentorDevoteeCount = useMentorDevoteeCount as jest.Mock
@@ -169,21 +179,21 @@ describe('AdminUserDetailScreen', () => {
   it('shows a loading state while pending', async () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: true, isError: false, data: undefined })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Loading…')).toBeTruthy()
   })
 
   it("shows the not-available message when the user isn't found", async () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: null })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText("This user isn't available.")).toBeTruthy()
   })
 
   it('renders the phone number and account status', async () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Test Devotee')).toBeTruthy()
     expect(getByText('+919876543210')).toBeTruthy()
     expect(getByText('Active')).toBeTruthy()
@@ -198,7 +208,7 @@ describe('AdminUserDetailScreen', () => {
       data: [{ id: 'r1', reportDate: '2026-01-15', totalRounds: 16, readingMinutes: 20, hearingMinutes: 10 }],
     })
 
-    const { getByText, queryByRole } = await render(<AdminUserDetailScreen />)
+    const { getByText, queryByRole } = await renderScreen()
     expect(getByText('Sadhana History')).toBeTruthy()
     expect(getByText(/16 rounds · 20m reading · 10m hearing/)).toBeTruthy()
     // Admin can view, but not comment — that's mentor-only.
@@ -209,7 +219,7 @@ describe('AdminUserDetailScreen', () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: mentorUser })
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 3 })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('3')).toBeTruthy()
   })
 
@@ -222,7 +232,7 @@ describe('AdminUserDetailScreen', () => {
     })
     mockUseDeactivateAssignment.mockReturnValue({ mutate: mockDeactivate, isPending: false })
 
-    const { getByRole } = await render(<AdminUserDetailScreen />)
+    const { getByRole } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'Remove' }))
 
     expect(mockDeactivate).toHaveBeenCalledWith('a1')
@@ -232,7 +242,7 @@ describe('AdminUserDetailScreen', () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: mentorUser })
     mockUseMentorDevoteeCount.mockReturnValue({ isPending: false, data: 2 })
 
-    const { getByRole, getByText } = await render(<AdminUserDetailScreen />)
+    const { getByRole, getByText } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'Devotee' }))
 
     expect(getByText(/active devotees and cannot change roles/i)).toBeTruthy()
@@ -244,7 +254,7 @@ describe('AdminUserDetailScreen', () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
     mockUseSetUserActive.mockReturnValue({ mutate: mockSetActive, isPending: false })
 
-    const { getByRole } = await render(<AdminUserDetailScreen />)
+    const { getByRole } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'Disable account' }))
 
     expect(mockSetActive).toHaveBeenCalledWith({ userId: 'u1', isActive: false })
@@ -262,7 +272,7 @@ describe('AdminUserDetailScreen', () => {
       reset: jest.fn(),
     })
 
-    const { getByRole, getByText } = await render(<AdminUserDetailScreen />)
+    const { getByRole, getByText } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'Generate recovery link' }))
 
     expect(mockGenerate).toHaveBeenCalledWith('u1', { onSuccess: expect.any(Function) })
@@ -288,7 +298,7 @@ describe('AdminUserDetailScreen', () => {
       reset: mockReset,
     })
 
-    const { getByRole, queryByText } = await render(<AdminUserDetailScreen />)
+    const { getByRole, queryByText } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'Generate recovery link' }))
     await fireEvent.press(getByRole('button', { name: 'Close' }))
 
@@ -305,7 +315,7 @@ describe('AdminUserDetailScreen', () => {
       reset: jest.fn(),
     })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Could not generate a recovery link.')).toBeTruthy()
   })
 
@@ -318,7 +328,7 @@ describe('AdminUserDetailScreen', () => {
       isError: false,
     })
 
-    const { getByRole } = await render(<AdminUserDetailScreen />)
+    const { getByRole } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'ISKCON Mumbai' }))
 
     expect(mockSetTempleGroup).toHaveBeenCalledWith({ userId: 'u1', templeGroupId: 'g2' })
@@ -337,7 +347,7 @@ describe('AdminUserDetailScreen', () => {
       isError: false,
     })
 
-    const { getByRole } = await render(<AdminUserDetailScreen />)
+    const { getByRole } = await renderScreen()
     await fireEvent.press(getByRole('button', { name: 'None' }))
 
     expect(mockSetTempleGroup).toHaveBeenCalledWith({ userId: 'u1', templeGroupId: null })
@@ -350,7 +360,7 @@ describe('AdminUserDetailScreen', () => {
       data: { ...devoteeUser, role: 'super_admin' },
     })
 
-    const { queryByText } = await render(<AdminUserDetailScreen />)
+    const { queryByText } = await renderScreen()
     expect(queryByText('Temple group')).toBeNull()
   })
 
@@ -358,7 +368,7 @@ describe('AdminUserDetailScreen', () => {
     mockUseAdminUserDetail.mockReturnValue({ isPending: false, isError: false, data: devoteeUser })
     mockUseSetUserTempleGroup.mockReturnValue({ mutate: jest.fn(), isPending: false, isError: true })
 
-    const { getByText } = await render(<AdminUserDetailScreen />)
+    const { getByText } = await renderScreen()
     expect(getByText('Something went wrong updating the temple group.')).toBeTruthy()
   })
 })

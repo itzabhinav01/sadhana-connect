@@ -70,9 +70,9 @@ export default function HistoryScreen() {
   async function fetchRangeReports(): Promise<SadhanaReport[]> {
     if (!userId) throw new Error('HistoryScreen: no authenticated user')
     return queryClient.fetchQuery({
-      queryKey: sadhanaQueryKeys.range(userId, exportFromDate, exportToDate),
+      queryKey: sadhanaQueryKeys.fullRange(userId, exportFromDate, exportToDate),
       queryFn: () =>
-        supabaseSadhanaReportRepository.listReportsInRange(userId, exportFromDate, exportToDate),
+        supabaseSadhanaReportRepository.listFullReportsInRange(userId, exportFromDate, exportToDate),
     })
   }
 
