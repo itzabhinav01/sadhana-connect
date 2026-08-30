@@ -36,7 +36,7 @@ instance:
 
 - **Web app** (`src/`) — React + TypeScript + Vite + Tailwind + shadcn/ui,
   deployed as a PWA to Vercel.
-- **Mobile app** (`apps/mobile/`) — Expo / React Native, Android-first.
+- **Mobile app** (`apps/mobile/`) — Expo / React Native, Android-first. See [Mobile App & OTA Updates Guide](apps/mobile/MOBILE_GUIDE.md) for full commands on instant updates, building APKs, and distribution.
 - **Shared logic** (`packages/*`) — domain models, validation, and
   data-fetching hooks used by both the web and mobile apps.
 - **Backend** — Supabase (Postgres + Auth + Storage + Edge Functions), with
