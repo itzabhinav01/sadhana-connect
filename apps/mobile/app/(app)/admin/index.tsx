@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
+import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
@@ -132,6 +133,8 @@ export default function AdminHomeScreen() {
             onPress={() => router.push('/admin/announcements')}
           />
         </Card>
+
+        <AppUpdateSection />
       </ScrollView>
     </>
   )

@@ -17,6 +17,7 @@ import { z } from 'zod'
 import { useTheme } from '../../src/application/theme/use-theme'
 import { useSignOut } from '../../src/application/auth/use-sign-out'
 import { useUpdateProfile } from '../../src/application/profile/use-update-profile'
+import { AppUpdateSection } from '../../src/presentation/components/AppUpdateSection'
 import { Button } from '../../src/presentation/components/Button'
 import { Card } from '../../src/presentation/components/Card'
 import { Chip } from '../../src/presentation/components/Chip'
@@ -229,6 +230,8 @@ export default function ProfileScreen() {
             onPress={() => router.push('/devotee/settings')}
           />
         ) : null}
+
+        <AppUpdateSection />
 
         <Button
           title="Sign Out"

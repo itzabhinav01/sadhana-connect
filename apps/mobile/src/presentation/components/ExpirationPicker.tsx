@@ -8,9 +8,8 @@ import { useMemo, useState } from 'react'
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
-import { fontSize, spacing, fontFamily } from '../../shared/theme'
+import { fontSize, spacing, fontFamily, radius } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
-import { Button } from './Button'
 
 function tomorrow() {
   const date = new Date()
@@ -46,16 +45,32 @@ export function ExpirationPicker({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Expiration</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.label}>Expiration</Text>
+        <Text style={styles.helperText}>Auto-archives after:</Text>
+      </View>
       <View style={styles.presetRow}>
-        {ANNOUNCEMENT_EXPIRATION_PRESETS.map((option) => (
-          <Button
-            key={option}
-            title={ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[option]}
-            variant={preset === option ? 'primary' : 'outline'}
-            onPress={() => onPresetChange(option)}
-          />
-        ))}
+        {ANNOUNCEMENT_EXPIRATION_PRESETS.map((option) => {
+          const isSelected = preset === option
+          return (
+            <Pressable
+              key={option}
+              accessibilityRole="button"
+              accessibilityLabel={ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[option]}
+              accessibilityState={{ selected: isSelected }}
+              onPress={() => onPresetChange(option)}
+              style={({ pressed }) => [
+                styles.chip,
+                isSelected ? styles.chipSelected : styles.chipUnselected,
+                pressed && styles.chipPressed,
+              ]}
+            >
+              <Text style={isSelected ? styles.chipTextSelected : styles.chipTextUnselected}>
+                {ANNOUNCEMENT_EXPIRATION_PRESET_LABELS[option]}
+              </Text>
+            </Pressable>
+          )
+        })}
       </View>
 
       {preset === 'custom' ? (
@@ -66,7 +81,7 @@ export function ExpirationPicker({
           style={styles.dateInput}
         >
           <Text style={styles.dateText}>
-            {customDateIso ? customDateIso.slice(0, 10) : 'Select date'}
+            📅 {customDateIso ? customDateIso.slice(0, 10) : 'Tap to select expiration date'}
           </Text>
         </Pressable>
       ) : null}
@@ -90,32 +105,78 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       gap: spacing.xs,
+      paddingVertical: spacing.xs,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
     },
     label: {
       fontSize: fontSize.sm,
-      fontWeight: '500',
-      fontFamily: fontFamily.medium,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
+    },
+    helperText: {
+      fontSize: fontSize.xs,
+      color: colors.muted,
+      fontFamily: fontFamily.regular,
     },
     presetRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: spacing.sm,
+      gap: spacing.xs + 2,
+    },
+    chip: {
+      paddingHorizontal: spacing.sm + 4,
+      paddingVertical: 7,
+      borderRadius: radius.full,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    chipUnselected: {
+      backgroundColor: colors.card,
+      borderColor: colors.border,
+    },
+    chipSelected: {
+      backgroundColor: colors.primary + '22',
+      borderColor: colors.primary,
+      borderWidth: 1.5,
+    },
+    chipPressed: {
+      opacity: 0.7,
+    },
+    chipTextUnselected: {
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.medium,
+      color: colors.muted,
+    },
+    chipTextSelected: {
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+      color: colors.primary,
     },
     dateInput: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 8,
+      borderRadius: radius.md,
+      backgroundColor: colors.card,
       paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
+      paddingVertical: spacing.sm + 2,
+      marginTop: spacing.xs,
     },
     dateText: {
       fontSize: fontSize.base,
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     errorText: {
       fontSize: fontSize.sm,
       color: colors.destructive,
+      fontFamily: fontFamily.regular,
     },
   })
 }
