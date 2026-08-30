@@ -16,7 +16,7 @@ export function BottomTabBar({ items }: BottomTabBarProps) {
   return (
     <nav
       aria-label="Primary tabs"
-      className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t bg-background md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[calc(4rem+env(safe-area-inset-bottom,0px))] items-stretch border-t bg-background pb-[env(safe-area-inset-bottom,0px)] md:hidden"
     >
       {items.map((item) => (
         <NavLink

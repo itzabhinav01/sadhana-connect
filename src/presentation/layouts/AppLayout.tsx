@@ -60,7 +60,7 @@ export function AppLayout() {
             id="main-content"
             className={cn(
               'flex-1 overflow-x-hidden p-4 md:p-6',
-              bottomTabItems ? 'pb-20 md:pb-6' : null,
+              bottomTabItems ? 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-6' : null,
             )}
           >
             {isRouteChunkLoading ? (
