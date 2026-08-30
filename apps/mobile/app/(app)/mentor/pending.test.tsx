@@ -28,8 +28,10 @@ const submittedDevotee = {
   devoteeId: 'd1',
   fullName: 'Submitted Devotee',
   assignedAt: '2025-01-01T00:00:00.000Z',
-  hasSubmittedToday: true,
-  todayTotalRounds: 16,
+  hasSubmittedYesterday: true,
+  yesterdayTotalRounds: 16,
+  hasSubmittedToday: false,
+  todayTotalRounds: null,
   lastReportDate: '2026-01-15',
 }
 
@@ -37,6 +39,8 @@ const pendingDevotee = {
   devoteeId: 'd2',
   fullName: 'Pending Devotee',
   assignedAt: '2025-01-01T00:00:00.000Z',
+  hasSubmittedYesterday: false,
+  yesterdayTotalRounds: null,
   hasSubmittedToday: false,
   todayTotalRounds: null,
   lastReportDate: null,
@@ -59,7 +63,7 @@ describe('MentorPendingScreen', () => {
     expect(getByText('Loading…')).toBeTruthy()
   })
 
-  it('shows only devotees who have not submitted today', async () => {
+  it('shows only devotees who have not submitted yesterday', async () => {
     mockUseMentorDevotees.mockReturnValue({
       isPending: false,
       isError: false,
@@ -81,7 +85,7 @@ describe('MentorPendingScreen', () => {
     })
 
     const { getByText } = await render(<MentorPendingScreen />)
-    expect(getByText('Everyone has submitted today.')).toBeTruthy()
+    expect(getByText("Everyone has submitted yesterday's sadhana.")).toBeTruthy()
   })
 
   it('filters by name search', async () => {

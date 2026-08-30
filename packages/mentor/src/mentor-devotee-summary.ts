@@ -1,3 +1,4 @@
+import { addDaysIso } from '@sadhana-connect/shared'
 import type { DevoteeLastReportDate } from '@sadhana-connect/domain'
 import type { MentorAssignedDevotee } from '@sadhana-connect/domain'
 import type { MentorDevoteeReportSummary } from '@sadhana-connect/domain'
@@ -6,6 +7,8 @@ export interface MentorDevoteeSummary {
   devoteeId: string
   fullName: string
   assignedAt: string
+  hasSubmittedYesterday: boolean
+  yesterdayTotalRounds: number | null
   hasSubmittedToday: boolean
   todayTotalRounds: number | null
   lastReportDate: string | null
@@ -21,22 +24,27 @@ export function calculateMentorDevoteeSummaries(
   lastReportDates: DevoteeLastReportDate[],
   today: string,
 ): MentorDevoteeSummary[] {
-  const todayReportByDevotee = new Map(
-    recentReports
-      .filter((report) => report.reportDate === today)
-      .map((report) => [report.profileId, report]),
-  )
+  const yesterday = addDaysIso(today, -1)
+
+  const reportByDevoteeAndDate = new Map<string, MentorDevoteeReportSummary>()
+  for (const report of recentReports) {
+    reportByDevoteeAndDate.set(`${report.profileId}:${report.reportDate}`, report)
+  }
+
   const lastReportDateByDevotee = new Map(
     lastReportDates.map((entry) => [entry.devoteeId, entry.lastReportDate]),
   )
 
   return devotees.map((devotee) => {
-    const todayReport = todayReportByDevotee.get(devotee.devoteeId)
+    const todayReport = reportByDevoteeAndDate.get(`${devotee.devoteeId}:${today}`)
+    const yesterdayReport = reportByDevoteeAndDate.get(`${devotee.devoteeId}:${yesterday}`)
 
     return {
       devoteeId: devotee.devoteeId,
       fullName: devotee.fullName,
       assignedAt: devotee.assignedAt,
+      hasSubmittedYesterday: yesterdayReport !== undefined,
+      yesterdayTotalRounds: yesterdayReport?.totalRounds ?? null,
       hasSubmittedToday: todayReport !== undefined,
       todayTotalRounds: todayReport?.totalRounds ?? null,
       lastReportDate: lastReportDateByDevotee.get(devotee.devoteeId) ?? null,

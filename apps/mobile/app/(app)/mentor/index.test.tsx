@@ -42,8 +42,10 @@ const submittedDevotee = {
   devoteeId: 'd1',
   fullName: 'Submitted Devotee',
   assignedAt: '2025-01-01T00:00:00.000Z',
-  hasSubmittedToday: true,
-  todayTotalRounds: 16,
+  hasSubmittedYesterday: true,
+  yesterdayTotalRounds: 16,
+  hasSubmittedToday: false,
+  todayTotalRounds: null,
   lastReportDate: '2026-01-15',
 }
 
@@ -51,6 +53,8 @@ const pendingDevotee = {
   devoteeId: 'd2',
   fullName: 'Pending Devotee',
   assignedAt: '2025-01-01T00:00:00.000Z',
+  hasSubmittedYesterday: false,
+  yesterdayTotalRounds: null,
   hasSubmittedToday: false,
   todayTotalRounds: null,
   lastReportDate: null,
@@ -102,7 +106,7 @@ describe('MentorDashboardScreen', () => {
     expect(getByText('Pending Devotee')).toBeTruthy()
   })
 
-  it('filters the list to only pending devotees when "Pending Today" is selected', async () => {
+  it('filters the list to only pending devotees when "Pending Yesterday" is selected', async () => {
     mockUseMentorDevotees.mockReturnValue({
       isPending: false,
       isError: false,
@@ -111,7 +115,7 @@ describe('MentorDashboardScreen', () => {
     })
 
     const { getByRole, getByText, queryByText } = await render(<MentorDashboardScreen />)
-    await fireEvent.press(getByRole('button', { name: 'Pending Today' }))
+    await fireEvent.press(getByRole('button', { name: 'Pending Yesterday' }))
 
     expect(getByText('Pending Devotee')).toBeTruthy()
     expect(queryByText('Submitted Devotee')).toBeNull()

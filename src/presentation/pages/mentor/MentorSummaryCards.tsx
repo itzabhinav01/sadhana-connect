@@ -7,13 +7,13 @@ interface MentorSummaryCardsProps {
 
 export function MentorSummaryCards({ summaries }: MentorSummaryCardsProps) {
   const totalAssigned = summaries.length
-  const submittedToday = summaries.filter((s) => s.hasSubmittedToday).length
-  const pendingToday = totalAssigned - submittedToday
+  const submittedYesterday = summaries.filter((s) => s.hasSubmittedYesterday).length
+  const pendingYesterday = totalAssigned - submittedYesterday
 
   const cards = [
     { label: 'Total Assigned', value: totalAssigned },
-    { label: 'Submitted Today', value: submittedToday },
-    { label: 'Pending Today', value: pendingToday },
+    { label: 'Submitted Yesterday', value: submittedYesterday },
+    { label: 'Pending Yesterday', value: pendingYesterday },
   ]
 
   return (

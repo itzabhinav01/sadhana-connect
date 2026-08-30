@@ -81,8 +81,10 @@ describe('MentorDashboardPage', () => {
           devoteeId: 'd1',
           fullName: 'Devotee One',
           assignedAt: '2025-01-01T00:00:00.000Z',
-          hasSubmittedToday: true,
-          todayTotalRounds: 16,
+          hasSubmittedYesterday: true,
+          yesterdayTotalRounds: 16,
+          hasSubmittedToday: false,
+          todayTotalRounds: null,
           lastReportDate: '2026-01-15',
         },
       ],
@@ -94,7 +96,7 @@ describe('MentorDashboardPage', () => {
     expect(screen.getAllByText('Devotee One').length).toBeGreaterThan(0)
   })
 
-  it('filters the list to only pending devotees when "Pending Today" is selected', async () => {
+  it('filters the list to only pending devotees when "Pending Yesterday" is selected', async () => {
     useMentorDevoteesMock.mockReturnValue({
       isPending: false,
       isError: false,
@@ -104,14 +106,18 @@ describe('MentorDashboardPage', () => {
           devoteeId: 'd1',
           fullName: 'Submitted Devotee',
           assignedAt: '2025-01-01T00:00:00.000Z',
-          hasSubmittedToday: true,
-          todayTotalRounds: 16,
+          hasSubmittedYesterday: true,
+          yesterdayTotalRounds: 16,
+          hasSubmittedToday: false,
+          todayTotalRounds: null,
           lastReportDate: '2026-01-15',
         },
         {
           devoteeId: 'd2',
           fullName: 'Pending Devotee',
           assignedAt: '2025-01-01T00:00:00.000Z',
+          hasSubmittedYesterday: false,
+          yesterdayTotalRounds: null,
           hasSubmittedToday: false,
           todayTotalRounds: null,
           lastReportDate: null,
@@ -122,7 +128,7 @@ describe('MentorDashboardPage', () => {
 
     renderPage()
 
-    await user.click(screen.getByRole('tab', { name: 'Pending Today' }))
+    await user.click(screen.getByRole('tab', { name: 'Pending Yesterday' }))
 
     expect(screen.getAllByText('Pending Devotee').length).toBeGreaterThan(0)
     expect(screen.queryByText('Submitted Devotee')).not.toBeInTheDocument()

@@ -43,22 +43,29 @@ function makeReport(overrides: Partial<SadhanaReport>): SadhanaReport {
 }
 
 describe('calculateMentorDevoteeSummaries', () => {
-  it('marks a devotee as submitted today with the correct total rounds', () => {
+  it('marks a devotee as submitted today and yesterday with the correct total rounds', () => {
     const devotees = [makeDevotee({ devoteeId: 'd1' })]
-    const reports = [makeReport({ profileId: 'd1', reportDate: TODAY, totalRounds: 20 })]
+    const reports = [
+      makeReport({ profileId: 'd1', reportDate: '2026-01-14', totalRounds: 16 }),
+      makeReport({ profileId: 'd1', reportDate: TODAY, totalRounds: 20 }),
+    ]
 
     const [summary] = calculateMentorDevoteeSummaries(devotees, reports, [], TODAY)
 
+    expect(summary.hasSubmittedYesterday).toBe(true)
+    expect(summary.yesterdayTotalRounds).toBe(16)
     expect(summary.hasSubmittedToday).toBe(true)
     expect(summary.todayTotalRounds).toBe(20)
   })
 
-  it('marks a devotee as pending when there is no report for today', () => {
+  it('marks a devotee as pending yesterday when there is no report for yesterday', () => {
     const devotees = [makeDevotee({ devoteeId: 'd1' })]
     const reports = [makeReport({ profileId: 'd1', reportDate: '2026-01-10' })]
 
     const [summary] = calculateMentorDevoteeSummaries(devotees, reports, [], TODAY)
 
+    expect(summary.hasSubmittedYesterday).toBe(false)
+    expect(summary.yesterdayTotalRounds).toBeNull()
     expect(summary.hasSubmittedToday).toBe(false)
     expect(summary.todayTotalRounds).toBeNull()
   })

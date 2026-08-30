@@ -22,8 +22,8 @@ import type { ThemeColors } from '../../../src/shared/theme'
 
 const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
   all: 'All',
-  submitted: 'Submitted Today',
-  pending: 'Pending Today',
+  submitted: 'Submitted Yesterday',
+  pending: 'Pending Yesterday',
 }
 
 function formatDisplayDate(iso: string) {
@@ -45,14 +45,15 @@ function DevoteeSummaryRow({ summary }: { summary: MentorDevoteeSummary }) {
     >
       <View style={styles.rowHeader}>
         <Text style={styles.rowName}>{summary.fullName}</Text>
-        <Text style={summary.hasSubmittedToday ? styles.badgeSubmitted : styles.badgePending}>
-          {summary.hasSubmittedToday ? 'Submitted' : 'Pending'}
+        <Text style={summary.hasSubmittedYesterday ? styles.badgeSubmitted : styles.badgePending}>
+          {summary.hasSubmittedYesterday ? 'Yesterday Logged' : 'Yesterday Pending'}
         </Text>
       </View>
       <Text style={styles.rowMuted}>
-        {summary.todayTotalRounds !== null
-          ? `${summary.todayTotalRounds} rounds today`
-          : 'No rounds submitted today'}
+        {summary.yesterdayTotalRounds !== null
+          ? `${summary.yesterdayTotalRounds} rounds yesterday`
+          : 'No report for yesterday'}
+        {summary.hasSubmittedToday ? ` • Today: ${summary.todayTotalRounds} rounds` : ''}
       </Text>
       <Text style={styles.rowMuted}>
         Last report:{' '}
@@ -123,8 +124,8 @@ export default function MentorDashboardScreen() {
     : statusFiltered
 
   const totalAssigned = summaries.length
-  const submittedToday = summaries.filter((summary) => summary.hasSubmittedToday).length
-  const pendingToday = totalAssigned - submittedToday
+  const submittedYesterday = summaries.filter((summary) => summary.hasSubmittedYesterday).length
+  const pendingYesterday = totalAssigned - submittedYesterday
 
   return (
       <ScrollView contentContainerStyle={styles.content}>
@@ -152,12 +153,12 @@ export default function MentorDashboardScreen() {
                   <Text style={styles.rowMuted}>Total Assigned</Text>
                 </View>
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{submittedToday}</Text>
-                  <Text style={styles.rowMuted}>Submitted Today</Text>
+                  <Text style={styles.statValue}>{submittedYesterday}</Text>
+                  <Text style={styles.rowMuted}>Submitted Yesterday</Text>
                 </View>
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{pendingToday}</Text>
-                  <Text style={styles.rowMuted}>Pending Today</Text>
+                  <Text style={styles.statValue}>{pendingYesterday}</Text>
+                  <Text style={styles.rowMuted}>Pending Yesterday</Text>
                 </View>
               </View>
             </Card>

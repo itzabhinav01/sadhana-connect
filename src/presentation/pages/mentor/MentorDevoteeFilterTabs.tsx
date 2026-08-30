@@ -6,8 +6,8 @@ import { Button } from '@/presentation/components/ui/button'
 
 const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
   all: 'All',
-  submitted: 'Submitted Today',
-  pending: 'Pending Today',
+  submitted: 'Submitted Yesterday',
+  pending: 'Pending Yesterday',
 }
 
 interface MentorDevoteeFilterTabsProps {

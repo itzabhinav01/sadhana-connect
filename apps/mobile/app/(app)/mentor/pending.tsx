@@ -79,7 +79,7 @@ export default function MentorPendingScreen() {
           />
 
           {pending.length === 0 ? (
-            <Text style={styles.rowMuted}>Everyone has submitted today.</Text>
+            <Text style={styles.rowMuted}>Everyone has submitted yesterday&apos;s sadhana.</Text>
           ) : visible.length === 0 ? (
             <Text style={styles.rowMuted}>No devotees match this search.</Text>
           ) : (

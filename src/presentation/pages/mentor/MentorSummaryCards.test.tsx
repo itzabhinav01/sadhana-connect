@@ -9,6 +9,8 @@ function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSum
     devoteeId: 'd1',
     fullName: 'Devotee',
     assignedAt: '2025-01-01T00:00:00.000Z',
+    hasSubmittedYesterday: false,
+    yesterdayTotalRounds: null,
     hasSubmittedToday: false,
     todayTotalRounds: null,
     lastReportDate: null,
@@ -17,20 +19,20 @@ function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSum
 }
 
 describe('MentorSummaryCards', () => {
-  it('computes total assigned, submitted today, and pending today from the summaries', () => {
+  it('computes total assigned, submitted yesterday, and pending yesterday from the summaries', () => {
     const summaries = [
-      makeSummary({ devoteeId: 'd1', hasSubmittedToday: true }),
-      makeSummary({ devoteeId: 'd2', hasSubmittedToday: true }),
-      makeSummary({ devoteeId: 'd3', hasSubmittedToday: false }),
+      makeSummary({ devoteeId: 'd1', hasSubmittedYesterday: true }),
+      makeSummary({ devoteeId: 'd2', hasSubmittedYesterday: true }),
+      makeSummary({ devoteeId: 'd3', hasSubmittedYesterday: false }),
     ]
 
     render(<MentorSummaryCards summaries={summaries} />)
 
     expect(screen.getByText('Total Assigned')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('Submitted Today')).toBeInTheDocument()
+    expect(screen.getByText('Submitted Yesterday')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.getByText('Pending Today')).toBeInTheDocument()
+    expect(screen.getByText('Pending Yesterday')).toBeInTheDocument()
     expect(screen.getByText('1')).toBeInTheDocument()
   })
 

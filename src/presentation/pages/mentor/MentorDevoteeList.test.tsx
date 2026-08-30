@@ -10,14 +10,18 @@ const summaries: MentorDevoteeSummary[] = [
     devoteeId: 'd1',
     fullName: 'Devotee One',
     assignedAt: '2025-01-01T00:00:00.000Z',
-    hasSubmittedToday: true,
-    todayTotalRounds: 16,
+    hasSubmittedYesterday: true,
+    yesterdayTotalRounds: 16,
+    hasSubmittedToday: false,
+    todayTotalRounds: null,
     lastReportDate: '2026-01-15',
   },
   {
     devoteeId: 'd2',
     fullName: 'Devotee Two',
     assignedAt: '2025-02-01T00:00:00.000Z',
+    hasSubmittedYesterday: false,
+    yesterdayTotalRounds: null,
     hasSubmittedToday: false,
     todayTotalRounds: null,
     lastReportDate: null,
@@ -40,11 +44,11 @@ describe('MentorDevoteeList', () => {
     expect(screen.getAllByText('Devotee Two').length).toBeGreaterThan(0)
   })
 
-  it('shows Submitted/Pending status matching each devotee', () => {
+  it('shows Yesterday Logged/Pending status matching each devotee', () => {
     renderList()
 
-    expect(screen.getAllByText('Submitted').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Pending').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Yesterday Logged').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Yesterday Pending').length).toBeGreaterThan(0)
   })
 
   it('shows "No reports yet" for a devotee with no last report date', () => {

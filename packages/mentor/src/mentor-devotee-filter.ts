@@ -11,10 +11,10 @@ export function filterMentorDevotees(
   filter: MentorDevoteeFilter,
 ): MentorDevoteeSummary[] {
   if (filter === 'submitted') {
-    return summaries.filter((summary) => summary.hasSubmittedToday)
+    return summaries.filter((summary) => summary.hasSubmittedYesterday)
   }
   if (filter === 'pending') {
-    return summaries.filter((summary) => !summary.hasSubmittedToday)
+    return summaries.filter((summary) => !summary.hasSubmittedYesterday)
   }
   return summaries
 }

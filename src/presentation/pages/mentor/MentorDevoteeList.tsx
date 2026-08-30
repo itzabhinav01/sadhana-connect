@@ -8,16 +8,16 @@ function formatDisplayDate(iso: string) {
   return formatIsoDateLong(iso)
 }
 
-function StatusBadge({ hasSubmittedToday }: { hasSubmittedToday: boolean }) {
+function StatusBadge({ hasSubmittedYesterday }: { hasSubmittedYesterday: boolean }) {
   return (
     <span
       className={
-        hasSubmittedToday
+        hasSubmittedYesterday
           ? 'rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'
           : 'rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground'
       }
     >
-      {hasSubmittedToday ? 'Submitted' : 'Pending'}
+      {hasSubmittedYesterday ? 'Yesterday Logged' : 'Yesterday Pending'}
     </span>
   )
 }
@@ -37,8 +37,8 @@ export function MentorDevoteeList({ summaries }: MentorDevoteeListProps) {
           <thead>
             <tr className="border-b text-left text-muted-foreground">
               <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Today&apos;s Rounds</th>
+              <th className="px-4 py-3 font-medium">Yesterday&apos;s Status</th>
+              <th className="px-4 py-3 font-medium">Yesterday&apos;s Rounds</th>
               <th className="px-4 py-3 font-medium">Assigned Since</th>
               <th className="px-4 py-3 font-medium">Last Report</th>
               <th className="px-4 py-3 font-medium">
@@ -53,17 +53,17 @@ export function MentorDevoteeList({ summaries }: MentorDevoteeListProps) {
                   {summary.fullName}
                 </td>
                 <td className="px-4 py-3">
-                  <StatusBadge hasSubmittedToday={summary.hasSubmittedToday} />
+                  <StatusBadge hasSubmittedYesterday={summary.hasSubmittedYesterday} />
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {summary.todayTotalRounds ?? '—'}
+                  {summary.yesterdayTotalRounds ?? '—'}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {formatDisplayDate(summary.assignedAt.slice(0, 10))}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {summary.lastReportDate
-                    ? formatDisplayDate(summary.lastReportDate)
+                     ? formatDisplayDate(summary.lastReportDate)
                     : 'No reports yet'}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -89,12 +89,13 @@ export function MentorDevoteeList({ summaries }: MentorDevoteeListProps) {
               <span className="font-medium text-foreground">
                 {summary.fullName}
               </span>
-              <StatusBadge hasSubmittedToday={summary.hasSubmittedToday} />
+              <StatusBadge hasSubmittedYesterday={summary.hasSubmittedYesterday} />
             </div>
             <p className="text-sm text-muted-foreground">
-              {summary.todayTotalRounds !== null
-                ? `${summary.todayTotalRounds} rounds today`
-                : 'No rounds submitted today'}
+              {summary.yesterdayTotalRounds !== null
+                ? `${summary.yesterdayTotalRounds} rounds yesterday`
+                : 'No report for yesterday'}
+              {summary.hasSubmittedToday ? ` • Today: ${summary.todayTotalRounds} rounds` : ''}
             </p>
             <p className="text-xs text-muted-foreground">
               Last report:{' '}
