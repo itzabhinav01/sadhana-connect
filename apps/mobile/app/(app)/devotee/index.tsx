@@ -28,12 +28,6 @@ import type { ThemeColors } from '../../../src/shared/theme'
 
 const RECENT_REPORTS_DISPLAY_COUNT = 3
 
-function greetingForHour(hour: number): string {
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 function WeekStrip({ chartData, colors }: { chartData: { date: string; hasReport: boolean }[]; colors: ThemeColors }) {
   return (
     <View style={weekStripStyles.row}>
@@ -120,7 +114,7 @@ export default function DashboardScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
-            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} 🙏
+            Hare Krishna{userName ? `, ${userName}` : ''} 🙏
           </Text>
           <Text style={styles.headerTitle}>
             {report ? "Today's sadhana is logged" : 'Your sadhana at a glance'}

@@ -8,7 +8,7 @@ This guide contains **every command and step** you need to run, update, build, a
 
 | Task | Command (Run in `apps/mobile`) | Description |
 | :--- | :--- | :--- |
-| **Push Instant In-App Update** | `npx eas update --auto --message "Your message"` | Updates code on all users' phones without building a new APK |
+| **Push Instant In-App Update** | `npx eas-cli update --branch preview --message "Your message"` | Updates code on all users' phones without building a new APK |
 | **Build New APK for Sharing** | `npx eas-cli build -p android --profile preview` | Generates a shareable APK link & QR code via cloud build |
 | **Start Local Development** | `npx expo start` | Starts the Metro bundler to test on Expo Go or an emulator |
 | **Run Tests** | `npm test` | Runs the full Jest unit test suite |
@@ -27,8 +27,9 @@ cd C:\Users\abhin\Projects\sadhana-connect\apps\mobile
 
 ### Step 2: Push the update
 ```powershell
-npx eas update --auto --message "Fix devotee sadhana form and text"
+npx eas-cli update --branch preview --message "Updated greeting to Hare Krishna"
 ```
+*(Or for production release: `npx eas-cli update --branch production --message "..."`)*
 
 ### What happens next:
 1. EAS compiles your JavaScript/TypeScript code and assets, and uploads them to Expo's CDN.
@@ -131,10 +132,10 @@ npm run lint
 
 | Change You Made | Command to Run | Users need to reinstall APK? |
 | :--- | :--- | :---: |
-| Changing text, titles, spiritual quotes, or translations | `npx eas update --auto` | ❌ **No** |
-| Fixing a bug or form validation issue | `npx eas update --auto` | ❌ **No** |
-| Changing button colors, themes, dark mode styling | `npx eas update --auto` | ❌ **No** |
-| Adding a new page, screen, tab, or chart | `npx eas update --auto` | ❌ **No** |
-| Updating Supabase database queries or notifications | `npx eas update --auto` | ❌ **No** |
+| Changing text, titles, spiritual quotes, or translations | `npx eas-cli update --branch preview` | ❌ **No** |
+| Fixing a bug or form validation issue | `npx eas-cli update --branch preview` | ❌ **No** |
+| Changing button colors, themes, dark mode styling | `npx eas-cli update --branch preview` | ❌ **No** |
+| Adding a new page, screen, tab, or chart | `npx eas-cli update --branch preview` | ❌ **No** |
+| Updating Supabase database queries or notifications | `npx eas-cli update --branch preview` | ❌ **No** |
 | Adding a new native hardware library (e.g., Camera, Bluetooth) | `npx eas-cli build -p android --profile preview` | ✅ **Yes** |
 | Changing app name, package ID, or app icon | `npx eas-cli build -p android --profile preview` | ✅ **Yes** |

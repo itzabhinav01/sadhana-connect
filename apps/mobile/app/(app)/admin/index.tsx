@@ -13,12 +13,6 @@ import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderTh
 import { fontFamily, fontSize, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
-function greetingForHour(hour: number): string {
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 const SUMMARY_CARDS: { label: string; key: keyof AdminDashboardSummary }[] = [
   { label: 'Total devotees', key: 'totalDevotees' },
   { label: 'Total mentors', key: 'totalMentors' },
@@ -72,7 +66,7 @@ export default function AdminHomeScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
-            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} (Admin) 🙏
+            Hare Krishna{userName ? `, ${userName}` : ''} (Admin) 🙏
           </Text>
           <Text style={styles.headerTitle}>Platform overview</Text>
         </View>

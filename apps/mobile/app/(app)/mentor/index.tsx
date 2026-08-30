@@ -26,12 +26,6 @@ const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
   pending: 'Pending Today',
 }
 
-function greetingForHour(hour: number): string {
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 function formatDisplayDate(iso: string) {
   const [year, month, day] = iso.split('-')
   return `${month}/${day}/${year}`
@@ -136,7 +130,7 @@ export default function MentorDashboardScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
-            {greetingForHour(new Date().getHours())}{userName ? `, ${userName}` : ''} (Mentor) 🙏
+            Hare Krishna{userName ? `, ${userName}` : ''} (Mentor) 🙏
           </Text>
           <Text style={styles.headerTitle}>Your devotees at a glance</Text>
         </View>
