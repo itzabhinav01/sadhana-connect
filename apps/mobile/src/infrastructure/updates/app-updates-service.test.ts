@@ -48,6 +48,17 @@ describe('appUpdatesService', () => {
     })
   })
 
+  it('handles "no update found" / 404 cleanly as isAvailable: false', async () => {
+    ;(Updates as { isEnabled: boolean }).isEnabled = true
+    ;(Updates.checkForUpdateAsync as jest.Mock).mockRejectedValueOnce(new Error('No update found for channel preview'))
+
+    const result = await appUpdatesService.checkForUpdate()
+    expect(result).toEqual({
+      isAvailable: false,
+      isSupported: true,
+    })
+  })
+
   it('fetches update when available', async () => {
     ;(Updates as { isEnabled: boolean }).isEnabled = true
     ;(Updates.fetchUpdateAsync as jest.Mock).mockResolvedValueOnce({ isNew: true })

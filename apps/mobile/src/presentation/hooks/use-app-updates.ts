@@ -55,7 +55,7 @@ export function useAppUpdates(options: UseAppUpdatesOptions = {}) {
         if (result.error) {
           setError(result.error)
           if (isManualCheck) {
-            Alert.alert('Update Check Failed', 'Could not reach update server. Please check your connection.')
+            Alert.alert('Update Check Failed', result.error)
           }
           return
         }

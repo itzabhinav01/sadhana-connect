@@ -43,10 +43,10 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))
 
-jest.mock('../../../src/presentation/components/DailySadhanaReminderSection', () => {
+jest.mock('../../../src/presentation/components/AppUpdateSection', () => {
   const { Text } = require('react-native')
   return {
-    DailySadhanaReminderSection: () => <Text>DailySadhanaReminderSection</Text>,
+    AppUpdateSection: () => <Text>AppUpdateSection</Text>,
   }
 })
 
@@ -235,5 +235,14 @@ describe('DashboardScreen', () => {
     await fireEvent.press(getByRole('button', { name: 'Read more' }))
 
     expect(mockPush).toHaveBeenCalledWith('/devotee/verse')
+  })
+
+  it('navigates to /devotee/settings when "Open Settings" is pressed', async () => {
+    mockUseSadhanaReport.mockReturnValue({ isPending: false, data: null })
+
+    const { getByRole } = await render(<DashboardScreen />)
+    await fireEvent.press(getByRole('button', { name: 'Open Settings' }))
+
+    expect(mockPush).toHaveBeenCalledWith('/devotee/settings')
   })
 })

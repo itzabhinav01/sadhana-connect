@@ -18,7 +18,7 @@ import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { Chip } from '../../../src/presentation/components/Chip'
-import { DailySadhanaReminderSection } from '../../../src/presentation/components/DailySadhanaReminderSection'
+import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { Icon } from '../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
@@ -258,7 +258,18 @@ export default function DashboardScreen() {
           <Button title="Read more" onPress={() => router.push('/devotee/verse')} variant="text" />
         </Card>
 
-        <DailySadhanaReminderSection />
+        <Card title="Settings & Reminders">
+          <Text style={styles.mutedLine}>
+            Manage your 9:00 PM daily sadhana reminder notification, appearance, and preferences.
+          </Text>
+          <Button
+            title="Open Settings"
+            variant="outline"
+            onPress={() => router.push('/devotee/settings')}
+          />
+        </Card>
+
+        <AppUpdateSection />
       </ScrollView>
   )
 }

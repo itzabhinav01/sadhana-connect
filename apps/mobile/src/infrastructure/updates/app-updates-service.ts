@@ -35,10 +35,21 @@ export const appUpdatesService = {
         isSupported: true,
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to check for updates'
+      if (
+        message.toLowerCase().includes('no update') ||
+        message.toLowerCase().includes('not found') ||
+        message.toLowerCase().includes('404')
+      ) {
+        return {
+          isAvailable: false,
+          isSupported: true,
+        }
+      }
       return {
         isAvailable: false,
         isSupported: true,
-        error: error instanceof Error ? error.message : 'Failed to check for updates',
+        error: message,
       }
     }
   },
