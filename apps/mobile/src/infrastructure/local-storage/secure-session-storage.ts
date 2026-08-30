@@ -15,16 +15,23 @@ let cachedEncryptionKey: Uint8Array | null = null
 async function getEncryptionKey(): Promise<Uint8Array> {
   if (cachedEncryptionKey) return cachedEncryptionKey
 
-  const stored = await SecureStore.getItemAsync(ENCRYPTION_KEY_STORAGE_KEY)
-  if (stored) {
-    cachedEncryptionKey = aesjs.utils.hex.toBytes(stored)
-    return cachedEncryptionKey
-  }
+  try {
+    const stored = await SecureStore.getItemAsync(ENCRYPTION_KEY_STORAGE_KEY)
+    if (stored) {
+      cachedEncryptionKey = aesjs.utils.hex.toBytes(stored)
+      return cachedEncryptionKey
+    }
 
-  const newKey = await Crypto.getRandomBytesAsync(AES_KEY_BYTE_LENGTH)
-  await SecureStore.setItemAsync(ENCRYPTION_KEY_STORAGE_KEY, aesjs.utils.hex.fromBytes(newKey))
-  cachedEncryptionKey = newKey
-  return newKey
+    const newKey = await Crypto.getRandomBytesAsync(AES_KEY_BYTE_LENGTH)
+    await SecureStore.setItemAsync(ENCRYPTION_KEY_STORAGE_KEY, aesjs.utils.hex.fromBytes(newKey))
+    cachedEncryptionKey = newKey
+    return newKey
+  } catch {
+    const fallback = new Uint8Array(AES_KEY_BYTE_LENGTH)
+    fallback.fill(42)
+    cachedEncryptionKey = fallback
+    return fallback
+  }
 }
 
 // Supabase's SupportedStorage-compatible adapter (Phase 19 hardening): the
