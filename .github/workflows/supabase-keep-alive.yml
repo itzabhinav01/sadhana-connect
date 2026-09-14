@@ -28,21 +28,21 @@ jobs:
 
           echo "Pinging Supabase services at: ${CLEAN_URL}..."
 
-          # 1. Ping Auth Gateway (GoTrue health check)
+          # 1. Ping Auth Gateway (GoTrue public settings endpoint called by Supabase client)
           AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             --retry 3 \
             --retry-delay 5 \
             --max-time 15 \
-            -X GET "${CLEAN_URL}/auth/v1/health" \
+            -X GET "${CLEAN_URL}/auth/v1/settings" \
             -H "apikey: ${SUPABASE_ANON_KEY}")
 
           if [ "$AUTH_STATUS" -eq 200 ]; then
-            echo "✓ Auth service health check responded with HTTP $AUTH_STATUS"
+            echo "✓ Auth service responded with HTTP $AUTH_STATUS"
           else
             echo "::warning::Auth service returned HTTP $AUTH_STATUS"
           fi
 
-          # 2. Ping Database Gateway (PostgREST preflight query)
+          # 2. Ping Database Gateway (PostgREST table preflight check)
           DB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             --retry 3 \
             --retry-delay 5 \
