@@ -1,0 +1,55 @@
+name: Supabase Keep-Alive Ping
+
+on:
+  schedule:
+    # Runs at 04:00 UTC every 3 days (well within Supabase's 7-day inactivity window)
+    - cron: '0 4 */3 * *'
+  # Allows manual triggering from the GitHub Actions dashboard at any time
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase Endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Secrets and Ping Database Gateway
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Missing Supabase credentials in repository secrets."
+            echo "Please configure either SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY) under Repository Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+          # Strip trailing slash if present
+          CLEAN_URL="${SUPABASE_URL%/}"
+
+          echo "Pinging Supabase API gateway at: ${CLEAN_URL}..."
+
+          # 1. Ping PostgREST database gateway (generates database API activity)
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --retry 3 \
+            --retry-delay 5 \
+            --max-time 15 \
+            -X GET "${CLEAN_URL}/rest/v1/" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+            echo "✓ Database API gateway responded with HTTP $HTTP_STATUS"
+          else
+            echo "::warning::Database API gateway returned unexpected HTTP status: $HTTP_STATUS"
+          fi
+
+          # 2. Ping Auth service health check
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --retry 3 \
+            --retry-delay 5 \
+            --max-time 15 \
+            -X GET "${CLEAN_URL}/auth/v1/health")
+
+          echo "✓ Auth service health check responded with HTTP $AUTH_STATUS"
+
+          echo "🎉 Supabase keep-alive ping completed successfully on $(date -u)!"

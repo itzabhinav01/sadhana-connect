@@ -214,14 +214,28 @@ cp .env.example .env
   `index.html` (`<title>`) and `vite.config.ts` (the `VitePWA` manifest
   block) — both currently say "Sadhana Connect."
 
-## If Supabase gets paused due to inactivity (Free Tier)
+## Automated Keep-Alive & Supabase Inactivity (Free Tier)
 
-If a free-tier Supabase project goes inactive for 7 days, Supabase automatically **pauses** it (the compute/database is suspended, but nothing is deleted — your schema, data, and all settings are preserved).
+### 1. Automatic Keep-Alive Ping (Recommended)
 
-To restart it:
-1. Log into the Supabase Dashboard and open the paused project — it'll show a **"Paused"** status with a **"Restore project"** (or similar) button.
-2. Click it and wait a few minutes while Supabase spins the database back up.
-3. Once it's back to "Active," the app will work exactly as before — no changes needed to your `.env`, API keys, or Edge Function secrets, since the project ref and all credentials stay the same across a pause/restore cycle.
+Free-tier Supabase projects automatically pause after 7 consecutive days of zero database activity. To prevent this from ever happening, this repository includes a built-in scheduled GitHub Actions workflow (`.github/workflows/supabase-keep-alive.yml`) that pings your Supabase project's API gateway every 3 days.
+
+To enable it on your GitHub fork:
+1. In your GitHub repository, go to **Settings** ➔ **Secrets and variables** ➔ **Actions**.
+2. Click **New repository secret** and add:
+   - `SUPABASE_URL`: Your Supabase Project URL (e.g. `https://your-ref.supabase.co`)
+   - `SUPABASE_ANON_KEY`: Your Supabase anon/publishable key
+   *(Alternatively, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are also accepted).*
+3. Go to the **Actions** tab in GitHub ➔ select **Supabase Keep-Alive Ping** ➔ click **Run workflow** to test it immediately.
+
+From then on, it runs automatically every 3 days, keeping your database active without requiring any manual effort.
+
+### 2. If your project is already paused
+
+If a project went inactive before keep-alive was configured:
+1. Log into the Supabase Dashboard and open the project — it will show a **"Paused"** status with a **"Restore project"** button.
+2. Click it and wait 1–2 minutes while Supabase spins the database back up.
+3. Once back to "Active," the app will work as before — no changes needed to credentials or settings.
 
 ---
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useAuth } from '@sadhana-connect/auth'
 
@@ -18,43 +18,51 @@ function getStorageKey(userId: string): string {
   return `${STORAGE_PREFIX}:${userId}`
 }
 
-export function useDailySadhanaReminder() {
-  const { session } = useAuth()
-  const userId = session?.userId ?? null
-
-  const [isLoading, setIsLoading] = useState(true)
-  const [enabled, setEnabled] = useState(DEFAULT_REMINDER_SETTINGS.enabled)
-  const [reminderTime, setReminderTime] = useState(DEFAULT_REMINDER_SETTINGS.reminderTime)
-  const [permission, setPermission] = useState<NotificationPermission>('default')
-  const [isSupported, setIsSupported] = useState(false)
-
-  // Check browser notification support and load stored settings
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setIsSupported(true)
-      setPermission(Notification.permission)
-    }
-
-    if (!userId) {
-      setIsLoading(false)
-      return
-    }
-
-    try {
-      const raw = localStorage.getItem(getStorageKey(userId))
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<DailyReminderSettings>
-        if (typeof parsed.enabled === 'boolean') setEnabled(parsed.enabled)
-        if (typeof parsed.reminderTime === 'string' && /^\d{2}:\d{2}$/.test(parsed.reminderTime)) {
-          setReminderTime(parsed.reminderTime)
-        }
+function loadInitialSettings(userId: string | null): DailyReminderSettings {
+  if (!userId || typeof window === 'undefined') return DEFAULT_REMINDER_SETTINGS
+  try {
+    const raw = localStorage.getItem(getStorageKey(userId))
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<DailyReminderSettings>
+      return {
+        enabled: typeof parsed.enabled === 'boolean' ? parsed.enabled : DEFAULT_REMINDER_SETTINGS.enabled,
+        reminderTime:
+          typeof parsed.reminderTime === 'string' && /^\d{2}:\d{2}$/.test(parsed.reminderTime)
+            ? parsed.reminderTime
+            : DEFAULT_REMINDER_SETTINGS.reminderTime,
       }
-    } catch {
-      // Ignore localStorage read errors
-    } finally {
-      setIsLoading(false)
     }
-  }, [userId])
+  } catch {
+    // Ignore localStorage read errors
+  }
+  return DEFAULT_REMINDER_SETTINGS
+}
+
+export function useDailySadhanaReminder() {
+  const { session, isLoading: isAuthLoading } = useAuth()
+  const userId = session?.userId ?? null
+  const isLoading = isAuthLoading ?? false
+
+  const [lastUserId, setLastUserId] = useState(userId)
+  const [enabled, setEnabled] = useState(() => loadInitialSettings(userId).enabled)
+  const [reminderTime, setReminderTime] = useState(() => loadInitialSettings(userId).reminderTime)
+
+  if (userId !== lastUserId) {
+    setLastUserId(userId)
+    const settings = loadInitialSettings(userId)
+    setEnabled(settings.enabled)
+    setReminderTime(settings.reminderTime)
+  }
+
+  const [permission, setPermission] = useState<NotificationPermission>(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission
+    }
+    return 'default'
+  })
+  const [isSupported] = useState(
+    () => typeof window !== 'undefined' && 'Notification' in window,
+  )
 
   const requestBrowserPermission = useCallback(async (): Promise<boolean> => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
