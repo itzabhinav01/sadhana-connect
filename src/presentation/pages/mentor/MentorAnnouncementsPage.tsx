@@ -1,11 +1,14 @@
-import { useAnnouncements } from '@sadhana-connect/announcements'
+import { useAnnouncements, useMentorTempleGroups } from '@sadhana-connect/announcements'
 import { useProfile } from '@sadhana-connect/auth'
+import { getEffectiveTempleGroupIds } from '@sadhana-connect/domain'
 import { MentorAnnouncementForm } from '@/presentation/pages/mentor/MentorAnnouncementForm'
 import { MentorAnnouncementList } from '@/presentation/pages/mentor/MentorAnnouncementList'
 
 export function MentorAnnouncementsPage() {
   const profile = useProfile()
   const announcementsQuery = useAnnouncements()
+  const mentorTempleGroups = useMentorTempleGroups()
+  const hasTempleGroup = getEffectiveTempleGroupIds(profile.data).length > 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -16,11 +19,11 @@ export function MentorAnnouncementsPage() {
         </p>
       </div>
 
-      {profile.isSuccess && profile.data?.templeGroupId ? (
-        <MentorAnnouncementForm />
+      {profile.isSuccess && hasTempleGroup ? (
+        <MentorAnnouncementForm templeGroups={mentorTempleGroups.data} />
       ) : null}
 
-      {profile.isSuccess && !profile.data?.templeGroupId ? (
+      {profile.isSuccess && !hasTempleGroup ? (
         <div className="rounded-lg border border-dashed p-6">
           <p className="text-sm text-muted-foreground">
             You haven&apos;t been assigned to a temple group yet. Please

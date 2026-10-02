@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { announcementQueryKeys } from './announcement-query-keys'
-import { useAuth } from '@sadhana-connect/auth'
-import { useProfile } from '@sadhana-connect/auth'
+import { useAuth, useProfile } from '@sadhana-connect/auth'
+import { getEffectiveTempleGroupIds } from '@sadhana-connect/domain'
 import { supabaseAnnouncementRepository } from '@sadhana-connect/infra-supabase'
 
 interface CreateMentorAnnouncementInput {
@@ -10,17 +10,14 @@ interface CreateMentorAnnouncementInput {
   content: string
   isPublished: boolean
   expiresAt: string | null
+  templeGroupId?: string | null
 }
 
 // Mentors may only author scope: 'temple_group' announcements, matching
-// their own profile.temple_group_id — this hook hardcodes that rule so
-// no caller (and no UI) can ever offer a scope choice that could only
-// fail. RLS (announcements_insert / private.can_publish_announcement) is
-// what actually enforces it regardless; this is not a substitute for
-// that, just the reason the UI never shows the choice in the first
-// place. Throws (surfaced as a mutation error) if the mentor has no
-// temple group yet — callers should prefer not rendering the form at all
-// in that case (see MentorAnnouncementsPage's prerequisite state).
+// one of their own assigned temple groups — this hook enforces that rule
+// client-side and defaults to their first group when they only have one.
+// RLS (announcements_insert / private.can_publish_announcement) is what
+// actually enforces it server-side regardless.
 export function useCreateMentorAnnouncement() {
   const { session } = useAuth()
   const profile = useProfile()
@@ -32,9 +29,16 @@ export function useCreateMentorAnnouncement() {
       if (!userId) {
         throw new Error('useCreateMentorAnnouncement: no authenticated user')
       }
-      if (!profile.data?.templeGroupId) {
+      const assignedGroupIds = getEffectiveTempleGroupIds(profile.data)
+      if (assignedGroupIds.length === 0) {
         throw new Error(
           'useCreateMentorAnnouncement: mentor has no temple group assigned',
+        )
+      }
+      const targetTempleGroupId = input.templeGroupId ?? assignedGroupIds[0]
+      if (!targetTempleGroupId || !assignedGroupIds.includes(targetTempleGroupId)) {
+        throw new Error(
+          'useCreateMentorAnnouncement: mentor is not assigned to the selected temple group',
         )
       }
       return supabaseAnnouncementRepository.createAnnouncement({
@@ -42,7 +46,7 @@ export function useCreateMentorAnnouncement() {
         title: input.title,
         content: input.content,
         scope: 'temple_group',
-        templeGroupId: profile.data.templeGroupId,
+        templeGroupId: targetTempleGroupId,
         isPublished: input.isPublished,
         expiresAt: input.expiresAt,
       })
@@ -54,3 +58,4 @@ export function useCreateMentorAnnouncement() {
     },
   })
 }
+

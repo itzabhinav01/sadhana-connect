@@ -12,3 +12,5 @@ export * from './use-create-announcement-comment'
 export * from './use-update-announcement-comment'
 export * from './use-delete-announcement-comment'
 export * from './use-create-admin-announcement'
+export * from './use-mentor-temple-groups'
+

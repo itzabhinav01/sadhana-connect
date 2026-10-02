@@ -15,6 +15,7 @@ export interface AdminUser {
   role: AppRole
   isActive: boolean
   templeGroupId: string | null
+  templeGroupIds?: string[]
   phoneNumber: string | null
   createdAt: string
 }

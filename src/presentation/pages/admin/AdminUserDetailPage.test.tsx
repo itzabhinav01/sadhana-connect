@@ -9,10 +9,12 @@ import { AdminUserDetailPage } from '@/presentation/pages/admin/AdminUserDetailP
 const {
   useAdminUserDetailMock,
   useAdminAssignmentsMock,
+  useAdminTempleGroupsMock,
   useDeactivateAssignmentMock,
   useMentorDevoteeCountMock,
   useRevealUserEmailMock,
   useSetUserActiveMock,
+  useSetUserTempleGroupMock,
   useHardDeleteUserMock,
   useGenerateRecoveryLinkMock,
   useChangeUserRoleMock,
@@ -22,10 +24,12 @@ const {
 } = vi.hoisted(() => ({
   useAdminUserDetailMock: vi.fn(),
   useAdminAssignmentsMock: vi.fn(),
+  useAdminTempleGroupsMock: vi.fn(),
   useDeactivateAssignmentMock: vi.fn(),
   useMentorDevoteeCountMock: vi.fn(),
   useRevealUserEmailMock: vi.fn(),
   useSetUserActiveMock: vi.fn(),
+  useSetUserTempleGroupMock: vi.fn(),
   useHardDeleteUserMock: vi.fn(),
   useGenerateRecoveryLinkMock: vi.fn(),
   useChangeUserRoleMock: vi.fn(),
@@ -46,9 +50,11 @@ vi.mock('@sadhana-connect/admin', async () => {
     ...actual,
     useAdminUserDetail: useAdminUserDetailMock,
     useAdminAssignments: useAdminAssignmentsMock,
+    useAdminTempleGroups: useAdminTempleGroupsMock,
     useDeactivateAssignment: useDeactivateAssignmentMock,
     useMentorDevoteeCount: useMentorDevoteeCountMock,
     useSetUserActive: useSetUserActiveMock,
+    useSetUserTempleGroup: useSetUserTempleGroupMock,
     useChangeUserRole: useChangeUserRoleMock,
     useGenerateRecoveryLink: useGenerateRecoveryLinkMock,
   }
@@ -105,10 +111,12 @@ describe('AdminUserDetailPage', () => {
       isLoading: false,
     })
     useAdminAssignmentsMock.mockReturnValue({ isPending: false, data: [] })
+    useAdminTempleGroupsMock.mockReturnValue({ isPending: false, isError: false, isSuccess: true, data: [] })
     useDeactivateAssignmentMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
     useMentorDevoteeCountMock.mockReturnValue({ isPending: false, data: 0 })
     useRevealUserEmailMock.mockReturnValue({ data: undefined, isPending: false, isError: false, mutate: vi.fn() })
     useSetUserActiveMock.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    useSetUserTempleGroupMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false })
     useHardDeleteUserMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false })
     useGenerateRecoveryLinkMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false, reset: vi.fn() })
     useChangeUserRoleMock.mockReturnValue({ mutate: vi.fn(), isPending: false, isError: false })
@@ -245,5 +253,34 @@ describe('AdminUserDetailPage', () => {
     await user.click(screen.getByRole('button', { name: 'Confirm delete' }))
 
     expect(mutate).toHaveBeenCalledWith('user-1', expect.anything())
+  })
+
+  it('allows toggling multiple temple groups for a user', async () => {
+    const mutate = vi.fn()
+    useSetUserTempleGroupMock.mockReturnValue({ mutate, isPending: false, isError: false })
+    useAdminTempleGroupsMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [
+        { id: 'group-1', name: 'Vrindavan Group', createdAt: '2026-01-01T00:00:00.000Z' },
+        { id: 'group-2', name: 'Mayapur Group', createdAt: '2026-01-02T00:00:00.000Z' },
+      ],
+    })
+    useAdminUserDetailMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        ...activeUser,
+        templeGroupId: 'group-1',
+        templeGroupIds: ['group-1', 'group-2'],
+      },
+    })
+    const user = userEvent.setup()
+
+    renderPage()
+    await user.click(screen.getByRole('button', { name: 'Mayapur Group' }))
+
+    expect(mutate).toHaveBeenCalledWith({ userId: 'user-1', templeGroupId: 'group-2' })
   })
 })

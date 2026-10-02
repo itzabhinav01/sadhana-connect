@@ -12,6 +12,7 @@ import {
   type AnnouncementExpirationPreset,
   type AnnouncementFormValues,
 } from '@sadhana-connect/announcements'
+import type { TempleGroup } from '@sadhana-connect/domain'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
@@ -24,13 +25,18 @@ import {
 } from '@/presentation/components/ui/select'
 import { Textarea } from '@/presentation/components/ui/textarea'
 
-// No scope selector anywhere on this form, on purpose — mentors may only
-// ever author scope: 'temple_group' announcements matching their own
-// temple group (useCreateMentorAnnouncement hardcodes this), and RLS
-// would reject anything else regardless. Offering a choice that could
-// only fail would be worse UX, not more flexible.
-export function MentorAnnouncementForm() {
+interface MentorAnnouncementFormProps {
+  templeGroups?: TempleGroup[]
+}
+
+// Mentors may only ever author scope: 'temple_group' announcements matching
+// one of their own assigned temple groups. When a mentor belongs to multiple
+// temple groups, they can pick which of their groups to post to.
+export function MentorAnnouncementForm({ templeGroups = [] }: MentorAnnouncementFormProps) {
   const createAnnouncement = useCreateMentorAnnouncement()
+  const hasMultipleGroups = templeGroups.length > 1
+  const [selectedTempleGroupId, setSelectedTempleGroupId] = useState<string>('')
+  const effectiveTempleGroupId = selectedTempleGroupId || templeGroups[0]?.id || ''
   const [publishNow, setPublishNow] = useState(true)
   const [expirationPreset, setExpirationPreset] = useState<AnnouncementExpirationPreset>('never')
   const [customExpiresAt, setCustomExpiresAt] = useState('')
@@ -53,6 +59,9 @@ export function MentorAnnouncementForm() {
         content: values.content,
         isPublished: publishNow,
         expiresAt: resolveExpiresAt(expirationPreset, customExpiresAt || null),
+        ...(hasMultipleGroups && effectiveTempleGroupId
+          ? { templeGroupId: effectiveTempleGroupId }
+          : {}),
       },
       {
         onSuccess: () => {
@@ -73,6 +82,32 @@ export function MentorAnnouncementForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
+          {hasMultipleGroups ? (
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="announcement-temple-group"
+                className="text-sm font-medium text-foreground"
+              >
+                Temple Group
+              </label>
+              <Select
+                value={effectiveTempleGroupId}
+                onValueChange={setSelectedTempleGroupId}
+              >
+                <SelectTrigger id="announcement-temple-group">
+                  <SelectValue placeholder="Select temple group…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templeGroups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-1">
             <label htmlFor="announcement-title" className="text-sm font-medium text-foreground">
               Title

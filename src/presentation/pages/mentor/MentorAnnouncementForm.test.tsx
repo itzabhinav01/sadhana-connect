@@ -126,4 +126,46 @@ describe('MentorAnnouncementForm', () => {
     expect(mutate).not.toHaveBeenCalled()
     expect(screen.getByText('Choose an expiration date.')).toBeInTheDocument()
   })
+
+  it('renders a Temple Group selector when the mentor belongs to multiple groups and submits the chosen group', async () => {
+    const mutate = vi.fn()
+    useCreateMentorAnnouncementMock.mockReturnValue({ mutate, isPending: false, isError: false })
+    const user = userEvent.setup()
+
+    render(
+      <MentorAnnouncementForm
+        templeGroups={[
+          {
+            id: 'group-1',
+            name: 'Bhakti Vriksha A',
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+          {
+            id: 'group-2',
+            name: 'Bhakti Vriksha B',
+            createdAt: '2026-01-02T00:00:00.000Z',
+            updatedAt: '2026-01-02T00:00:00.000Z',
+          },
+        ]}
+      />,
+    )
+
+    expect(screen.getByLabelText('Temple Group')).toBeInTheDocument()
+    await selectOption(user, screen.getByLabelText('Temple Group'), 'Bhakti Vriksha B')
+    await user.type(screen.getByLabelText('Title'), 'Group B Notice')
+    await user.type(screen.getByLabelText('Content'), 'Only for Group B.')
+    await user.click(screen.getByRole('button', { name: /post announcement/i }))
+
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        title: 'Group B Notice',
+        content: 'Only for Group B.',
+        isPublished: true,
+        expiresAt: null,
+        templeGroupId: 'group-2',
+      },
+      expect.anything(),
+    )
+  })
 })

@@ -7,12 +7,17 @@ import {
   useAnnouncements,
   useCreateMentorAnnouncement,
   useDeleteAnnouncement,
+  useMentorTempleGroups,
   useUpdateAnnouncement,
   type AnnouncementExpirationPreset,
   type AnnouncementFormValues,
 } from '@sadhana-connect/announcements'
 import { useAuth, useProfile } from '@sadhana-connect/auth'
-import type { Announcement } from '@sadhana-connect/domain'
+import {
+  getEffectiveTempleGroupIds,
+  type Announcement,
+  type TempleGroup,
+} from '@sadhana-connect/domain'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
@@ -32,10 +37,13 @@ function formatDisplayDate(iso: string) {
   return new Date(iso).toLocaleDateString()
 }
 
-function AnnouncementForm() {
+function AnnouncementForm({ templeGroups = [] }: { templeGroups?: TempleGroup[] }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const createAnnouncement = useCreateMentorAnnouncement()
+  const hasMultipleGroups = templeGroups.length > 1
+  const [selectedTempleGroupId, setSelectedTempleGroupId] = useState<string>('')
+  const effectiveTempleGroupId = selectedTempleGroupId || templeGroups[0]?.id || ''
   const [publishNow, setPublishNow] = useState(true)
   const [expirationPreset, setExpirationPreset] = useState<AnnouncementExpirationPreset>('never')
   const [customExpiresAt, setCustomExpiresAt] = useState('')
@@ -59,6 +67,9 @@ function AnnouncementForm() {
         content: values.content,
         isPublished: publishNow,
         expiresAt: resolveExpiresAt(expirationPreset, customExpiresAt || null),
+        ...(hasMultipleGroups && effectiveTempleGroupId
+          ? { templeGroupId: effectiveTempleGroupId }
+          : {}),
       },
       {
         onSuccess: () => {
@@ -73,6 +84,22 @@ function AnnouncementForm() {
 
   return (
     <Card title="New Announcement">
+      {hasMultipleGroups ? (
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>Temple Group</Text>
+          <View style={styles.actionsRow}>
+            {templeGroups.map((group) => (
+              <Button
+                key={group.id}
+                title={group.name}
+                variant={effectiveTempleGroupId === group.id ? 'primary' : 'outline'}
+                onPress={() => setSelectedTempleGroupId(group.id)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <TextField control={control} name="title" label="Title" />
 
       <Controller
@@ -287,13 +314,17 @@ export default function MentorAnnouncementsScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const profile = useProfile()
+  const mentorTempleGroups = useMentorTempleGroups()
   const announcementsQuery = useAnnouncements()
+  const hasTempleGroups = getEffectiveTempleGroupIds(profile.data).length > 0
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      {profile.isSuccess && profile.data?.templeGroupId ? <AnnouncementForm /> : null}
+      {profile.isSuccess && hasTempleGroups ? (
+        <AnnouncementForm templeGroups={mentorTempleGroups.data} />
+      ) : null}
 
-      {profile.isSuccess && !profile.data?.templeGroupId ? (
+      {profile.isSuccess && !hasTempleGroups ? (
         <Text style={styles.itemMuted}>
           You haven&apos;t been assigned to a temple group yet. Please contact your Super Admin.
         </Text>

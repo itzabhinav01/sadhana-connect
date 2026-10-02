@@ -2,10 +2,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import {
   useAdminAssignments,
+  useAdminTempleGroups,
   useAdminUserDetail,
   useDeactivateAssignment,
   useMentorDevoteeCount,
+  useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
+import { getEffectiveTempleGroupIds } from '@sadhana-connect/domain'
 import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
@@ -59,6 +62,8 @@ export function AdminUserDetailPage() {
         <DevoteeInfoPanel devoteeId={user.id} devoteeName={user.fullName} />
       ) : null}
 
+      {user.role !== 'super_admin' ? <TempleGroupPanel user={user} /> : null}
+
       {/* Phase 20C: there is no durable "anonymized" state to guard
           against anymore — a deleted account is a genuinely deleted row,
           not a row you could navigate back to. The only remaining guard
@@ -68,6 +73,61 @@ export function AdminUserDetailPage() {
       <AdminUserLifecycleControls user={user} onDeleted={() => navigate('/admin/users')} />
 
       <AdminUserPasswordReset targetUserId={user.id} />
+    </div>
+  )
+}
+
+function TempleGroupPanel({
+  user,
+}: {
+  user: { id: string; templeGroupId: string | null; templeGroupIds?: string[] }
+}) {
+  const templeGroupsQuery = useAdminTempleGroups()
+  const setTempleGroup = useSetUserTempleGroup()
+  const assignedGroupIds = getEffectiveTempleGroupIds(user)
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border p-3">
+      <span className="text-sm font-medium text-foreground">Temple groups</span>
+      {templeGroupsQuery.isPending ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : null}
+      {templeGroupsQuery.isError ? (
+        <p className="text-sm text-destructive">Something went wrong loading temple groups.</p>
+      ) : null}
+      {templeGroupsQuery.isSuccess && templeGroupsQuery.data.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No temple groups exist yet. Create one first.
+        </p>
+      ) : null}
+      {templeGroupsQuery.data && templeGroupsQuery.data.length > 0 ? (
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button
+            type="button"
+            size="sm"
+            variant={assignedGroupIds.length === 0 ? 'default' : 'outline'}
+            disabled={setTempleGroup.isPending}
+            onClick={() => setTempleGroup.mutate({ userId: user.id, templeGroupId: null })}
+          >
+            None
+          </Button>
+          {templeGroupsQuery.data.map((group) => (
+            <Button
+              key={group.id}
+              type="button"
+              size="sm"
+              variant={assignedGroupIds.includes(group.id) ? 'default' : 'outline'}
+              disabled={setTempleGroup.isPending}
+              onClick={() => setTempleGroup.mutate({ userId: user.id, templeGroupId: group.id })}
+            >
+              {group.name}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+      {setTempleGroup.isError ? (
+        <p className="text-sm text-destructive">Something went wrong updating temple groups.</p>
+      ) : null}
     </div>
   )
 }

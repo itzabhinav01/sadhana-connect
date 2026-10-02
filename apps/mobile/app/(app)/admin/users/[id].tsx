@@ -12,7 +12,7 @@ import {
   useSetUserActive,
   useSetUserTempleGroup,
 } from '@sadhana-connect/admin'
-import type { AppRole } from '@sadhana-connect/domain'
+import { getEffectiveTempleGroupIds, type AppRole } from '@sadhana-connect/domain'
 import * as Clipboard from 'expo-clipboard'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
@@ -94,19 +94,19 @@ function DevoteeInfoPanel({
 }
 
 // Unblocks the announcement flow, which was otherwise unreachable: a
-// mentor can only ever publish with scope: 'temple_group' using their
-// own temple_group_id (can_publish_announcement), and a devotee only
-// sees temple_group announcements matching their own — so this screen
-// was the missing piece letting a super admin actually set it.
+// mentor can only ever publish with scope: 'temple_group' using one of
+// their assigned temple groups (can_publish_announcement), and a devotee
+// sees temple_group announcements matching any of their assigned groups.
 function TempleGroupPanel({
   user,
 }: {
-  user: { id: string; templeGroupId: string | null }
+  user: { id: string; templeGroupId: string | null; templeGroupIds?: string[] }
 }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const templeGroupsQuery = useAdminTempleGroups()
   const setTempleGroup = useSetUserTempleGroup()
+  const assignedGroupIds = getEffectiveTempleGroupIds(user)
 
   return (
     <Card title="Temple group">
@@ -121,7 +121,7 @@ function TempleGroupPanel({
         <View style={styles.filterRow}>
           <Button
             title="None"
-            variant={user.templeGroupId === null ? 'primary' : 'outline'}
+            variant={assignedGroupIds.length === 0 ? 'primary' : 'outline'}
             isPending={setTempleGroup.isPending}
             onPress={() => setTempleGroup.mutate({ userId: user.id, templeGroupId: null })}
           />
@@ -129,7 +129,7 @@ function TempleGroupPanel({
             <Button
               key={group.id}
               title={group.name}
-              variant={user.templeGroupId === group.id ? 'primary' : 'outline'}
+              variant={assignedGroupIds.includes(group.id) ? 'primary' : 'outline'}
               isPending={setTempleGroup.isPending}
               onPress={() =>
                 setTempleGroup.mutate({ userId: user.id, templeGroupId: group.id })
