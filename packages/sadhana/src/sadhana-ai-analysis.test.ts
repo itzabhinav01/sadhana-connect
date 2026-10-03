@@ -47,10 +47,41 @@ describe('buildSadhanaAiPrompt', () => {
       'Analyze the following Sadhna performance data. If there is ONE person, use INDIVIDUAL MODE; if MULTIPLE people, use MENTOR MODE. Do not repeat the raw data. For 2026-10-01 to 2026-10-03',
     )
     expect(prompt).toContain('Missing/"No Logged Activity" = not reported, NOT Sadhna not performed.')
+    expect(prompt).toContain('OUTPUT STRUCTURE FOR INDIVIDUAL MODE')
     expect(prompt).toContain('=== Person 1: Govinda Das (Days Reported: 1/3) ===')
+    expect(prompt).toContain('Pre-Calculated Summary (use these exact figures; do not recalculate):')
+    expect(prompt).toContain('Total Morning (<7 AM): 16/16 (100%)')
     expect(prompt).toContain('2026-10-01: Chanting: 16 rounds')
     expect(prompt).toContain('2026-10-02: No Logged Activity')
     expect(prompt).toContain('2026-10-03: No Logged Activity')
+  })
+
+  it('includes Mentor Mode structure, WhatsApp follow-up drafts, and group tags when analyzing a group', () => {
+    const prompt = buildSadhanaAiPrompt({
+      fromDate: '2026-10-01',
+      toDate: '2026-10-02',
+      selectedGroupName: 'BACE Youth',
+      devotees: [
+        {
+          devoteeName: 'Govinda Das',
+          groupNames: ['BACE Youth', 'Core Team'],
+          reports: [makeReport({ reportDate: '2026-10-01' })],
+        },
+        {
+          devoteeName: 'Madhava Das',
+          groupNames: ['BACE Youth'],
+          reports: [],
+        },
+      ],
+    })
+
+    expect(prompt).toContain('Selected Youth Group Filter: BACE Youth')
+    expect(prompt).toContain('OUTPUT STRUCTURE FOR MENTOR MODE')
+    expect(prompt).toContain('Ready-to-Send WhatsApp Follow-Up Message Drafts')
+    expect(prompt).toContain(
+      '=== Person 1: Govinda Das (Days Reported: 1/2) [Groups: BACE Youth, Core Team] ===',
+    )
+    expect(prompt).toContain('=== Person 2: Madhava Das (Days Reported: 0/2) [Groups: BACE Youth] ===')
   })
 
   it('builds valid AI provider URLs for chatgpt, claude, and gemini', () => {

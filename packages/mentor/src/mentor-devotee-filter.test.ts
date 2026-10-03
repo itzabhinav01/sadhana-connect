@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { filterMentorDevotees } from './mentor-devotee-filter'
+import {
+  extractMentorDevoteeGroups,
+  filterMentorDevotees,
+  filterMentorDevoteesByGroup,
+} from './mentor-devotee-filter'
 import type { MentorDevoteeSummary } from './mentor-devotee-summary'
 
 function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSummary {
@@ -48,5 +52,43 @@ describe('filterMentorDevotees', () => {
 
   it('"needs_attention" returns devotees who missed both yesterday and today', () => {
     expect(filterMentorDevotees(summaries, 'needs_attention')).toEqual([pending])
+  })
+})
+
+describe('extractMentorDevoteeGroups and filterMentorDevoteesByGroup', () => {
+  const youthA = makeSummary({
+    devoteeId: 'd1',
+    fullName: 'Arjuna',
+    templeGroups: [
+      { id: 'g1', name: 'BACE Youth' },
+      { id: 'g2', name: 'Core Team' },
+    ],
+  })
+  const youthB = makeSummary({
+    devoteeId: 'd2',
+    fullName: 'Bhima',
+    templeGroups: [{ id: 'g1', name: 'BACE Youth' }],
+  })
+  const ungrouped = makeSummary({
+    devoteeId: 'd3',
+    fullName: 'Nakula',
+    templeGroups: [],
+  })
+  const all = [youthA, youthB, ungrouped]
+
+  it('extracts sorted unique groups with devotee counts', () => {
+    expect(extractMentorDevoteeGroups(all)).toEqual([
+      { id: 'g1', name: 'BACE Youth', count: 2 },
+      { id: 'g2', name: 'Core Team', count: 1 },
+    ])
+  })
+
+  it('filters devotees by specific group id (supporting multi-group membership)', () => {
+    expect(filterMentorDevoteesByGroup(all, 'g1')).toEqual([youthA, youthB])
+    expect(filterMentorDevoteesByGroup(all, 'g2')).toEqual([youthA])
+  })
+
+  it('filters ungrouped devotees when "ungrouped" is selected', () => {
+    expect(filterMentorDevoteesByGroup(all, 'ungrouped')).toEqual([ungrouped])
   })
 })

@@ -1,9 +1,12 @@
 import {
   MENTOR_DEVOTEE_FILTERS,
+  extractMentorDevoteeGroups,
   filterMentorDevotees,
+  filterMentorDevoteesByGroup,
   useMentorDevotees,
   type MentorDevoteeFilter,
   type MentorDevoteeSummary,
+  type MentorGroupFilter,
 } from '@sadhana-connect/mentor'
 import { useProfile } from '@sadhana-connect/auth'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
@@ -54,6 +57,7 @@ function DevoteeSummaryRow({ summary }: { summary: MentorDevoteeSummary }) {
   const router = useRouter()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+  const groups = summary.templeGroups ?? []
 
   return (
     <Pressable
@@ -68,6 +72,15 @@ function DevoteeSummaryRow({ summary }: { summary: MentorDevoteeSummary }) {
           {summary.hasSubmittedYesterday ? 'Yesterday Logged' : 'Yesterday Pending'}
         </Text>
       </View>
+      {groups.length > 0 ? (
+        <View style={styles.groupBadgeRow}>
+          {groups.map((group) => (
+            <View key={group.id} style={styles.groupBadge}>
+              <Text style={styles.groupBadgeText}>{group.name}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
       <Text style={styles.rowMuted}>
         {summary.yesterdayTotalRounds !== null
           ? `${summary.yesterdayTotalRounds} rounds yesterday`
@@ -88,6 +101,7 @@ export default function MentorDashboardScreen() {
   const navigation = useNavigation()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+  const [groupFilter, setGroupFilter] = useState<MentorGroupFilter>('all')
   const [filter, setFilter] = useState<MentorDevoteeFilter>('all')
   const [search, setSearch] = useState('')
   const [aiExpanded, setAiExpanded] = useState(false)
@@ -141,22 +155,41 @@ export default function MentorDashboardScreen() {
   }
 
   const summaries = devoteesQuery.data ?? []
-  const statusFiltered = filterMentorDevotees(summaries, filter)
+  const groupOptions = extractMentorDevoteeGroups(summaries)
+  const ungroupedCount = summaries.filter((s) => (s.templeGroups ?? []).length === 0).length
+  const groupFilteredSummaries = filterMentorDevoteesByGroup(summaries, groupFilter)
+  const activeGroupName =
+    groupFilter === 'all'
+      ? null
+      : groupFilter === 'ungrouped'
+        ? 'Ungrouped'
+        : (groupOptions.find((g) => g.id === groupFilter)?.name ?? null)
+
+  const statusFiltered = filterMentorDevotees(groupFilteredSummaries, filter)
   const searchTerm = search.trim().toLowerCase()
   const visibleSummaries = searchTerm
     ? statusFiltered.filter((summary) => summary.fullName.toLowerCase().includes(searchTerm))
     : statusFiltered
 
-  const totalAssigned = summaries.length
-  const submittedYesterday = summaries.filter((summary) => summary.hasSubmittedYesterday).length
+  const totalAssigned = groupFilteredSummaries.length
+  const submittedYesterday = groupFilteredSummaries.filter(
+    (summary) => summary.hasSubmittedYesterday,
+  ).length
   const pendingYesterday = totalAssigned - submittedYesterday
 
-  const effectiveSelectedIds = selectedDevoteeIds ?? summaries.map((s) => s.devoteeId)
+  const effectiveSelectedIds = selectedDevoteeIds ?? groupFilteredSummaries.map((s) => s.devoteeId)
+
+  const handleSelectGroupFilter = (nextGroup: MentorGroupFilter) => {
+    setGroupFilter(nextGroup)
+    const nextGroupDevotees = filterMentorDevoteesByGroup(summaries, nextGroup)
+    setSelectedDevoteeIds(nextGroupDevotees.map((s) => s.devoteeId))
+    setAiStatusMessage(null)
+  }
 
   const toggleDevoteeSelection = (devoteeId: string) => {
     setAiStatusMessage(null)
     setSelectedDevoteeIds((prev) => {
-      const current = prev ?? summaries.map((s) => s.devoteeId)
+      const current = prev ?? groupFilteredSummaries.map((s) => s.devoteeId)
       return current.includes(devoteeId)
         ? current.filter((id) => id !== devoteeId)
         : [...current, devoteeId]
@@ -176,6 +209,7 @@ export default function MentorDashboardScreen() {
       const devotees = await Promise.all(
         chosenSummaries.map(async (s) => ({
           devoteeName: s.fullName,
+          groupNames: (s.templeGroups ?? []).map((g) => g.name),
           reports: await supabaseSadhanaReportRepository.listFullReportsInRange(
             s.devoteeId,
             range.fromDate,
@@ -186,6 +220,7 @@ export default function MentorDashboardScreen() {
       return buildSadhanaAiPrompt({
         fromDate: range.fromDate,
         toDate: range.toDate,
+        selectedGroupName: activeGroupName,
         devotees,
       })
     } catch {
@@ -242,7 +277,76 @@ export default function MentorDashboardScreen() {
 
         {devoteesQuery.isSuccess && summaries.length > 0 ? (
           <>
-            <Card title="Overview">
+            {groupOptions.length > 0 ? (
+              <Card title="Youth Groups">
+                <Text style={styles.rowMuted}>
+                  Tap a group to filter overview stats, devotee list, and AI analysis.
+                </Text>
+                <View style={styles.devoteeChipWrap}>
+                  <Pressable
+                    onPress={() => handleSelectGroupFilter('all')}
+                    style={[
+                      styles.devoteeChip,
+                      groupFilter === 'all' ? styles.devoteeChipSelected : null,
+                    ]}
+                    accessibilityRole="button"
+                  >
+                    <Text
+                      style={[
+                        styles.devoteeChipText,
+                        groupFilter === 'all' ? styles.devoteeChipTextSelected : null,
+                      ]}
+                    >
+                      All Groups ({summaries.length})
+                    </Text>
+                  </Pressable>
+                  {groupOptions.map((group) => {
+                    const isSelected = groupFilter === group.id
+                    return (
+                      <Pressable
+                        key={group.id}
+                        onPress={() => handleSelectGroupFilter(group.id)}
+                        style={[
+                          styles.devoteeChip,
+                          isSelected ? styles.devoteeChipSelected : null,
+                        ]}
+                        accessibilityRole="button"
+                      >
+                        <Text
+                          style={[
+                            styles.devoteeChipText,
+                            isSelected ? styles.devoteeChipTextSelected : null,
+                          ]}
+                        >
+                          {group.name} ({group.count})
+                        </Text>
+                      </Pressable>
+                    )
+                  })}
+                  {ungroupedCount > 0 ? (
+                    <Pressable
+                      onPress={() => handleSelectGroupFilter('ungrouped')}
+                      style={[
+                        styles.devoteeChip,
+                        groupFilter === 'ungrouped' ? styles.devoteeChipSelected : null,
+                      ]}
+                      accessibilityRole="button"
+                    >
+                      <Text
+                        style={[
+                          styles.devoteeChipText,
+                          groupFilter === 'ungrouped' ? styles.devoteeChipTextSelected : null,
+                        ]}
+                      >
+                        Ungrouped ({ungroupedCount})
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </Card>
+            ) : null}
+
+            <Card title={activeGroupName ? `Overview (${activeGroupName})` : 'Overview'}>
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{totalAssigned}</Text>
@@ -305,6 +409,40 @@ export default function MentorDashboardScreen() {
                       </Pressable>
                     </View>
                   </View>
+
+                  {groupOptions.length > 0 ? (
+                    <View style={styles.devoteeChipWrap}>
+                      {groupOptions.map((group) => {
+                        const groupDevoteeIds = filterMentorDevoteesByGroup(
+                          summaries,
+                          group.id,
+                        ).map((s) => s.devoteeId)
+                        const isGroupExactMatch =
+                          effectiveSelectedIds.length === groupDevoteeIds.length &&
+                          groupDevoteeIds.every((id) => effectiveSelectedIds.includes(id))
+                        return (
+                          <Pressable
+                            key={group.id}
+                            onPress={() => handleSelectGroupFilter(group.id)}
+                            style={[
+                              styles.devoteeChip,
+                              isGroupExactMatch ? styles.devoteeChipSelected : null,
+                            ]}
+                            accessibilityRole="button"
+                          >
+                            <Text
+                              style={[
+                                styles.devoteeChipText,
+                                isGroupExactMatch ? styles.devoteeChipTextSelected : null,
+                              ]}
+                            >
+                              Group: {group.name} ({group.count})
+                            </Text>
+                          </Pressable>
+                        )
+                      })}
+                    </View>
+                  ) : null}
 
                   <View style={styles.devoteeChipWrap}>
                     {summaries.map((summary) => {
@@ -530,7 +668,7 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.card,
       borderRadius: radius.lg,
       padding: spacing.md,
-      gap: 2,
+      gap: 4,
       shadowColor: colors.shadow,
       shadowOpacity: 0.06,
       shadowRadius: 12,
@@ -547,6 +685,25 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '600',
       fontFamily: fontFamily.semiBold,
       color: colors.foreground,
+    },
+    groupBadgeRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+      marginVertical: 2,
+    },
+    groupBadge: {
+      backgroundColor: colors.primarySoft,
+      borderColor: colors.primary,
+      borderWidth: 0.5,
+      borderRadius: radius.full,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    groupBadgeText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      color: colors.primary,
     },
     rowMuted: {
       fontSize: fontSize.sm,

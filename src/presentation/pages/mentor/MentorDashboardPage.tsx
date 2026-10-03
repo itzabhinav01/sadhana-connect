@@ -1,8 +1,15 @@
-import { Copy, ExternalLink, Search, Sparkles } from 'lucide-react'
+import { Copy, ExternalLink, Search, Sparkles, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
-import { filterMentorDevotees, type MentorDevoteeFilter, useMentorDevotees } from '@sadhana-connect/mentor'
+import {
+  extractMentorDevoteeGroups,
+  filterMentorDevotees,
+  filterMentorDevoteesByGroup,
+  type MentorDevoteeFilter,
+  type MentorGroupFilter,
+  useMentorDevotees,
+} from '@sadhana-connect/mentor'
 import {
   AI_PROVIDERS,
   AI_PROVIDER_LABELS,
@@ -24,6 +31,7 @@ import { MentorSummaryCards } from '@/presentation/pages/mentor/MentorSummaryCar
 type AiRangeOption = '7' | '14' | '30' | 'custom'
 
 export function MentorDashboardPage() {
+  const [groupFilter, setGroupFilter] = useState<MentorGroupFilter>('all')
   const [filter, setFilter] = useState<MentorDevoteeFilter>('all')
   const [search, setSearch] = useState('')
   const [aiExpanded, setAiExpanded] = useState(false)
@@ -35,25 +43,55 @@ export function MentorDashboardPage() {
   const devoteesQuery = useMentorDevotees()
 
   const summaries = useMemo(() => devoteesQuery.data ?? [], [devoteesQuery.data])
-  const statusFiltered = filterMentorDevotees(summaries, filter)
+  const groupOptions = useMemo(() => extractMentorDevoteeGroups(summaries), [summaries])
+  const ungroupedCount = useMemo(
+    () => summaries.filter((s) => (s.templeGroups?.length ?? 0) === 0).length,
+    [summaries],
+  )
+
+  const groupFilteredSummaries = useMemo(
+    () => filterMentorDevoteesByGroup(summaries, groupFilter),
+    [summaries, groupFilter],
+  )
+  const statusFiltered = filterMentorDevotees(groupFilteredSummaries, filter)
   const searchTerm = search.trim().toLowerCase()
   const filteredSummaries = searchTerm
     ? statusFiltered.filter((summary) => summary.fullName.toLowerCase().includes(searchTerm))
     : statusFiltered
 
   const effectiveSelectedIds = useMemo(
-    () => selectedDevoteeIds ?? summaries.map((s) => s.devoteeId),
-    [selectedDevoteeIds, summaries],
+    () => selectedDevoteeIds ?? groupFilteredSummaries.map((s) => s.devoteeId),
+    [selectedDevoteeIds, groupFilteredSummaries],
   )
+
+  const selectedGroupLabel = useMemo(() => {
+    if (groupFilter === 'all') return undefined
+    if (groupFilter === 'ungrouped') return 'Ungrouped'
+    return groupOptions.find((g) => g.id === groupFilter)?.name
+  }, [groupFilter, groupOptions])
 
   const aiRange =
     aiRangeOption === 'custom' ? aiCustomRange : getLastNDaysRange(Number(aiRangeOption))
   const aiRangeValidation = validateDateRange(aiRange.fromDate, aiRange.toDate)
 
+  function handleSelectGroupFilter(nextGroupFilter: MentorGroupFilter) {
+    setGroupFilter(nextGroupFilter)
+    // Reset manual AI selection so AI defaults to the newly selected group's devotees
+    setSelectedDevoteeIds(null)
+    setAiStatusMessage(null)
+  }
+
+  function handleSelectAiGroupQuick(targetGroupFilter: MentorGroupFilter) {
+    setGroupFilter(targetGroupFilter)
+    const matching = filterMentorDevoteesByGroup(summaries, targetGroupFilter)
+    setSelectedDevoteeIds(matching.map((s) => s.devoteeId))
+    setAiStatusMessage(null)
+  }
+
   function toggleDevoteeSelection(devoteeId: string) {
     setAiStatusMessage(null)
     setSelectedDevoteeIds((prev) => {
-      const current = prev ?? summaries.map((s) => s.devoteeId)
+      const current = prev ?? groupFilteredSummaries.map((s) => s.devoteeId)
       return current.includes(devoteeId)
         ? current.filter((id) => id !== devoteeId)
         : [...current, devoteeId]
@@ -76,6 +114,7 @@ export function MentorDashboardPage() {
       const devotees = await Promise.all(
         chosenSummaries.map(async (s) => ({
           devoteeName: s.fullName,
+          groupNames: (s.templeGroups ?? []).map((g) => g.name),
           reports: await supabaseSadhanaReportRepository.listFullReportsInRange(
             s.devoteeId,
             aiRange.fromDate,
@@ -86,6 +125,7 @@ export function MentorDashboardPage() {
       return buildSadhanaAiPrompt({
         fromDate: aiRange.fromDate,
         toDate: aiRange.toDate,
+        selectedGroupName: selectedGroupLabel,
         devotees,
       })
     } catch {
@@ -161,7 +201,54 @@ export function MentorDashboardPage() {
 
       {devoteesQuery.isSuccess && summaries.length > 0 ? (
         <>
-          <MentorSummaryCards summaries={summaries} />
+          {/* Youth Group Segregation Bar */}
+          {groupOptions.length > 0 ? (
+            <div
+              aria-label="Filter devotees by group"
+              className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Users className="size-3.5 text-primary" aria-hidden="true" />
+                <span>Youth Groups</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={groupFilter === 'all' ? 'default' : 'outline'}
+                  aria-pressed={groupFilter === 'all'}
+                  onClick={() => handleSelectGroupFilter('all')}
+                >
+                  All Groups ({summaries.length})
+                </Button>
+                {groupOptions.map((group) => (
+                  <Button
+                    key={group.id}
+                    type="button"
+                    size="sm"
+                    variant={groupFilter === group.id ? 'default' : 'outline'}
+                    aria-pressed={groupFilter === group.id}
+                    onClick={() => handleSelectGroupFilter(group.id)}
+                  >
+                    {group.name} ({group.count})
+                  </Button>
+                ))}
+                {ungroupedCount > 0 ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={groupFilter === 'ungrouped' ? 'default' : 'outline'}
+                    aria-pressed={groupFilter === 'ungrouped'}
+                    onClick={() => handleSelectGroupFilter('ungrouped')}
+                  >
+                    Ungrouped ({ungroupedCount})
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          <MentorSummaryCards summaries={groupFilteredSummaries} />
 
           <Card className="border-primary/20 bg-primary/[0.02]">
             <CardHeader className="pb-3">
@@ -169,7 +256,8 @@ export function MentorDashboardPage() {
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-4 text-primary" aria-hidden="true" />
                   <CardTitle className="text-base">
-                    AI Sadhana Analysis (Mentor Mode)
+                    AI Sadhana Analysis (Mentor Mode
+                    {selectedGroupLabel ? ` · ${selectedGroupLabel}` : ''})
                   </CardTitle>
                 </div>
                 <Button
@@ -180,11 +268,11 @@ export function MentorDashboardPage() {
                 >
                   {aiExpanded
                     ? 'Hide AI Analysis'
-                    : `Analyze Devotees with AI (${effectiveSelectedIds.length}/${summaries.length})`}
+                    : `Analyze ${selectedGroupLabel ?? 'Devotees'} with AI (${effectiveSelectedIds.length}/${summaries.length})`}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Select a date range and one or multiple devotees to analyze their Sadhana performance in ChatGPT, Gemini, or Claude.
+                Get a structured Group Health Snapshot, categorized devotee care list, coaching points, and ready-to-send WhatsApp follow-up drafts in ChatGPT, Gemini, or Claude.
               </p>
             </CardHeader>
 
@@ -234,11 +322,50 @@ export function MentorDashboardPage() {
                   ) : null}
                 </div>
 
+                {groupOptions.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      2. Quick Select by Youth Group
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={groupFilter === 'all' ? 'default' : 'outline'}
+                        onClick={() => handleSelectAiGroupQuick('all')}
+                      >
+                        All Groups ({summaries.length})
+                      </Button>
+                      {groupOptions.map((group) => (
+                        <Button
+                          key={group.id}
+                          type="button"
+                          size="sm"
+                          variant={groupFilter === group.id ? 'default' : 'outline'}
+                          onClick={() => handleSelectAiGroupQuick(group.id)}
+                        >
+                          {group.name} ({group.count})
+                        </Button>
+                      ))}
+                      {ungroupedCount > 0 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={groupFilter === 'ungrouped' ? 'default' : 'outline'}
+                          onClick={() => handleSelectAiGroupQuick('ungrouped')}
+                        >
+                          Ungrouped ({ungroupedCount})
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      2. Select Devotees ({effectiveSelectedIds.length} of {summaries.length}{' '}
-                      selected)
+                      {groupOptions.length > 0 ? '3.' : '2.'} Fine-Tune Selected Devotees (
+                      {effectiveSelectedIds.length} of {summaries.length} selected)
                     </span>
                     <div className="flex items-center gap-2">
                       <Button
@@ -247,10 +374,10 @@ export function MentorDashboardPage() {
                         size="sm"
                         className="h-7 px-2 text-xs"
                         onClick={() =>
-                          setSelectedDevoteeIds(summaries.map((s) => s.devoteeId))
+                          setSelectedDevoteeIds(groupFilteredSummaries.map((s) => s.devoteeId))
                         }
                       >
-                        Select All
+                        Select Shown ({groupFilteredSummaries.length})
                       </Button>
                       <Button
                         type="button"
@@ -266,6 +393,10 @@ export function MentorDashboardPage() {
                   <div className="flex flex-wrap gap-2">
                     {summaries.map((summary) => {
                       const isSelected = effectiveSelectedIds.includes(summary.devoteeId)
+                      const groupTag =
+                        summary.templeGroups && summary.templeGroups.length > 0
+                          ? ` (${summary.templeGroups.map((g) => g.name).join(', ')})`
+                          : ''
                       return (
                         <button
                           key={summary.devoteeId}
@@ -280,6 +411,7 @@ export function MentorDashboardPage() {
                         >
                           {isSelected ? '✓ ' : ''}
                           {summary.fullName}
+                          {groupTag}
                         </button>
                       )
                     })}
@@ -288,7 +420,7 @@ export function MentorDashboardPage() {
 
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    3. Open in AI Assistant
+                    {groupOptions.length > 0 ? '4.' : '3.'} Open in AI Assistant
                   </span>
                   <div className="flex flex-wrap items-center gap-2">
                     {AI_PROVIDERS.map((provider) => (

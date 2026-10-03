@@ -50,7 +50,21 @@ export function MentorDevoteeList({ summaries }: MentorDevoteeListProps) {
             {summaries.map((summary) => (
               <tr key={summary.devoteeId}>
                 <td className="px-4 py-3 font-medium text-foreground">
-                  {summary.fullName}
+                  <div className="flex flex-col gap-1">
+                    <span>{summary.fullName}</span>
+                    {summary.templeGroups && summary.templeGroups.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {summary.templeGroups.map((group) => (
+                          <span
+                            key={group.id}
+                            className="rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
+                          >
+                            {group.name}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <StatusBadge hasSubmittedYesterday={summary.hasSubmittedYesterday} />
@@ -91,6 +105,18 @@ export function MentorDevoteeList({ summaries }: MentorDevoteeListProps) {
               </span>
               <StatusBadge hasSubmittedYesterday={summary.hasSubmittedYesterday} />
             </div>
+            {summary.templeGroups && summary.templeGroups.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {summary.templeGroups.map((group) => (
+                  <span
+                    key={group.id}
+                    className="rounded-md border border-primary/25 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
+                  >
+                    {group.name}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <p className="text-sm text-muted-foreground">
               {summary.yesterdayTotalRounds !== null
                 ? `${summary.yesterdayTotalRounds} rounds yesterday`

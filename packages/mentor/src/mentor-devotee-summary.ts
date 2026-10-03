@@ -1,7 +1,10 @@
 import { addDaysIso } from '@sadhana-connect/shared'
-import type { DevoteeLastReportDate } from '@sadhana-connect/domain'
-import type { MentorAssignedDevotee } from '@sadhana-connect/domain'
-import type { MentorDevoteeReportSummary } from '@sadhana-connect/domain'
+import type {
+  DevoteeLastReportDate,
+  MentorAssignedDevotee,
+  MentorDevoteeGroup,
+  MentorDevoteeReportSummary,
+} from '@sadhana-connect/domain'
 
 export interface MentorDevoteeSummary {
   devoteeId: string
@@ -12,6 +15,7 @@ export interface MentorDevoteeSummary {
   hasSubmittedToday: boolean
   todayTotalRounds: number | null
   lastReportDate: string | null
+  templeGroups?: MentorDevoteeGroup[]
 }
 
 // Pure merge of the three fetched, already-authorized result sets into
@@ -48,6 +52,7 @@ export function calculateMentorDevoteeSummaries(
       hasSubmittedToday: todayReport !== undefined,
       todayTotalRounds: todayReport?.totalRounds ?? null,
       lastReportDate: lastReportDateByDevotee.get(devotee.devoteeId) ?? null,
+      templeGroups: devotee.templeGroups ?? [],
     }
   })
 }
