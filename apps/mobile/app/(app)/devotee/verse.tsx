@@ -52,7 +52,7 @@ export default function VerseOfTheDayScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <View style={styles.card}>
         <Text style={styles.heading} accessibilityRole="header">
           {formatVerseCitation(verse)}
@@ -93,6 +93,7 @@ export default function VerseOfTheDayScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

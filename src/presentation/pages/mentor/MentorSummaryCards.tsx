@@ -17,14 +17,16 @@ export function MentorSummaryCards({ summaries }: MentorSummaryCardsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
       {cards.map((card) => (
-        <Card key={card.label}>
-          <CardHeader>
-            <p className="text-sm text-muted-foreground">{card.label}</p>
+        <Card key={card.label} className="gap-2 py-3.5 sm:gap-4 sm:py-5">
+          <CardHeader className="px-3.5 sm:px-6">
+            <p className="text-xs font-medium text-muted-foreground sm:text-sm">
+              {card.label}
+            </p>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-foreground">
+          <CardContent className="px-3.5 sm:px-6">
+            <p className="text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
               {card.value}
             </p>
           </CardContent>

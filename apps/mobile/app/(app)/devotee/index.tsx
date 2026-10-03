@@ -111,7 +111,7 @@ export default function DashboardScreen() {
   const latestAnnouncement = announcementsQuery.data?.[0]
 
   return (
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
             Hare Krishna{userName ? `, ${userName}` : ''} 🙏
@@ -163,6 +163,11 @@ export default function DashboardScreen() {
                   variant="outline"
                 />
                 <Button
+                  title="Japa Counter"
+                  onPress={() => router.push('/devotee/japa')}
+                  variant="outline"
+                />
+                <Button
                   title="Share to WhatsApp"
                   onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
                   variant="outline"
@@ -172,10 +177,17 @@ export default function DashboardScreen() {
           ) : (
             <>
               <Text style={styles.mutedLine}>You haven&apos;t logged today&apos;s sadhana yet.</Text>
-              <Button
-                title="Fill Sadhana"
-                onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
-              />
+              <View style={styles.actionsRow}>
+                <Button
+                  title="Fill Sadhana"
+                  onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
+                />
+                <Button
+                  title="Japa Counter"
+                  onPress={() => router.push('/devotee/japa')}
+                  variant="outline"
+                />
+              </View>
             </>
           )}
         </Card>
@@ -271,6 +283,7 @@ export default function DashboardScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

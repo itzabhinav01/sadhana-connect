@@ -133,4 +133,42 @@ describe('MentorDashboardPage', () => {
     expect(screen.getAllByText('Pending Devotee').length).toBeGreaterThan(0)
     expect(screen.queryByText('Submitted Devotee')).not.toBeInTheDocument()
   })
+
+  it('filters devotees by name when typing in the search input', async () => {
+    useMentorDevoteesMock.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [
+        {
+          devoteeId: 'd1',
+          fullName: 'Govinda Das',
+          assignedAt: '2025-01-01T00:00:00.000Z',
+          hasSubmittedYesterday: true,
+          yesterdayTotalRounds: 16,
+          hasSubmittedToday: false,
+          todayTotalRounds: null,
+          lastReportDate: '2026-01-15',
+        },
+        {
+          devoteeId: 'd2',
+          fullName: 'Madhava Das',
+          assignedAt: '2025-01-01T00:00:00.000Z',
+          hasSubmittedYesterday: false,
+          yesterdayTotalRounds: null,
+          hasSubmittedToday: false,
+          todayTotalRounds: null,
+          lastReportDate: null,
+        },
+      ],
+    })
+    const user = userEvent.setup()
+
+    renderPage()
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search devotees by name' }), 'Madhava')
+
+    expect(screen.getAllByText('Madhava Das').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Govinda Das')).not.toBeInTheDocument()
+  })
 })

@@ -45,7 +45,16 @@ export default function AppLayout() {
     return <AccountDisabledScreen />
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerStyle: { backgroundColor: colors.card },
+        headerTintColor: colors.foreground,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    />
+  )
 }
 
 function createStyles(colors: ThemeColors) {

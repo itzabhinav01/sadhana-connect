@@ -1,6 +1,7 @@
 import { useAuth } from '@sadhana-connect/auth'
 import { Redirect, Stack } from 'expo-router'
 
+import { useTheme } from '../../src/application/theme/use-theme'
 import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
 
 // PublicOnlyRoute equivalent: redirects an already-authenticated session
@@ -10,6 +11,7 @@ import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
 // password-reset-by-email flag is turned on).
 export default function AuthLayout() {
   const { session, isLoading } = useAuth()
+  const { colors } = useTheme()
 
   if (isLoading) {
     return <LoadingScreen />
@@ -19,5 +21,12 @@ export default function AuthLayout() {
     return <Redirect href="/" />
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    />
+  )
 }

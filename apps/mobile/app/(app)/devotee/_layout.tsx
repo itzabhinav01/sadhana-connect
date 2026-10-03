@@ -67,6 +67,7 @@ export default function DevoteeLayout() {
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.foreground,
         headerRight: () => <HeaderThemeToggle />,
+        sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },

@@ -57,7 +57,7 @@ export default function MentorPendingScreen() {
     : pending
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       {devoteesQuery.isError ? (
         <ErrorBanner message="Something went wrong loading your devotees. Please try again." />
       ) : null}
@@ -94,6 +94,7 @@ export default function MentorPendingScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

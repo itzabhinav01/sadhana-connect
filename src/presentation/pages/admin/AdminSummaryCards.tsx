@@ -18,16 +18,16 @@ const CARDS: { label: string; key: keyof AdminDashboardSummary }[] = [
 
 export function AdminSummaryCards({ summary }: AdminSummaryCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {CARDS.map(({ label, key }) => (
-        <Card key={key}>
-          <CardHeader>
+        <Card key={key} className="gap-2 py-4 sm:gap-4 sm:py-5">
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle>
-              <span className="text-sm font-medium text-muted-foreground">{label}</span>
+              <span className="text-xs font-medium text-muted-foreground sm:text-sm">{label}</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold text-foreground">{summary[key]}</p>
+          <CardContent className="px-4 sm:px-6">
+            <p className="text-2xl font-bold tabular-nums text-foreground">{summary[key]}</p>
           </CardContent>
         </Card>
       ))}

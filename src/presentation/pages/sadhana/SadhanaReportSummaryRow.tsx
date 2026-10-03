@@ -47,20 +47,20 @@ export function SadhanaReportSummaryRow({
   const dateLabel = formatDisplayDate(report.reportDate)
 
   return (
-    <div className="flex flex-col gap-1 py-2">
-      <div className="flex items-center justify-between gap-4 text-sm">
+    <div className="flex flex-col gap-2 py-3">
+      <div className="flex flex-col gap-2.5 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <Link
           to={`/sadhana?date=${report.reportDate}`}
-          className="flex flex-1 items-center justify-between gap-4 rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex min-w-0 flex-1 flex-col gap-1 rounded-sm outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:gap-4"
         >
-          <span className="font-medium text-foreground">{dateLabel}</span>
+          <span className="font-semibold text-foreground">{dateLabel}</span>
 
           {variant === 'compact' ? (
             <span className="text-muted-foreground">
               {report.totalRounds} rounds
             </span>
           ) : (
-            <span className="flex flex-col items-end gap-0.5 text-muted-foreground">
+            <span className="flex flex-col gap-0.5 text-muted-foreground sm:items-end">
               <span>
                 {report.totalRounds} rounds · {report.readingMinutes}m
                 reading · {report.hearingMinutes}m hearing
@@ -73,12 +73,12 @@ export function SadhanaReportSummaryRow({
             </span>
           )}
         </Link>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0 sm:gap-2">
           <a
             href={buildWhatsAppShareUrl(report)}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             Share to WhatsApp
           </a>
@@ -86,7 +86,7 @@ export function SadhanaReportSummaryRow({
             <button
               type="button"
               onClick={() => onExportPdf(report)}
-              className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               Export PDF
             </button>
@@ -95,7 +95,7 @@ export function SadhanaReportSummaryRow({
             <button
               type="button"
               onClick={() => onExportText(report)}
-              className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+              className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               Export Text
             </button>
@@ -105,7 +105,7 @@ export function SadhanaReportSummaryRow({
             onClick={() => setShowComments((current) => !current)}
             aria-expanded={showComments}
             aria-label={`${showComments ? 'Hide' : 'Show'} mentor comments for ${dateLabel}`}
-            className="rounded-sm px-2 py-1 text-xs text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             {showComments ? 'Hide comments' : 'Comments'}
           </button>

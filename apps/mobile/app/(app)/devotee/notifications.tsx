@@ -130,7 +130,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.heading}>Notifications</Text>
         <Button
@@ -180,6 +180,7 @@ export default function NotificationsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

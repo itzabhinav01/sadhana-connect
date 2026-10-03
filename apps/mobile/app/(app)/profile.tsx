@@ -134,7 +134,7 @@ export default function ProfileScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Profile', headerShown: true }} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
         {/* Header Avatar & Identity */}
         <View style={styles.identityHeader}>
           <View style={styles.avatar}>
@@ -345,6 +345,7 @@ export default function ProfileScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

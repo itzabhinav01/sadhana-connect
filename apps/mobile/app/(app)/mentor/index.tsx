@@ -129,7 +129,7 @@ export default function MentorDashboardScreen() {
   const pendingYesterday = totalAssigned - submittedYesterday
 
   return (
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
             Hare Krishna{userName ? `, ${userName}` : ''} (Mentor) 🙏
@@ -151,15 +151,15 @@ export default function MentorDashboardScreen() {
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{totalAssigned}</Text>
-                  <Text style={styles.rowMuted}>Total Assigned</Text>
+                  <Text style={styles.statLabel}>Total Assigned</Text>
                 </View>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{submittedYesterday}</Text>
-                  <Text style={styles.rowMuted}>Submitted Yesterday</Text>
+                  <Text style={styles.statLabel}>Submitted Yesterday</Text>
                 </View>
                 <View style={styles.stat}>
                   <Text style={styles.statValue}>{pendingYesterday}</Text>
-                  <Text style={styles.rowMuted}>Pending Yesterday</Text>
+                  <Text style={styles.statLabel}>Pending Yesterday</Text>
                 </View>
               </View>
             </Card>
@@ -209,6 +209,7 @@ export default function MentorDashboardScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
@@ -237,9 +238,17 @@ function createStyles(colors: ThemeColors) {
     statsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      gap: spacing.xs,
     },
     stat: {
+      flex: 1,
       alignItems: 'center',
+    },
+    statLabel: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.regular,
+      color: colors.muted,
+      textAlign: 'center',
     },
     statValue: {
       fontSize: fontSize.xl,

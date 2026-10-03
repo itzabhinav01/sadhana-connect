@@ -139,13 +139,21 @@ function createStyles(colors: ThemeColors) {
     actionsRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: spacing.sm,
+      gap: spacing.xs,
+      marginTop: spacing.xs,
     },
     actionLink: {
-      paddingVertical: spacing.xs,
+      paddingVertical: 4,
+      paddingHorizontal: 10,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.mutedBackground,
     },
     actionLinkText: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      fontWeight: '500',
       color: colors.link,
     },
     errorLine: {

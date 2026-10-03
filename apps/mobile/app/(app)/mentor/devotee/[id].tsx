@@ -74,7 +74,7 @@ export default function MentorDevoteeDetailScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <View style={styles.headerInfo}>
           <Text style={styles.heading} accessibilityRole="header">
@@ -128,6 +128,7 @@ export default function MentorDevoteeDetailScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

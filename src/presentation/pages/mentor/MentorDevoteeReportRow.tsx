@@ -32,8 +32,8 @@ export function MentorDevoteeReportRow({ report }: MentorDevoteeReportRowProps) 
   const dateLabel = formatDisplayDate(report.reportDate)
 
   return (
-    <div className="flex flex-col gap-2 py-2 text-sm">
-      <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col gap-2 py-2.5 text-sm">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <span className="font-medium text-foreground">{dateLabel}</span>
         <span className="text-muted-foreground">
           {report.totalRounds} rounds · {report.readingMinutes}m reading ·{' '}

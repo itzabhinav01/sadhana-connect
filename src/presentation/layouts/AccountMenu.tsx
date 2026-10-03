@@ -1,4 +1,4 @@
-import { LogOut, Settings, User } from 'lucide-react'
+import { BookOpen, Hand, LogOut, Megaphone, Settings, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { useSignOut } from '@/application/auth/use-sign-out'
@@ -77,6 +77,23 @@ export function AccountMenu({ fullName, email, role }: AccountMenuProps) {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {role === 'devotee' ? (
+          <>
+            <DropdownMenuItem onSelect={() => navigate('/announcements')}>
+              <Megaphone className="size-4" aria-hidden="true" />
+              Announcements
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => navigate('/japa')}>
+              <Hand className="size-4" aria-hidden="true" />
+              Japa Counter
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => navigate('/verse-of-the-day')}>
+              <BookOpen className="size-4" aria-hidden="true" />
+              Verse of the Day
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuItem onSelect={() => navigate('/profile')}>
           <User className="size-4" aria-hidden="true" />
           Profile

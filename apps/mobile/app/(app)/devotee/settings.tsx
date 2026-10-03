@@ -23,7 +23,7 @@ export default function SettingsScreen() {
   const appVersion = Constants.expoConfig?.version ?? '—'
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <Card title="Appearance">
         <View style={styles.actions}>
           {THEME_OPTIONS.map((option) => (
@@ -57,7 +57,7 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
-      flex: 1,
+      flexGrow: 1,
     },
     actions: {
       flexDirection: 'row',

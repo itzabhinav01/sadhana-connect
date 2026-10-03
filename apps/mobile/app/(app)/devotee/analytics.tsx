@@ -40,7 +40,7 @@ export default function AnalyticsScreen() {
   const hasSubmittedDays = (summary?.totalReports ?? 0) > 0
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <View style={styles.filterRow}>
         {PRESETS.map((preset) => (
           <Button
@@ -169,6 +169,7 @@ export default function AnalyticsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

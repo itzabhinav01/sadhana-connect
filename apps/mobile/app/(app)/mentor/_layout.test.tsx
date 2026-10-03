@@ -11,8 +11,19 @@ jest.mock('../../../../../packages/auth/src/use-profile', () => ({
   useProfile: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/notifications/src/use-notifications-realtime', () => ({
+  useNotificationsRealtime: jest.fn(),
+}))
+
 jest.mock('../../../../../packages/notifications/src/use-unread-notification-count', () => ({
   useUnreadNotificationCount: jest.fn(() => ({ data: 0 })),
+}))
+
+jest.mock('../../../src/infrastructure/notifications/daily-sadhana-notification-service', () => ({
+  dailySadhanaNotificationService: {
+    registerPushTokenAsync: jest.fn(),
+    presentAlertNotification: jest.fn(),
+  },
 }))
 
 jest.mock('expo-router', () => ({

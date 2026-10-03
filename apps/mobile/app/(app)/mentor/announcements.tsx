@@ -319,7 +319,7 @@ export default function MentorAnnouncementsScreen() {
   const hasTempleGroups = getEffectiveTempleGroupIds(profile.data).length > 0
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       {profile.isSuccess && hasTempleGroups ? (
         <AnnouncementForm templeGroups={mentorTempleGroups.data} />
       ) : null}
@@ -349,6 +349,7 @@ export default function MentorAnnouncementsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
