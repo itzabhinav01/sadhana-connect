@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '../../application/theme/use-theme'
-import { fontFamily, fontSize, spacing } from '../../shared/theme'
+import { fontFamily, fontSize, radius, spacing } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { useAppUpdates } from '../hooks/use-app-updates'
 import { Button } from './Button'
-import { Card } from './Card'
 
 export function AppUpdateSection() {
   const { colors } = useTheme()
@@ -20,53 +19,76 @@ export function AppUpdateSection() {
   } = useAppUpdates({ promptUserOnUpdate: false })
 
   return (
-    <Card title="App Updates">
-      <Text style={styles.description}>
-        Get the latest improvements and fixes instantly without reinstalling.
-      </Text>
-
+    <View style={styles.container}>
       {isUpdateAvailable ? (
         <View style={styles.updateAvailableBox}>
-          <Text style={styles.updateAvailableText}>A new update is available!</Text>
+          <View style={styles.textColumn}>
+            <Text style={styles.title}>App Updates</Text>
+            <Text style={styles.updateAvailableText}>A new update is available!</Text>
+          </View>
           <Button
             title="Update & Restart Now"
             pendingTitle="Updating…"
             isPending={isDownloading}
+            size="sm"
             onPress={() => void downloadAndApplyUpdate()}
           />
         </View>
       ) : (
-        <Button
-          title="Check for updates"
-          pendingTitle="Checking…"
-          isPending={isChecking}
-          variant="outline"
-          onPress={() => void checkForUpdates(true)}
-        />
+        <View style={styles.compactRow}>
+          <View style={styles.textColumn}>
+            <Text style={styles.title}>App Updates</Text>
+            <Text style={styles.mutedText}>
+              {isSupported
+                ? 'Instant over-the-air updates'
+                : 'Enabled in release builds'}
+            </Text>
+          </View>
+          <Button
+            title="Check for updates"
+            pendingTitle="Checking…"
+            isPending={isChecking}
+            variant="outline"
+            size="sm"
+            onPress={() => void checkForUpdates(true)}
+          />
+        </View>
       )}
-
-      {!isSupported ? (
-        <Text style={styles.mutedText}>
-          Over-the-air updates are enabled in release builds.
-        </Text>
-      ) : null}
-    </Card>
+    </View>
   )
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
-    description: {
+    container: {
+      borderRadius: radius.lg,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    compactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    textColumn: {
+      flex: 1,
+      gap: 2,
+    },
+    title: {
       fontSize: fontSize.sm,
-      fontFamily: fontFamily.regular,
-      color: colors.muted,
-      marginBottom: spacing.xs,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
+      color: colors.foreground,
     },
     updateAvailableBox: {
       gap: spacing.sm,
     },
     updateAvailableText: {
-      fontSize: fontSize.base,
+      fontSize: fontSize.sm,
       fontFamily: fontFamily.semiBold,
       fontWeight: '600',
       color: colors.primary,
@@ -75,7 +97,6 @@ function createStyles(colors: ThemeColors) {
       fontSize: fontSize.xs,
       fontFamily: fontFamily.regular,
       color: colors.muted,
-      marginTop: spacing.xs,
     },
   })
 }

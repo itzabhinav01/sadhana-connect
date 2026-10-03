@@ -49,6 +49,7 @@ export default function AdminHomeScreen() {
             <View style={styles.headerActions}>
               <Button
                 title="Profile"
+                size="sm"
                 onPress={() => router.push('/profile')}
                 variant="outline"
               />
@@ -56,6 +57,7 @@ export default function AdminHomeScreen() {
               <Button
                 title="Sign Out"
                 pendingTitle="…"
+                size="sm"
                 isPending={signOut.isPending}
                 onPress={handleSignOut}
                 variant="outline"
@@ -96,6 +98,7 @@ export default function AdminHomeScreen() {
           <Text style={styles.mutedLine}>Search, view, and manage every account.</Text>
           <Button
             title="Manage Users"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/admin/users')}
           />
@@ -105,6 +108,7 @@ export default function AdminHomeScreen() {
           <Text style={styles.mutedLine}>Assign devotees to mentors and review history.</Text>
           <Button
             title="Manage Assignments"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/admin/assignments')}
           />
@@ -114,6 +118,7 @@ export default function AdminHomeScreen() {
           <Text style={styles.mutedLine}>Create, rename, and manage temple groups.</Text>
           <Button
             title="Manage Temple Groups"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/admin/temple-groups')}
           />
@@ -123,6 +128,7 @@ export default function AdminHomeScreen() {
           <Text style={styles.mutedLine}>Every mentor and how many devotees they currently have.</Text>
           <Button
             title="View Mentors"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/admin/mentors')}
           />
@@ -132,6 +138,7 @@ export default function AdminHomeScreen() {
           <Text style={styles.mutedLine}>Create, edit, publish, and remove announcements.</Text>
           <Button
             title="Manage Announcements"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/admin/announcements')}
           />
@@ -148,13 +155,13 @@ function createStyles(colors: ThemeColors) {
     content: {
       flexGrow: 1,
       padding: spacing.md,
-      gap: spacing.md,
+      gap: spacing.sm + 2,
       backgroundColor: colors.background,
     },
     headerActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
+      gap: 6,
     },
     header: {
       gap: 2,

@@ -27,7 +27,6 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { Button } from '../../../src/presentation/components/Button'
-import { Card } from '../../../src/presentation/components/Card'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
@@ -133,6 +132,7 @@ export default function MentorDashboardScreen() {
         <View style={styles.headerActions}>
           <Button
             title="Profile"
+            size="sm"
             onPress={() => router.push('/profile')}
             variant="outline"
           />
@@ -140,6 +140,7 @@ export default function MentorDashboardScreen() {
           <Button
             title="Sign Out"
             pendingTitle="…"
+            size="sm"
             isPending={signOut.isPending}
             onPress={handleSignOut}
             variant="outline"
@@ -259,58 +260,151 @@ export default function MentorDashboardScreen() {
   }
 
   return (
-      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>
-            Hare Krishna{userName ? `, ${userName}` : ''} (Mentor) 🙏
-          </Text>
-          <Text style={styles.headerTitle}>Your devotees at a glance</Text>
-        </View>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>
+          Hare Krishna{userName ? `, ${userName}` : ''} (Mentor) 🙏
+        </Text>
+        <Text style={styles.headerTitle}>Your devotees at a glance</Text>
+      </View>
 
-        {devoteesQuery.isError ? (
-          <ErrorBanner message="Something went wrong loading your devotees. Please try again." />
-        ) : null}
+      {devoteesQuery.isError ? (
+        <ErrorBanner message="Something went wrong loading your devotees. Please try again." />
+      ) : null}
 
-        {devoteesQuery.isSuccess && summaries.length === 0 ? (
-          <Text style={styles.rowMuted}>No devotees are currently assigned to you.</Text>
-        ) : null}
+      {devoteesQuery.isSuccess && summaries.length === 0 ? (
+        <Text style={styles.rowMuted}>No devotees are currently assigned to you.</Text>
+      ) : null}
 
-        {devoteesQuery.isSuccess && summaries.length > 0 ? (
-          <>
-            {groupOptions.length > 0 ? (
-              <Card title="Youth Groups">
-                <Text style={styles.rowMuted}>
-                  Tap a group to filter overview stats, devotee list, and AI analysis.
+      {devoteesQuery.isSuccess && summaries.length > 0 ? (
+        <>
+          {/* Compact 3-Stat Overview Strip */}
+          <View style={styles.overviewCard}>
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{totalAssigned}</Text>
+              <Text style={styles.statLabel}>Total Assigned</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.stat}>
+              <Text style={[styles.statValue, { color: colors.success }]}>
+                {submittedYesterday}
+              </Text>
+              <Text style={styles.statLabel}>Submitted Yesterday</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.stat}>
+              <Text style={[styles.statValue, { color: colors.warning }]}>
+                {pendingYesterday}
+              </Text>
+              <Text style={styles.statLabel}>Pending Yesterday</Text>
+            </View>
+          </View>
+
+          {/* Compact Single-Row Collapsible AI Analysis Banner */}
+          <View style={styles.aiBanner}>
+            <View style={styles.aiBannerHeader}>
+              <View style={styles.aiBannerTitleGroup}>
+                <Text style={styles.aiBannerTitle}>AI Sadhana Analysis</Text>
+                <Text style={styles.aiBannerSubtitle}>
+                  {activeGroupName ? `${activeGroupName} · ` : ''}
+                  {effectiveSelectedIds.length}/{summaries.length} devotees · ChatGPT, Gemini, Claude
                 </Text>
-                <View style={styles.devoteeChipWrap}>
-                  <Pressable
-                    onPress={() => handleSelectGroupFilter('all')}
-                    style={[
-                      styles.devoteeChip,
-                      groupFilter === 'all' ? styles.devoteeChipSelected : null,
-                    ]}
-                    accessibilityRole="button"
-                  >
-                    <Text
-                      style={[
-                        styles.devoteeChipText,
-                        groupFilter === 'all' ? styles.devoteeChipTextSelected : null,
-                      ]}
+              </View>
+              <Button
+                title={aiExpanded ? 'Close' : 'Analyze'}
+                size="sm"
+                variant={aiExpanded ? 'outline' : 'primary'}
+                onPress={() => setAiExpanded((prev) => !prev)}
+              />
+            </View>
+
+            {aiExpanded ? (
+              <View style={styles.aiContainer}>
+                <View style={styles.aiDivider} />
+                <Text style={styles.aiSectionLabel}>1. Date Range</Text>
+                <View style={styles.filterRow}>
+                  {AI_RANGE_PRESETS.map((preset) => (
+                    <Button
+                      key={preset.days}
+                      title={preset.label}
+                      size="sm"
+                      variant={aiDays === preset.days ? 'primary' : 'outline'}
+                      onPress={() => setAiDays(preset.days)}
+                    />
+                  ))}
+                </View>
+
+                <View style={styles.aiDevoteeHeader}>
+                  <Text style={styles.aiSectionLabel}>
+                    2. Devotees ({effectiveSelectedIds.length} selected)
+                  </Text>
+                  <View style={styles.aiQuickSelectRow}>
+                    <Pressable
+                      onPress={() => setSelectedDevoteeIds(summaries.map((s) => s.devoteeId))}
+                      accessibilityRole="button"
                     >
-                      All Groups ({summaries.length})
-                    </Text>
-                  </Pressable>
-                  {groupOptions.map((group) => {
-                    const isSelected = groupFilter === group.id
+                      <Text style={styles.aiQuickActionText}>Select All</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setSelectedDevoteeIds([])}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.aiQuickActionText}>Clear</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                {groupOptions.length > 0 ? (
+                  <View style={styles.devoteeChipWrap}>
+                    {groupOptions.map((group) => {
+                      const groupDevoteeIds = filterMentorDevoteesByGroup(
+                        summaries,
+                        group.id,
+                      ).map((s) => s.devoteeId)
+                      const isGroupExactMatch =
+                        effectiveSelectedIds.length === groupDevoteeIds.length &&
+                        groupDevoteeIds.every((id) => effectiveSelectedIds.includes(id))
+                      return (
+                        <Pressable
+                          key={group.id}
+                          onPress={() => handleSelectGroupFilter(group.id)}
+                          style={[
+                            styles.devoteeChip,
+                            isGroupExactMatch ? styles.devoteeChipSelected : null,
+                          ]}
+                          accessibilityRole="button"
+                        >
+                          <Text
+                            style={[
+                              styles.devoteeChipText,
+                              isGroupExactMatch ? styles.devoteeChipTextSelected : null,
+                            ]}
+                          >
+                            Group: {group.name} ({group.count})
+                          </Text>
+                        </Pressable>
+                      )
+                    })}
+                  </View>
+                ) : null}
+
+                <View style={styles.devoteeChipWrap}>
+                  {summaries.map((summary) => {
+                    const isSelected = effectiveSelectedIds.includes(summary.devoteeId)
                     return (
                       <Pressable
-                        key={group.id}
-                        onPress={() => handleSelectGroupFilter(group.id)}
+                        key={summary.devoteeId}
+                        onPress={() => toggleDevoteeSelection(summary.devoteeId)}
                         style={[
                           styles.devoteeChip,
                           isSelected ? styles.devoteeChipSelected : null,
                         ]}
-                        accessibilityRole="button"
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: isSelected }}
                       >
                         <Text
                           style={[
@@ -318,225 +412,158 @@ export default function MentorDashboardScreen() {
                             isSelected ? styles.devoteeChipTextSelected : null,
                           ]}
                         >
-                          {group.name} ({group.count})
+                          {isSelected ? '✓ ' : ''}
+                          {summary.fullName}
                         </Text>
                       </Pressable>
                     )
                   })}
-                  {ungroupedCount > 0 ? (
-                    <Pressable
-                      onPress={() => handleSelectGroupFilter('ungrouped')}
-                      style={[
-                        styles.devoteeChip,
-                        groupFilter === 'ungrouped' ? styles.devoteeChipSelected : null,
-                      ]}
-                      accessibilityRole="button"
-                    >
-                      <Text
-                        style={[
-                          styles.devoteeChipText,
-                          groupFilter === 'ungrouped' ? styles.devoteeChipTextSelected : null,
-                        ]}
-                      >
-                        Ungrouped ({ungroupedCount})
-                      </Text>
-                    </Pressable>
-                  ) : null}
                 </View>
-              </Card>
-            ) : null}
 
-            <Card title={activeGroupName ? `Overview (${activeGroupName})` : 'Overview'}>
-              <View style={styles.statsRow}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{totalAssigned}</Text>
-                  <Text style={styles.statLabel}>Total Assigned</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{submittedYesterday}</Text>
-                  <Text style={styles.statLabel}>Submitted Yesterday</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>{pendingYesterday}</Text>
-                  <Text style={styles.statLabel}>Pending Yesterday</Text>
-                </View>
-              </View>
-            </Card>
-
-            <Card title="AI Sadhana Analysis (Mentor Mode)">
-              <Text style={styles.rowMuted}>
-                Analyze one or multiple devotees&apos; Sadhana logs with ChatGPT, Gemini, or Claude.
-              </Text>
-              <Button
-                title={
-                  aiExpanded
-                    ? 'Hide AI Analysis Options'
-                    : `Configure AI Analysis (${effectiveSelectedIds.length}/${summaries.length} devotees)`
-                }
-                variant="outline"
-                onPress={() => setAiExpanded((prev) => !prev)}
-              />
-              {aiExpanded ? (
-                <View style={styles.aiContainer}>
-                  <Text style={styles.aiSectionLabel}>1. Select Date Range</Text>
-                  <View style={styles.filterRow}>
-                    {AI_RANGE_PRESETS.map((preset) => (
-                      <Button
-                        key={preset.days}
-                        title={preset.label}
-                        variant={aiDays === preset.days ? 'primary' : 'outline'}
-                        onPress={() => setAiDays(preset.days)}
-                      />
-                    ))}
-                  </View>
-
-                  <View style={styles.aiDevoteeHeader}>
-                    <Text style={styles.aiSectionLabel}>
-                      2. Select Devotees ({effectiveSelectedIds.length} selected)
-                    </Text>
-                    <View style={styles.aiQuickSelectRow}>
-                      <Pressable
-                        onPress={() => setSelectedDevoteeIds(summaries.map((s) => s.devoteeId))}
-                        accessibilityRole="button"
-                      >
-                        <Text style={styles.aiQuickActionText}>Select All</Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => setSelectedDevoteeIds([])}
-                        accessibilityRole="button"
-                      >
-                        <Text style={styles.aiQuickActionText}>Clear</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-
-                  {groupOptions.length > 0 ? (
-                    <View style={styles.devoteeChipWrap}>
-                      {groupOptions.map((group) => {
-                        const groupDevoteeIds = filterMentorDevoteesByGroup(
-                          summaries,
-                          group.id,
-                        ).map((s) => s.devoteeId)
-                        const isGroupExactMatch =
-                          effectiveSelectedIds.length === groupDevoteeIds.length &&
-                          groupDevoteeIds.every((id) => effectiveSelectedIds.includes(id))
-                        return (
-                          <Pressable
-                            key={group.id}
-                            onPress={() => handleSelectGroupFilter(group.id)}
-                            style={[
-                              styles.devoteeChip,
-                              isGroupExactMatch ? styles.devoteeChipSelected : null,
-                            ]}
-                            accessibilityRole="button"
-                          >
-                            <Text
-                              style={[
-                                styles.devoteeChipText,
-                                isGroupExactMatch ? styles.devoteeChipTextSelected : null,
-                              ]}
-                            >
-                              Group: {group.name} ({group.count})
-                            </Text>
-                          </Pressable>
-                        )
-                      })}
-                    </View>
-                  ) : null}
-
-                  <View style={styles.devoteeChipWrap}>
-                    {summaries.map((summary) => {
-                      const isSelected = effectiveSelectedIds.includes(summary.devoteeId)
-                      return (
-                        <Pressable
-                          key={summary.devoteeId}
-                          onPress={() => toggleDevoteeSelection(summary.devoteeId)}
-                          style={[
-                            styles.devoteeChip,
-                            isSelected ? styles.devoteeChipSelected : null,
-                          ]}
-                          accessibilityRole="checkbox"
-                          accessibilityState={{ checked: isSelected }}
-                        >
-                          <Text
-                            style={[
-                              styles.devoteeChipText,
-                              isSelected ? styles.devoteeChipTextSelected : null,
-                            ]}
-                          >
-                            {isSelected ? '✓ ' : ''}
-                            {summary.fullName}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
-
-                  <Text style={styles.aiSectionLabel}>3. Open in AI Assistant</Text>
-                  <View style={styles.filterRow}>
-                    {AI_PROVIDERS.map((provider) => (
-                      <Button
-                        key={provider}
-                        title={AI_PROVIDER_LABELS[provider]}
-                        variant="primary"
-                        disabled={aiBusy || effectiveSelectedIds.length === 0}
-                        onPress={() => void handleLaunchMentorAi(provider)}
-                      />
-                    ))}
+                <Text style={styles.aiSectionLabel}>3. Open in AI Assistant</Text>
+                <View style={styles.filterRow}>
+                  {AI_PROVIDERS.map((provider) => (
                     <Button
-                      title="Copy Prompt"
-                      variant="outline"
+                      key={provider}
+                      title={AI_PROVIDER_LABELS[provider]}
+                      size="sm"
+                      variant="primary"
                       disabled={aiBusy || effectiveSelectedIds.length === 0}
-                      onPress={() => void handleCopyMentorAiPrompt()}
+                      onPress={() => void handleLaunchMentorAi(provider)}
                     />
-                  </View>
-
-                  {aiStatusMessage ? (
-                    <Text style={styles.aiStatusText}>{aiStatusMessage}</Text>
-                  ) : null}
+                  ))}
+                  <Button
+                    title="Copy Prompt"
+                    size="sm"
+                    variant="outline"
+                    disabled={aiBusy || effectiveSelectedIds.length === 0}
+                    onPress={() => void handleCopyMentorAiPrompt()}
+                  />
                 </View>
+
+                {aiStatusMessage ? (
+                  <Text style={styles.aiStatusText}>{aiStatusMessage}</Text>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
+
+          {/* Youth Groups — Clean Horizontal Scroll Strip */}
+          {groupOptions.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalFilterStrip}
+            >
+              <Pressable
+                onPress={() => handleSelectGroupFilter('all')}
+                style={[
+                  styles.devoteeChip,
+                  groupFilter === 'all' ? styles.devoteeChipSelected : null,
+                ]}
+                accessibilityRole="button"
+              >
+                <Text
+                  style={[
+                    styles.devoteeChipText,
+                    groupFilter === 'all' ? styles.devoteeChipTextSelected : null,
+                  ]}
+                >
+                  All Groups ({summaries.length})
+                </Text>
+              </Pressable>
+              {groupOptions.map((group) => {
+                const isSelected = groupFilter === group.id
+                return (
+                  <Pressable
+                    key={group.id}
+                    onPress={() => handleSelectGroupFilter(group.id)}
+                    style={[
+                      styles.devoteeChip,
+                      isSelected ? styles.devoteeChipSelected : null,
+                    ]}
+                    accessibilityRole="button"
+                  >
+                    <Text
+                      style={[
+                        styles.devoteeChipText,
+                        isSelected ? styles.devoteeChipTextSelected : null,
+                      ]}
+                    >
+                      {group.name} ({group.count})
+                    </Text>
+                  </Pressable>
+                )
+              })}
+              {ungroupedCount > 0 ? (
+                <Pressable
+                  onPress={() => handleSelectGroupFilter('ungrouped')}
+                  style={[
+                    styles.devoteeChip,
+                    groupFilter === 'ungrouped' ? styles.devoteeChipSelected : null,
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Text
+                    style={[
+                      styles.devoteeChipText,
+                      groupFilter === 'ungrouped' ? styles.devoteeChipTextSelected : null,
+                    ]}
+                  >
+                    Ungrouped ({ungroupedCount})
+                  </Text>
+                </Pressable>
               ) : null}
-            </Card>
+            </ScrollView>
+          ) : null}
 
-            <View style={styles.filterRow}>
-              {MENTOR_DEVOTEE_FILTERS.map((option) => (
-                <Button
-                  key={option}
-                  title={FILTER_LABELS[option]}
-                  variant={filter === option ? 'primary' : 'outline'}
-                  onPress={() => setFilter(option)}
-                />
-              ))}
-            </View>
+          {/* Search Input */}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search devotees by name…"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+            accessibilityLabel="Search devotees by name"
+          />
 
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search by name"
-              placeholderTextColor={colors.placeholder ?? colors.muted}
-              value={search}
-              onChangeText={setSearch}
-              autoCapitalize="none"
-              accessibilityLabel="Search devotees by name"
-            />
+          {/* Single-Row Horizontal Scrollable Status Filters */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalFilterStrip}
+          >
+            {MENTOR_DEVOTEE_FILTERS.map((option) => (
+              <Button
+                key={option}
+                title={FILTER_LABELS[option]}
+                size="sm"
+                variant={filter === option ? 'primary' : 'outline'}
+                onPress={() => setFilter(option)}
+              />
+            ))}
+          </ScrollView>
 
-            {visibleSummaries.length === 0 ? (
-              <Text style={styles.rowMuted}>No devotees match this filter.</Text>
-            ) : (
-              visibleSummaries.map((summary) => (
-                <DevoteeSummaryRow key={summary.devoteeId} summary={summary} />
-              ))
-            )}
-          </>
-        ) : null}
+          {visibleSummaries.length === 0 ? (
+            <Text style={styles.rowMuted}>No devotees match this filter.</Text>
+          ) : (
+            visibleSummaries.map((summary) => (
+              <DevoteeSummaryRow key={summary.devoteeId} summary={summary} />
+            ))
+          )}
+        </>
+      ) : null}
 
-        <Button
-          title="Announcements"
-          variant="outline"
-          onPress={() => router.push('/mentor/announcements')}
-        />
+      <Button
+        title="Announcements"
+        variant="outline"
+        size="sm"
+        onPress={() => router.push('/mentor/announcements')}
+      />
 
-        <AppUpdateSection />
-      </ScrollView>
+      <AppUpdateSection />
+    </ScrollView>
   )
 }
 
@@ -545,38 +572,49 @@ function createStyles(colors: ThemeColors) {
     content: {
       flexGrow: 1,
       padding: spacing.md,
-      gap: spacing.md,
+      gap: spacing.sm + 2,
       backgroundColor: colors.background,
     },
     headerActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
+      gap: 6,
     },
     header: {
-      gap: 2,
-      paddingBottom: spacing.xs,
+      gap: 1,
     },
     eyebrow: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
       fontWeight: '600',
       fontFamily: fontFamily.semiBold,
       color: colors.primary,
     },
     headerTitle: {
-      fontSize: fontSize.xl,
+      fontSize: fontSize.lg,
       fontWeight: '700',
       fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
-    statsRow: {
+    overviewCard: {
       flexDirection: 'row',
+      alignItems: 'center',
       justifyContent: 'space-between',
-      gap: spacing.xs,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      paddingVertical: spacing.sm + 2,
+      paddingHorizontal: spacing.sm,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+    },
+    statDivider: {
+      width: StyleSheet.hairlineWidth,
+      alignSelf: 'stretch',
+      backgroundColor: colors.border,
     },
     stat: {
       flex: 1,
       alignItems: 'center',
+      gap: 1,
     },
     statLabel: {
       fontSize: fontSize.xs,
@@ -585,19 +623,58 @@ function createStyles(colors: ThemeColors) {
       textAlign: 'center',
     },
     statValue: {
-      fontSize: fontSize.xl,
+      fontSize: fontSize.lg,
       fontWeight: '700',
       fontFamily: fontFamily.bold,
       color: colors.foreground,
     },
+    aiBanner: {
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      gap: spacing.sm,
+    },
+    aiBannerHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
+    aiBannerTitleGroup: {
+      flex: 1,
+      gap: 1,
+    },
+    aiBannerTitle: {
+      fontSize: fontSize.sm,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+      color: colors.foreground,
+    },
+    aiBannerSubtitle: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.regular,
+      color: colors.muted,
+    },
+    aiDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.border,
+    },
     filterRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: spacing.sm,
+      gap: spacing.xs,
+    },
+    horizontalFilterStrip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingVertical: 2,
     },
     aiContainer: {
       gap: spacing.sm,
-      paddingTop: spacing.xs,
     },
     aiSectionLabel: {
       fontSize: fontSize.xs,
@@ -657,40 +734,46 @@ function createStyles(colors: ThemeColors) {
     searchInput: {
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 8,
+      backgroundColor: colors.card,
+      borderRadius: radius.md,
       paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      fontSize: fontSize.base,
+      paddingVertical: spacing.xs + 4,
+      fontSize: fontSize.sm,
       fontFamily: fontFamily.regular,
       color: colors.foreground,
     },
     row: {
       backgroundColor: colors.card,
       borderRadius: radius.lg,
-      padding: spacing.md,
-      gap: 4,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 4,
+      gap: 3,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
       shadowColor: colors.shadow,
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 4 },
-      elevation: 2,
+      shadowOpacity: 0.04,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 1,
     },
     rowHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: spacing.xs,
     },
     rowName: {
       fontSize: fontSize.base,
       fontWeight: '600',
       fontFamily: fontFamily.semiBold,
       color: colors.foreground,
+      flexShrink: 1,
     },
     groupBadgeRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 6,
-      marginVertical: 2,
+      marginVertical: 1,
     },
     groupBadge: {
       backgroundColor: colors.primarySoft,
@@ -706,18 +789,18 @@ function createStyles(colors: ThemeColors) {
       color: colors.primary,
     },
     rowMuted: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
       fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     badgeSubmitted: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
       fontWeight: '600',
       fontFamily: fontFamily.semiBold,
       color: colors.success,
     },
     badgePending: {
-      fontSize: fontSize.sm,
+      fontSize: fontSize.xs,
       fontWeight: '600',
       fontFamily: fontFamily.semiBold,
       color: colors.warning,

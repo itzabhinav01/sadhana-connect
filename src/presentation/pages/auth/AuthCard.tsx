@@ -19,7 +19,12 @@ interface AuthCardProps {
 export function AuthCard({ title, description, children }: AuthCardProps) {
   return (
     <Card className="w-full max-w-sm">
-      <CardHeader>
+      <CardHeader className="items-center text-center">
+        <img
+          src="/logo.png"
+          alt="Sadhana Connect"
+          className="mb-2 size-14 rounded-xl object-contain shadow-sm"
+        />
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>

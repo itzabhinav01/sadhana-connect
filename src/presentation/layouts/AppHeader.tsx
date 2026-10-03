@@ -31,11 +31,19 @@ export function AppHeader({ navItems, profile, email }: AppHeaderProps) {
   const hasBottomTabs = getBottomTabItemsForRole(profile.role) !== null
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+    <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2.5 border-b bg-background/95 px-4 backdrop-blur-sm">
       {hasBottomTabs ? null : <MobileNav items={navItems} />}
-      <span className="text-base font-semibold md:hidden">
-        Sadhana Connect
-      </span>
+      <div className="flex items-center gap-2 md:hidden">
+        <img
+          src="/logo.png"
+          alt=""
+          aria-hidden="true"
+          className="size-7 rounded-md object-contain shadow-xs"
+        />
+        <span className="text-base font-semibold tracking-tight">
+          Sadhana Connect
+        </span>
+      </div>
       {pageTitle ? (
         <h1 className="hidden text-sm font-medium text-foreground md:block">
           {pageTitle}

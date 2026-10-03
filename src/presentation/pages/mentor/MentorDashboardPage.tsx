@@ -205,60 +205,61 @@ export function MentorDashboardPage() {
           {groupOptions.length > 0 ? (
             <div
               aria-label="Filter devotees by group"
-              className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+              className="flex flex-wrap items-center gap-2"
             >
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="mr-1 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 <Users className="size-3.5 text-primary" aria-hidden="true" />
-                <span>Youth Groups</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
+                <span>Groups:</span>
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant={groupFilter === 'all' ? 'default' : 'outline'}
+                aria-pressed={groupFilter === 'all'}
+                onClick={() => handleSelectGroupFilter('all')}
+              >
+                All Groups ({summaries.length})
+              </Button>
+              {groupOptions.map((group) => (
+                <Button
+                  key={group.id}
+                  type="button"
+                  size="sm"
+                  variant={groupFilter === group.id ? 'default' : 'outline'}
+                  aria-pressed={groupFilter === group.id}
+                  onClick={() => handleSelectGroupFilter(group.id)}
+                >
+                  {group.name} ({group.count})
+                </Button>
+              ))}
+              {ungroupedCount > 0 ? (
                 <Button
                   type="button"
                   size="sm"
-                  variant={groupFilter === 'all' ? 'default' : 'outline'}
-                  aria-pressed={groupFilter === 'all'}
-                  onClick={() => handleSelectGroupFilter('all')}
+                  variant={groupFilter === 'ungrouped' ? 'default' : 'outline'}
+                  aria-pressed={groupFilter === 'ungrouped'}
+                  onClick={() => handleSelectGroupFilter('ungrouped')}
                 >
-                  All Groups ({summaries.length})
+                  Ungrouped ({ungroupedCount})
                 </Button>
-                {groupOptions.map((group) => (
-                  <Button
-                    key={group.id}
-                    type="button"
-                    size="sm"
-                    variant={groupFilter === group.id ? 'default' : 'outline'}
-                    aria-pressed={groupFilter === group.id}
-                    onClick={() => handleSelectGroupFilter(group.id)}
-                  >
-                    {group.name} ({group.count})
-                  </Button>
-                ))}
-                {ungroupedCount > 0 ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={groupFilter === 'ungrouped' ? 'default' : 'outline'}
-                    aria-pressed={groupFilter === 'ungrouped'}
-                    onClick={() => handleSelectGroupFilter('ungrouped')}
-                  >
-                    Ungrouped ({ungroupedCount})
-                  </Button>
-                ) : null}
-              </div>
+              ) : null}
             </div>
           ) : null}
 
           <MentorSummaryCards summaries={groupFilteredSummaries} />
 
-          <Card className="border-primary/20 bg-primary/[0.02]">
-            <CardHeader className="pb-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Card className="border-primary/20 bg-primary/[0.02] py-3">
+            <CardHeader className="px-4 py-0">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-4 text-primary" aria-hidden="true" />
-                  <CardTitle className="text-base">
-                    AI Sadhana Analysis (Mentor Mode
-                    {selectedGroupLabel ? ` · ${selectedGroupLabel}` : ''})
+                  <CardTitle className="text-sm font-semibold">
+                    AI Sadhana Analysis
+                    {selectedGroupLabel ? ` (${selectedGroupLabel})` : ''}
                   </CardTitle>
+                  <span className="text-xs text-muted-foreground">
+                    · {effectiveSelectedIds.length}/{summaries.length} devotees
+                  </span>
                 </div>
                 <Button
                   type="button"
@@ -266,14 +267,9 @@ export function MentorDashboardPage() {
                   size="sm"
                   onClick={() => setAiExpanded((prev) => !prev)}
                 >
-                  {aiExpanded
-                    ? 'Hide AI Analysis'
-                    : `Analyze ${selectedGroupLabel ?? 'Devotees'} with AI (${effectiveSelectedIds.length}/${summaries.length})`}
+                  {aiExpanded ? 'Close' : 'Analyze with AI'}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Get a structured Group Health Snapshot, categorized devotee care list, coaching points, and ready-to-send WhatsApp follow-up drafts in ChatGPT, Gemini, or Claude.
-              </p>
             </CardHeader>
 
             {aiExpanded ? (

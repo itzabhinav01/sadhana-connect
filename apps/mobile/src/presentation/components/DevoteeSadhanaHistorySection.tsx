@@ -74,6 +74,7 @@ export function ReadOnlyReportRow({
         <>
           <Button
             title={commentsOpen ? 'Hide comments' : 'Comments'}
+            size="sm"
             variant="outline"
             onPress={() => setCommentsOpen((current) => !current)}
           />
@@ -426,6 +427,7 @@ export function DevoteeSadhanaHistorySection({
               <Button
                 key={quickOption.value}
                 title={quickOption.label}
+                size="sm"
                 variant={option === quickOption.value ? 'primary' : 'outline'}
                 onPress={() => setOption(quickOption.value)}
               />
@@ -548,6 +550,7 @@ export function DevoteeSadhanaHistorySection({
                 <Button
                   key={provider}
                   title={AI_PROVIDER_LABELS[provider]}
+                  size="sm"
                   variant="outline"
                   disabled={aiBusy}
                   onPress={() => void handleOpenAiProvider(provider)}
@@ -555,6 +558,7 @@ export function DevoteeSadhanaHistorySection({
               ))}
               <Button
                 title="Copy Prompt"
+                size="sm"
                 variant="outline"
                 disabled={aiBusy}
                 onPress={() => void handleCopyAiPrompt()}

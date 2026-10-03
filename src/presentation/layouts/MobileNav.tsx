@@ -36,7 +36,15 @@ export function MobileNav({ items }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
-          <SheetTitle>Sadhana Connect</SheetTitle>
+          <SheetTitle className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt=""
+              aria-hidden="true"
+              className="size-7 rounded-md object-contain shadow-xs"
+            />
+            <span>Sadhana Connect</span>
+          </SheetTitle>
         </SheetHeader>
         <div className="px-4 pb-4">
           <NavLinks items={items} onNavigate={() => setOpen(false)} />

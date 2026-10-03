@@ -85,6 +85,7 @@ export default function DashboardScreen() {
         <View style={styles.headerActions}>
           <Button
             title="Profile"
+            size="sm"
             onPress={() => router.push('/profile')}
             variant="outline"
           />
@@ -92,6 +93,7 @@ export default function DashboardScreen() {
           <Button
             title="Sign Out"
             pendingTitle="…"
+            size="sm"
             isPending={signOut.isPending}
             onPress={handleSignOut}
             variant="outline"
@@ -159,16 +161,19 @@ export default function DashboardScreen() {
               <View style={styles.actionsRow}>
                 <Button
                   title="Edit Sadhana"
+                  size="sm"
                   onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
                   variant="outline"
                 />
                 <Button
                   title="Japa Counter"
+                  size="sm"
                   onPress={() => router.push('/devotee/japa')}
                   variant="outline"
                 />
                 <Button
                   title="Share to WhatsApp"
+                  size="sm"
                   onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
                   variant="outline"
                 />
@@ -180,10 +185,12 @@ export default function DashboardScreen() {
               <View style={styles.actionsRow}>
                 <Button
                   title="Fill Sadhana"
+                  size="sm"
                   onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: today } })}
                 />
                 <Button
                   title="Japa Counter"
+                  size="sm"
                   onPress={() => router.push('/devotee/japa')}
                   variant="outline"
                 />
@@ -270,6 +277,7 @@ export default function DashboardScreen() {
           </Text>
           <Button
             title="Open Settings"
+            size="sm"
             variant="outline"
             onPress={() => router.push('/devotee/settings')}
           />
@@ -285,13 +293,13 @@ function createStyles(colors: ThemeColors) {
     content: {
       flexGrow: 1,
       padding: spacing.md,
-      gap: spacing.md,
+      gap: spacing.sm + 2,
       backgroundColor: colors.background,
     },
     headerActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
+      gap: 6,
     },
     header: {
       gap: 2,

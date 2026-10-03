@@ -6,6 +6,7 @@ import { fontSize, radius, spacing, fontFamily, touchTarget } from '../../shared
 import type { ThemeColors } from '../../shared/theme'
 
 type ButtonVariant = 'primary' | 'outline' | 'text' | 'destructive'
+type ButtonSize = 'default' | 'sm'
 
 interface ButtonProps {
   onPress: () => void
@@ -14,6 +15,7 @@ interface ButtonProps {
   isPending?: boolean
   disabled?: boolean
   variant?: ButtonVariant
+  size?: ButtonSize
   // Overrides the accessible name when the visible title alone would be
   // ambiguous — e.g. several quick-amount buttons on the same screen
   // sharing the same number.
@@ -27,6 +29,7 @@ export function Button({
   isPending = false,
   disabled = false,
   variant = 'primary',
+  size = 'default',
   accessibilityLabel,
 }: ButtonProps) {
   const { colors } = useTheme()
@@ -58,9 +61,10 @@ export function Button({
       accessibilityLabel={
         isPending && pendingTitle ? pendingTitle : (accessibilityLabel ?? title)
       }
-      hitSlop={variant === 'text' ? spacing.xs : undefined}
+      hitSlop={variant === 'text' || size === 'sm' ? spacing.xs : undefined}
       style={({ pressed }) => [
         styles.button,
+        size === 'sm' && styles.buttonSm,
         variant === 'text' && styles.buttonText,
         containerStyle,
         (disabled || isPending) && styles.disabled,
@@ -68,9 +72,11 @@ export function Button({
       ]}
     >
       {isPending ? (
-        <ActivityIndicator color={spinnerColor} />
+        <ActivityIndicator color={spinnerColor} size={size === 'sm' ? 'small' : undefined} />
       ) : (
-        <Text style={textStyle}>{isPending && pendingTitle ? pendingTitle : title}</Text>
+        <Text style={[textStyle, size === 'sm' && styles.textSm]}>
+          {isPending && pendingTitle ? pendingTitle : title}
+        </Text>
       )}
     </Pressable>
   )
@@ -85,6 +91,15 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: touchTarget,
+    },
+    buttonSm: {
+      borderRadius: radius.full,
+      paddingVertical: 6,
+      paddingHorizontal: spacing.sm + 4,
+      minHeight: 34,
+    },
+    textSm: {
+      fontSize: fontSize.sm,
     },
     // The "text" variant is intentionally low-chrome (no border, tighter
     // padding) — it still meets touchTarget via hitSlop rather than

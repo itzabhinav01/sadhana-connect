@@ -27,13 +27,15 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     card: {
       borderRadius: radius.lg,
-      padding: spacing.lg,
+      padding: spacing.md,
       gap: spacing.sm,
       backgroundColor: colors.card,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
       shadowColor: colors.shadow,
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 3 },
       elevation: 2,
     },
     title: {

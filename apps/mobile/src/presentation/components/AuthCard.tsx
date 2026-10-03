@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, radius, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const appLogo = require('../../../assets/logo.png')
 
 interface AuthCardProps {
   title: string
@@ -22,6 +25,7 @@ export function AuthCard({ title, description, children }: AuthCardProps) {
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.brand}>
+        <Image source={appLogo} style={styles.logoImage} resizeMode="contain" />
         <Text style={styles.brandMark}>Sadhana Connect</Text>
       </View>
       <View style={styles.card}>
@@ -43,7 +47,13 @@ function createStyles(colors: ThemeColors) {
     },
     brand: {
       alignItems: 'center',
+      gap: spacing.sm,
       marginBottom: spacing.lg,
+    },
+    logoImage: {
+      width: 64,
+      height: 64,
+      borderRadius: 16,
     },
     brandMark: {
       fontSize: fontSize.lg,

@@ -124,6 +124,7 @@ export default function AnalyticsScreen() {
           <Button
             key={preset.days}
             title={preset.label}
+            size="sm"
             variant={selectedDays === preset.days ? 'primary' : 'outline'}
             onPress={() => setSelectedDays(preset.days)}
           />
@@ -147,6 +148,7 @@ export default function AnalyticsScreen() {
                 <Button
                   key={provider}
                   title={AI_PROVIDER_LABELS[provider]}
+                  size="sm"
                   variant="primary"
                   disabled={aiBusy}
                   onPress={() => void handleOpenAiProvider(provider)}
@@ -154,6 +156,7 @@ export default function AnalyticsScreen() {
               ))}
               <Button
                 title="Copy Prompt"
+                size="sm"
                 variant="outline"
                 disabled={aiBusy}
                 onPress={() => void handleCopyAiPrompt()}
