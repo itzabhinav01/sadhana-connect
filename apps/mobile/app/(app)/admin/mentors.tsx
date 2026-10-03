@@ -1,7 +1,7 @@
 import { useAdminUsers, useMentorDevoteeCounts } from '@sadhana-connect/admin'
 import { useRouter } from 'expo-router'
-import { useMemo } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useMemo, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
@@ -20,16 +20,21 @@ export default function AdminMentorsScreen() {
   const router = useRouter()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+  const [search, setSearch] = useState('')
   const mentorsQuery = useAdminUsers({ role: 'mentor' })
   const countsQuery = useMentorDevoteeCounts()
 
   const mentors = mentorsQuery.data?.pages.flatMap((page) => page.users) ?? []
+  const searchTerm = search.trim().toLowerCase()
+  const visibleMentors = searchTerm
+    ? mentors.filter((mentor) => mentor.fullName.toLowerCase().includes(searchTerm))
+    : mentors
   const countByMentorId = new Map(
     (countsQuery.data ?? []).map((count) => [count.mentorId, count.activeDevoteeCount]),
   )
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       {mentorsQuery.isPending || countsQuery.isPending ? (
         <Text style={styles.mutedLine}>Loading…</Text>
       ) : null}
@@ -42,7 +47,24 @@ export default function AdminMentorsScreen() {
         <Text style={styles.mutedLine}>No mentors yet.</Text>
       ) : null}
 
-      {mentors.map((mentor) => (
+      {mentors.length > 0 ? (
+        <>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search mentors by name…"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+            accessibilityLabel="Search mentors by name"
+          />
+          {visibleMentors.length === 0 ? (
+            <Text style={styles.mutedLine}>No mentors match this search.</Text>
+          ) : null}
+        </>
+      ) : null}
+
+      {visibleMentors.map((mentor) => (
         <Pressable
           key={mentor.id}
           onPress={() => router.push(`/admin/users/${mentor.id}`)}
@@ -79,9 +101,20 @@ export default function AdminMentorsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
+    },
+    searchInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      fontSize: fontSize.base,
+      fontFamily: fontFamily.regular,
+      color: colors.foreground,
     },
     mutedLine: {
       fontSize: fontSize.sm,

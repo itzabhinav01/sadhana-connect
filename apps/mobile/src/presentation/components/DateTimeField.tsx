@@ -16,6 +16,7 @@ interface DateTimeFieldProps<T extends FieldValues> {
   // Date is always required (defaults to today); time fields are
   // optional and clearable, matching web's optional time inputs.
   clearable?: boolean
+  onValueChange?: (value: string) => void
 }
 
 function parseStoredValue(value: string | undefined, mode: 'date' | 'time'): Date {
@@ -51,6 +52,7 @@ export function DateTimeField<T extends FieldValues>({
   label,
   mode,
   clearable = false,
+  onValueChange,
 }: DateTimeFieldProps<T>) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -66,7 +68,9 @@ export function DateTimeField<T extends FieldValues>({
         const handleChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
           setIsPickerOpen(Platform.OS === 'ios')
           if (event.type === 'set' && selectedDate) {
-            onChange(formatToStoredValue(selectedDate, mode))
+            const nextValue = formatToStoredValue(selectedDate, mode)
+            onChange(nextValue)
+            onValueChange?.(nextValue)
           }
         }
 

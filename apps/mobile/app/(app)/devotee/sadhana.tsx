@@ -21,6 +21,7 @@ import { DateTimeField } from '../../../src/presentation/components/DateTimeFiel
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { NumberField } from '../../../src/presentation/components/NumberField'
+import { SadhanaReportComments } from '../../../src/presentation/components/SadhanaReportComments'
 import { StickyFooterBar } from '../../../src/presentation/components/StickyFooterBar'
 import { TextField } from '../../../src/presentation/components/TextField'
 import { spacing } from '../../../src/shared/theme'
@@ -98,16 +99,30 @@ function computeInitialExpanded(
 
 export default function SadhanaFormScreen() {
   const params = useLocalSearchParams<{ date?: string; prefillRounds?: string }>()
-  const date = params.date ?? getLocalDateIso()
+  const paramDate = params.date ?? getLocalDateIso()
+  const [selectedDate, setSelectedDate] = useState(paramDate)
+  const [syncedParamDate, setSyncedParamDate] = useState(paramDate)
+
+  if (paramDate !== syncedParamDate) {
+    setSyncedParamDate(paramDate)
+    setSelectedDate(paramDate)
+  }
+
   const prefillRounds = parsePrefillRoundsParam(params.prefillRounds)
-  const existingReport = useSadhanaReport(date)
+  const existingReport = useSadhanaReport(selectedDate)
 
   if (existingReport.isPending) {
     return <LoadingScreen />
   }
 
   return (
-    <SadhanaFormBody date={date} existingReport={existingReport.data ?? null} prefillRounds={prefillRounds} />
+    <SadhanaFormBody
+      key={`${selectedDate}-${existingReport.data?.id ?? 'new'}-${prefillRounds ?? ''}`}
+      date={selectedDate}
+      existingReport={existingReport.data ?? null}
+      prefillRounds={prefillRounds}
+      onDateChange={setSelectedDate}
+    />
   )
 }
 
@@ -115,6 +130,7 @@ function SadhanaFormBody({
   date,
   existingReport,
   prefillRounds,
+  onDateChange,
 }: {
   date: string
   existingReport: ReturnType<typeof useSadhanaReport>['data']
@@ -122,6 +138,7 @@ function SadhanaFormBody({
   // action — an explicitly devotee-chosen initial value for Total
   // Rounds, matching web's SadhanaReportForm.
   prefillRounds?: number
+  onDateChange: (nextDate: string) => void
 }) {
   const router = useRouter()
   const { colors } = useTheme()
@@ -145,6 +162,7 @@ function SadhanaFormBody({
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
     computeInitialExpanded(isEditingMode, defaultValues),
   )
+  const [commentsExpanded, setCommentsExpanded] = useState(false)
   const toggleSection = (key: SectionKey) =>
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
 
@@ -192,12 +210,18 @@ function SadhanaFormBody({
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
         {upsertReport.isError ? (
           <ErrorBanner message="Something went wrong saving your sadhana. Please try again." />
         ) : null}
 
-        <DateTimeField control={control} name="reportDate" label="Date" mode="date" />
+        <DateTimeField
+          control={control}
+          name="reportDate"
+          label="Date"
+          mode="date"
+          onValueChange={onDateChange}
+        />
 
         <Accordion
           title="Chanting"
@@ -253,7 +277,12 @@ function SadhanaFormBody({
           onToggle={() => toggleSection('hearing')}
           summary={hearingSummary}
         >
-          <TextField control={control} name="hearingMinutes" label="Hearing Minutes" keyboardType="numeric" />
+          <NumberField
+            control={control}
+            name="hearingMinutes"
+            label="Hearing Minutes"
+            quickAmounts={[10, 15, 30, 60]}
+          />
           <TextField control={control} name="speakerName" label="Speaker Name" />
         </Accordion>
 
@@ -289,6 +318,17 @@ function SadhanaFormBody({
           <TextField control={control} name="notes" label="Notes" />
           <TextField control={control} name="signatureText" label="Signature" />
         </Accordion>
+
+        {existingReport ? (
+          <Accordion
+            title="Mentor Comments"
+            expanded={commentsExpanded}
+            onToggle={() => setCommentsExpanded((prev) => !prev)}
+            summary="Tap to view mentor feedback"
+          >
+            <SadhanaReportComments sadhanaReportId={existingReport.id} />
+          </Accordion>
+        ) : null}
       </ScrollView>
 
       <StickyFooterBar>
@@ -306,6 +346,7 @@ function SadhanaFormBody({
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

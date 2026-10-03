@@ -52,6 +52,7 @@ function UserSearchPicker({ role, label, selectedId, selectedName, onSelect }: U
       <TextInput
         style={styles.input}
         placeholder={`Search ${label.toLowerCase()} by name…`}
+        placeholderTextColor={colors.placeholder ?? colors.muted}
         value={search}
         onChangeText={setSearch}
         autoCapitalize="none"
@@ -80,6 +81,8 @@ export default function AdminAssignmentsScreen() {
   const [mentorId, setMentorId] = useState<string | null>(null)
   const [mentorName, setMentorName] = useState<string | null>(null)
   const [blockedMessage, setBlockedMessage] = useState<string | null>(null)
+  const [assignmentSearch, setAssignmentSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
 
   const assign = useAssignMentor()
   const assignmentsQuery = useAdminAssignments()
@@ -106,8 +109,20 @@ export default function AdminAssignmentsScreen() {
     )
   }
 
+  const allAssignments = assignmentsQuery.data ?? []
+  const searchTerm = assignmentSearch.trim().toLowerCase()
+  const visibleAssignments = allAssignments.filter((assignment) => {
+    if (statusFilter === 'active' && !assignment.isActive) return false
+    if (statusFilter === 'inactive' && assignment.isActive) return false
+    if (!searchTerm) return true
+    return (
+      assignment.mentorName.toLowerCase().includes(searchTerm) ||
+      assignment.devoteeName.toLowerCase().includes(searchTerm)
+    )
+  })
+
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <Card title="Assign a Mentor">
         <UserSearchPicker
           role="devotee"
@@ -151,7 +166,34 @@ export default function AdminAssignmentsScreen() {
         <Text style={styles.mutedLine}>No assignments yet.</Text>
       ) : null}
 
-      {assignmentsQuery.data?.map((assignment) => (
+      {allAssignments.length > 0 ? (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Search assignments by mentor or devotee…"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
+            value={assignmentSearch}
+            onChangeText={setAssignmentSearch}
+            autoCapitalize="none"
+            accessibilityLabel="Search assignments"
+          />
+          <View style={styles.filterRow}>
+            {(['all', 'active', 'inactive'] as const).map((option) => (
+              <Button
+                key={option}
+                title={option === 'all' ? 'All' : option === 'active' ? 'Active' : 'Inactive'}
+                variant={statusFilter === option ? 'primary' : 'outline'}
+                onPress={() => setStatusFilter(option)}
+              />
+            ))}
+          </View>
+          {visibleAssignments.length === 0 ? (
+            <Text style={styles.mutedLine}>No assignments match this filter.</Text>
+          ) : null}
+        </>
+      ) : null}
+
+      {visibleAssignments.map((assignment) => (
         <View key={assignment.id} style={styles.assignmentRow}>
           <Text style={styles.rowName}>
             {assignment.mentorName} mentors {assignment.devoteeName}
@@ -179,9 +221,15 @@ export default function AdminAssignmentsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
     },
     fieldGroup: {
       gap: spacing.xs,

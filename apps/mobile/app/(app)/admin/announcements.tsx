@@ -366,7 +366,10 @@ export default function AdminAnnouncementsScreen() {
   const announcementsQuery = useAnnouncements()
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+    >
       <AdminAnnouncementForm />
 
       {announcementsQuery.isPending ? <Text style={styles.mutedLine}>Loading…</Text> : null}
@@ -388,6 +391,7 @@ export default function AdminAnnouncementsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

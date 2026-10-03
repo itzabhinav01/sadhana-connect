@@ -71,6 +71,7 @@ export function DevoteeSadhanaHistorySection({
   const [previewReports, setPreviewReports] = useState<SadhanaReport[]>([])
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   const [exportError, setExportError] = useState(false)
+  const [showMissedDates, setShowMissedDates] = useState(false)
   const [rangePrintTarget, setRangePrintTarget] = useState<{
     reports: SadhanaReport[]
     fromDate: string
@@ -277,13 +278,42 @@ export function DevoteeSadhanaHistorySection({
           ) : null}
 
           {validation.valid && historyQuery.isSuccess ? (
-            <p className="text-sm text-muted-foreground">
-              {missedDates.length === 0
-                ? `All ${allDates.length} days filled in this range.`
-                : `Missed ${missedDates.length} of ${allDates.length} days: ${missedDates
-                    .map(formatDisplayDate)
-                    .join(', ')}`}
-            </p>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm text-muted-foreground">
+                  {missedDates.length === 0
+                    ? `All ${allDates.length} days filled in this range.`
+                    : missedDates.length <= 7
+                      ? `Missed ${missedDates.length} of ${allDates.length} days: ${missedDates
+                          .map(formatDisplayDate)
+                          .join(', ')}`
+                      : `Missed ${missedDates.length} of ${allDates.length} days.`}
+                </p>
+                {missedDates.length > 7 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setShowMissedDates((current) => !current)}
+                  >
+                    {showMissedDates ? 'Hide missed dates' : 'Show missed dates'}
+                  </Button>
+                ) : null}
+              </div>
+              {missedDates.length > 7 && showMissedDates ? (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {missedDates.map((date) => (
+                    <span
+                      key={date}
+                      className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                    >
+                      {formatDisplayDate(date)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           ) : null}
 
           {validation.valid && historyQuery.isSuccess && historyQuery.data.length === 0 ? (

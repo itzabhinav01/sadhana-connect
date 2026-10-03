@@ -37,7 +37,10 @@ export default function AdminUsersScreen() {
   const users = usersQuery.data?.pages.flatMap((page) => page.users) ?? []
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+    >
       <TextInput
         style={styles.searchInput}
         placeholder="Search by name"
@@ -112,6 +115,7 @@ export default function AdminUsersScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

@@ -328,18 +328,11 @@ export function SadhanaReportForm({
                   )}
                 />
 
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="hearingMinutes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hearing Minutes</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Hearing Minutes"
+                  quickAmounts={[10, 15, 30, 60]}
                 />
 
                 <FormField

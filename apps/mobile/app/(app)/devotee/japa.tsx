@@ -64,7 +64,10 @@ export default function JapaCounterScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+    >
       <Text style={styles.heading}>Japa Counter</Text>
       <Text style={styles.mutedLine}>Tap to count each mantra. 108 beads make one round.</Text>
 
@@ -132,6 +135,7 @@ export default function JapaCounterScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.lg,
       alignItems: 'center',

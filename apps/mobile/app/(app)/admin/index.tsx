@@ -64,7 +64,10 @@ export default function AdminHomeScreen() {
           ),
         }}
       />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>
             Hare Krishna{userName ? `, ${userName}` : ''} (Admin) 🙏
@@ -143,6 +146,7 @@ export default function AdminHomeScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

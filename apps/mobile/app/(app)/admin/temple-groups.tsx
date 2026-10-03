@@ -51,6 +51,7 @@ function TempleGroupRow({ group }: { group: TempleGroup }) {
             style={styles.input}
             value={draftName}
             onChangeText={setDraftName}
+            placeholderTextColor={colors.placeholder ?? colors.muted}
             accessibilityLabel="Edit temple group name"
           />
           {renameError ? <Text style={styles.errorText}>{renameError}</Text> : null}
@@ -120,13 +121,17 @@ export default function AdminTempleGroupsScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={styles.content}
+    >
       <Card title="New temple group">
         <TextInput
           style={styles.input}
           value={newName}
           onChangeText={setNewName}
           placeholder="Group name…"
+          placeholderTextColor={colors.placeholder ?? colors.muted}
           accessibilityLabel="Group name"
         />
         <Button
@@ -157,6 +162,7 @@ export default function AdminTempleGroupsScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,

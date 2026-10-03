@@ -14,13 +14,13 @@ import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
+import { SadhanaReportComments } from './SadhanaReportComments'
 
 interface SadhanaReportRowProps {
   report: SadhanaReport
   // 'compact' (dashboard's Recent Reports card): date + summary + WhatsApp
   // share only. 'detailed' (History): also sleep/wake when present, plus
-  // Export PDF/Text — matching web's Dashboard-vs-History split, where
-  // export actions are History-only (Phase 16 approved product decision).
+  // Export PDF/Text and Comments — matching web's Dashboard-vs-History split.
   variant?: 'compact' | 'detailed'
 }
 
@@ -30,6 +30,7 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
   const styles = useMemo(() => createStyles(colors), [colors])
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [exportError, setExportError] = useState(false)
+  const [commentsOpen, setCommentsOpen] = useState(false)
   const hasSleepInfo = Boolean(report.sleepTime || report.wakeTime)
 
   const handleExportText = () => {
@@ -104,11 +105,28 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
             >
               <Text style={styles.actionLinkText}>Export Text</Text>
             </Pressable>
+            <Pressable
+              onPress={() => setCommentsOpen((current) => !current)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                commentsOpen
+                  ? `Hide comments for ${report.reportDate}`
+                  : `Comments for ${report.reportDate}`
+              }
+              style={styles.actionLink}
+            >
+              <Text style={styles.actionLinkText}>
+                {commentsOpen ? 'Hide comments' : 'Comments'}
+              </Text>
+            </Pressable>
           </>
         ) : null}
       </View>
       {exportError ? (
         <Text style={styles.errorLine}>Something went wrong exporting this report. Please try again.</Text>
+      ) : null}
+      {variant === 'detailed' && commentsOpen ? (
+        <SadhanaReportComments sadhanaReportId={report.id} />
       ) : null}
     </View>
   )

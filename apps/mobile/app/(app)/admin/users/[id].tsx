@@ -431,7 +431,10 @@ export default function AdminUserDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ title: user.fullName }} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={styles.content}
+      >
         <View>
           <Text style={styles.heading} accessibilityRole="header">
             {user.fullName}
@@ -468,6 +471,7 @@ export default function AdminUserDetailScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     content: {
+      flexGrow: 1,
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
