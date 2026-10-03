@@ -239,7 +239,7 @@ describe('NotificationsScreen', () => {
     await waitFor(() =>
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/devotee/sadhana',
-        params: { date: '2026-01-14' },
+        params: { date: '2026-01-14', openComments: '1' },
       }),
     )
   })

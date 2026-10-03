@@ -84,7 +84,10 @@ function useNavigateToNotification() {
         queryFn: () => supabaseSadhanaReportRepository.getReportDateById(reportId),
       })
       if (reportDate) {
-        router.push({ pathname: '/devotee/sadhana', params: { date: reportDate } })
+        router.push({
+          pathname: '/devotee/sadhana',
+          params: { date: reportDate, openComments: '1' },
+        })
         return
       }
     }

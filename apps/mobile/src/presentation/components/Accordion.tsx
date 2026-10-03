@@ -31,7 +31,7 @@ export function Accordion({ title, accent, expanded, onToggle, summary, children
     () => accent ?? { color: colors.muted, soft: colors.mutedBackground },
     [accent, colors.muted, colors.mutedBackground],
   )
-  const styles = useMemo(() => createStyles(resolvedAccent), [resolvedAccent])
+  const styles = useMemo(() => createStyles(resolvedAccent, colors.border), [resolvedAccent, colors.border])
   const duration = reducedMotion ? 0 : ANIMATION_MS
 
   return (
@@ -72,11 +72,13 @@ export function useSectionAccent(name: keyof typeof sectionAccents.light): Secti
   return sectionAccents[resolvedTheme][name]
 }
 
-function createStyles(accent: SectionAccent) {
+function createStyles(accent: SectionAccent, borderColor: string) {
   return StyleSheet.create({
     container: {
       backgroundColor: accent.soft,
       borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor,
       borderLeftWidth: 4,
       borderLeftColor: accent.color,
       overflow: 'hidden',

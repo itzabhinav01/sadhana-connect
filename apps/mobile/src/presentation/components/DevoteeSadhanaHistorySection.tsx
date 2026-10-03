@@ -1,4 +1,8 @@
 import {
+  AI_PROVIDERS,
+  AI_PROVIDER_LABELS,
+  buildAiProviderUrl,
+  buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
   buildSadhanaHistoryHtml,
   buildSadhanaRangeExportFilename,
@@ -6,6 +10,7 @@ import {
   sadhanaQueryKeys,
   useDevoteeReportHistory,
   validateDateRange,
+  type AiProvider,
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
 import type { SadhanaReport, SadhanaReportHistoryEntry } from '@sadhana-connect/domain'
@@ -17,11 +22,12 @@ import {
 import { useAuth } from '@sadhana-connect/auth'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
 import { useQueryClient } from '@tanstack/react-query'
+import * as Clipboard from 'expo-clipboard'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Print from 'expo-print'
 import * as Sharing from 'expo-sharing'
 import { useMemo, useState } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, spacing, fontFamily, radius } from '../../shared/theme'
@@ -167,6 +173,8 @@ export function DevoteeSadhanaHistorySection({
   const [previewReports, setPreviewReports] = useState<SadhanaReport[]>([])
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   const [exportError, setExportError] = useState(false)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null)
 
   const range = option === 'custom' ? customRange : getLastNDaysRange(Number(option))
   const validation = validateDateRange(range.fromDate, range.toDate)
@@ -178,6 +186,23 @@ export function DevoteeSadhanaHistorySection({
   const allDates = validation.valid ? buildDateRangeList(range.fromDate, range.toDate) : []
   const filledDates = new Set(historyQuery.data?.map((report) => report.reportDate) ?? [])
   const missedDates = allDates.filter((date) => !filledDates.has(date))
+
+  const historyEntries = historyQuery.data ?? []
+  const reportedCount = historyEntries.length
+  const completionPct =
+    allDates.length > 0 ? Math.round((reportedCount / allDates.length) * 100) : 0
+  const avgRounds =
+    reportedCount > 0
+      ? (historyEntries.reduce((sum, r) => sum + r.totalRounds, 0) / reportedCount).toFixed(1)
+      : '—'
+  const avgReading =
+    reportedCount > 0
+      ? `${Math.round(historyEntries.reduce((sum, r) => sum + r.readingMinutes, 0) / reportedCount)}m`
+      : '—'
+  const avgHearing =
+    reportedCount > 0
+      ? `${Math.round(historyEntries.reduce((sum, r) => sum + r.hearingMinutes, 0) / reportedCount)}m`
+      : '—'
 
   async function fetchFullReports(): Promise<SadhanaReport[]> {
     return queryClient.fetchQuery({
@@ -235,7 +260,7 @@ export function DevoteeSadhanaHistorySection({
       const reports = await fetchFullReports()
       const filename = buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'csv')
       const fileUri = `${FileSystem.cacheDirectory ?? ''}${filename}`
-      await FileSystem.writeAsStringAsync(fileUri, buildSadhanaHistoryCsv(reports), {
+      await FileSystem.writeAsStringAsync(fileUri, buildSadhanaHistoryCsv(reports, devoteeName), {
         encoding: FileSystem.EncodingType.UTF8,
       })
       await Sharing.shareAsync(fileUri, {
@@ -246,6 +271,57 @@ export function DevoteeSadhanaHistorySection({
       setExportError(true)
     } finally {
       setIsExportingCsv(false)
+    }
+  }
+
+  async function buildDevoteeAiPrompt(): Promise<string | null> {
+    if (!validation.valid) return null
+    setAiBusy(true)
+    setAiStatusMessage(null)
+    try {
+      const reports = await fetchFullReports()
+      return buildSadhanaAiPrompt({
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+        devotees: [
+          {
+            devoteeName: devoteeName || 'Devotee',
+            reports,
+          },
+        ],
+      })
+    } catch {
+      setExportError(true)
+      return null
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  async function handleOpenAiProvider(provider: AiProvider) {
+    const prompt = await buildDevoteeAiPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+    } catch {
+      // Ignore clipboard failure
+    }
+    setAiStatusMessage(`Prompt copied & opening ${AI_PROVIDER_LABELS[provider]}…`)
+    try {
+      await Linking.openURL(buildAiProviderUrl(provider, prompt))
+    } catch {
+      setAiStatusMessage('Prompt copied to clipboard! Paste it into your AI app.')
+    }
+  }
+
+  async function handleCopyAiPrompt() {
+    const prompt = await buildDevoteeAiPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+      setAiStatusMessage('AI analysis prompt copied to clipboard!')
+    } catch {
+      setAiStatusMessage('Could not copy prompt to clipboard.')
     }
   }
 
@@ -439,11 +515,61 @@ export function DevoteeSadhanaHistorySection({
           <ErrorBanner message="Something went wrong loading this devotee's history." />
         ) : null}
         {validation.valid && historyQuery.isSuccess ? (
-          <Text style={styles.rowMuted}>
-            {missedDates.length === 0
-              ? `All ${allDates.length} days filled in this range.`
-              : `Missed ${missedDates.length} of ${allDates.length} days.`}
-          </Text>
+          <View style={styles.sectionControlBlock}>
+            {/* Item 6: Range Analytics Summary */}
+            <View style={styles.metricsBar} accessibilityLabel="Range analytics summary">
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Completion</Text>
+                <Text style={styles.metricValue}>
+                  {completionPct}% ({reportedCount}/{allDates.length})
+                </Text>
+              </View>
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Avg Rounds</Text>
+                <Text style={styles.metricValue}>{avgRounds}</Text>
+              </View>
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Avg Reading</Text>
+                <Text style={styles.metricValue}>{avgReading}</Text>
+              </View>
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Avg Hearing</Text>
+                <Text style={styles.metricValue}>{avgHearing}</Text>
+              </View>
+            </View>
+
+            {/* Single-devotee AI Analysis */}
+            <View style={styles.sectionLabelRow}>
+              <Icon name="stats-chart-outline" size={14} color={colors.primary} />
+              <Text style={styles.sectionControlLabel}>AI Sadhana Analysis</Text>
+            </View>
+            <View style={styles.filterRow}>
+              {AI_PROVIDERS.map((provider) => (
+                <Button
+                  key={provider}
+                  title={AI_PROVIDER_LABELS[provider]}
+                  variant="outline"
+                  disabled={aiBusy}
+                  onPress={() => void handleOpenAiProvider(provider)}
+                />
+              ))}
+              <Button
+                title="Copy Prompt"
+                variant="outline"
+                disabled={aiBusy}
+                onPress={() => void handleCopyAiPrompt()}
+              />
+            </View>
+            {aiStatusMessage ? (
+              <Text style={styles.previewButtonText}>{aiStatusMessage}</Text>
+            ) : null}
+
+            <Text style={styles.rowMuted}>
+              {missedDates.length === 0
+                ? `All ${allDates.length} days filled in this range.`
+                : `Missed ${missedDates.length} of ${allDates.length} days.`}
+            </Text>
+          </View>
         ) : null}
         {validation.valid && historyQuery.isSuccess && historyQuery.data.length === 0 ? (
           <Text style={styles.rowMuted}>No reports in this range.</Text>

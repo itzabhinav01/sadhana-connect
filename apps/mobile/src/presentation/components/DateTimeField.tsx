@@ -126,23 +126,26 @@ function createStyles(colors: ThemeColors) {
     },
     label: {
       fontSize: fontSize.sm,
-      fontWeight: '500',
-      fontFamily: fontFamily.medium,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     input: {
       flex: 1,
-      borderWidth: 1,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
       borderColor: colors.border,
-      borderRadius: 8,
+      borderRadius: 10,
       paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
+      paddingVertical: spacing.sm + 2,
     },
     inputError: {
       borderColor: colors.destructive,
     },
     valueText: {
       fontSize: fontSize.base,
+      fontWeight: '500',
+      fontFamily: fontFamily.medium,
       color: colors.foreground,
     },
     clearButton: {

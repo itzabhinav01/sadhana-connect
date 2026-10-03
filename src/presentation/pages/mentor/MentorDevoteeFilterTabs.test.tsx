@@ -5,13 +5,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { MentorDevoteeFilterTabs } from '@/presentation/pages/mentor/MentorDevoteeFilterTabs'
 
 describe('MentorDevoteeFilterTabs', () => {
-  it('renders exactly All, Submitted Yesterday, and Pending Yesterday — no other filters', () => {
+  it('renders All, Submitted Yesterday, Pending Yesterday, Submitted Today, and Needs Attention filter tabs', () => {
     render(<MentorDevoteeFilterTabs filter="all" onFilterChange={vi.fn()} />)
 
     expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Submitted Yesterday' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Pending Yesterday' })).toBeInTheDocument()
-    expect(screen.getAllByRole('tab')).toHaveLength(3)
+    expect(screen.getByRole('tab', { name: 'Submitted Today' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Needs Attention' })).toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(5)
   })
 
   it('marks the active filter as selected', () => {

@@ -8,6 +8,8 @@ const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
   all: 'All',
   submitted: 'Submitted Yesterday',
   pending: 'Pending Yesterday',
+  submitted_today: 'Submitted Today',
+  needs_attention: 'Needs Attention',
 }
 
 interface MentorDevoteeFilterTabsProps {

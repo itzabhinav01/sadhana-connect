@@ -55,7 +55,12 @@ export function NumberFormField<T extends FieldValues>({
                 </Button>
               ) : null}
               <FormControl>
-                <Input inputMode="numeric" {...field} />
+                <Input
+                  inputMode="numeric"
+                  placeholder="0"
+                  className="bg-card font-medium"
+                  {...field}
+                />
               </FormControl>
               {showStepper ? (
                 <Button

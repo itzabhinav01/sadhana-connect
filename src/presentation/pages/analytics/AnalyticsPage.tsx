@@ -1,14 +1,26 @@
+import { Copy, ExternalLink, Sparkles } from 'lucide-react'
 import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
+  supabaseAuthRepository,
+  supabaseProfileRepository,
+  supabaseSadhanaReportRepository,
+} from '@sadhana-connect/infra-supabase'
+import {
+  AI_PROVIDERS,
+  AI_PROVIDER_LABELS,
+  buildAiProviderUrl,
+  buildSadhanaAiPrompt,
   getLastNDaysRange,
+  useSadhanaAnalytics,
   validateDateRange,
+  type AiProvider,
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
-import { useSadhanaAnalytics } from '@sadhana-connect/sadhana'
 import { ChartSkeleton } from '@/presentation/components/ChartSkeleton'
 import { Button } from '@/presentation/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import {
   AnalyticsRangeSelector,
   type AnalyticsRangeOption,
@@ -38,6 +50,8 @@ export function AnalyticsPage() {
   const [customRange, setCustomRange] = useState<SadhanaDateRange>(() =>
     getLastNDaysRange(7),
   )
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null)
 
   // Quick options are always computed fresh from "today" on every render
   // rather than stored as fixed dates, so the range never goes stale
@@ -48,6 +62,76 @@ export function AnalyticsPage() {
   const analyticsQuery = useSadhanaAnalytics(range.fromDate, range.toDate, {
     enabled: validation.valid,
   })
+
+  async function buildCurrentUserAiPrompt(): Promise<string | null> {
+    if (!validation.valid) return null
+    setAiBusy(true)
+    setAiStatusMessage(null)
+    try {
+      const session = await supabaseAuthRepository.getSession()
+      if (!session?.userId) {
+        setAiStatusMessage('Please sign in to generate AI analysis.')
+        return null
+      }
+      const [profile, reports] = await Promise.all([
+        supabaseProfileRepository.getProfile(session.userId),
+        supabaseSadhanaReportRepository.listFullReportsInRange(
+          session.userId,
+          range.fromDate,
+          range.toDate,
+        ),
+      ])
+      return buildSadhanaAiPrompt({
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+        devotees: [
+          {
+            devoteeName: profile?.fullName || 'Devotee',
+            reports,
+          },
+        ],
+      })
+    } catch {
+      setAiStatusMessage('Could not load Sadhana reports for AI analysis.')
+      return null
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  async function handleOpenAiProvider(provider: AiProvider) {
+    const popup = window.open('about:blank', '_blank')
+    const prompt = await buildCurrentUserAiPrompt()
+    if (!prompt) {
+      popup?.close()
+      return
+    }
+    try {
+      await navigator.clipboard?.writeText(prompt)
+    } catch {
+      // Ignore clipboard error
+    }
+    const targetUrl = buildAiProviderUrl(provider, prompt)
+    if (popup) {
+      popup.location.href = targetUrl
+    } else {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer')
+    }
+    setAiStatusMessage(
+      `Opened ${AI_PROVIDER_LABELS[provider]} (prompt also copied to clipboard).`,
+    )
+  }
+
+  async function handleCopyAiPrompt() {
+    const prompt = await buildCurrentUserAiPrompt()
+    if (!prompt) return
+    try {
+      await navigator.clipboard?.writeText(prompt)
+      setAiStatusMessage('AI analysis prompt copied to clipboard!')
+    } catch {
+      setAiStatusMessage('Could not copy prompt to clipboard.')
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,6 +172,47 @@ export function AnalyticsPage() {
           </div>
         ) : (
           <>
+            <Card className="border-primary/25 bg-primary/[0.02]">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" aria-hidden="true" />
+                  <CardTitle className="text-base">AI Sadhana Analysis</CardTitle>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Send your selected Sadhana range ({range.fromDate} to {range.toDate}) to your preferred AI assistant with structured Sadhana coaching rules.
+                </p>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {AI_PROVIDERS.map((provider) => (
+                    <Button
+                      key={provider}
+                      type="button"
+                      size="sm"
+                      disabled={aiBusy}
+                      onClick={() => void handleOpenAiProvider(provider)}
+                    >
+                      <ExternalLink className="mr-1.5 size-3.5" aria-hidden="true" />
+                      Analyze in {AI_PROVIDER_LABELS[provider]}
+                    </Button>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={aiBusy}
+                    onClick={() => void handleCopyAiPrompt()}
+                  >
+                    <Copy className="mr-1.5 size-3.5" aria-hidden="true" />
+                    Copy Prompt
+                  </Button>
+                </div>
+                {aiStatusMessage ? (
+                  <p className="text-xs font-medium text-primary">{aiStatusMessage}</p>
+                ) : null}
+              </CardContent>
+            </Card>
+
             <AnalyticsSummaryCards summary={analyticsQuery.data} />
             <Suspense fallback={<ChartSkeleton title="Daily Total Rounds" />}>
               <AnalyticsRoundsChart chartData={analyticsQuery.data.roundsChartData} />

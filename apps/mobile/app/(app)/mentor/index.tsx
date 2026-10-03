@@ -6,9 +6,19 @@ import {
   type MentorDevoteeSummary,
 } from '@sadhana-connect/mentor'
 import { useProfile } from '@sadhana-connect/auth'
+import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
+import {
+  AI_PROVIDERS,
+  AI_PROVIDER_LABELS,
+  buildAiProviderUrl,
+  buildSadhanaAiPrompt,
+  getLastNDaysRange,
+  type AiProvider,
+} from '@sadhana-connect/sadhana'
+import * as Clipboard from 'expo-clipboard'
 import { useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect, useMemo, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { useSignOut } from '../../../src/application/auth/use-sign-out'
@@ -25,7 +35,15 @@ const FILTER_LABELS: Record<MentorDevoteeFilter, string> = {
   all: 'All',
   submitted: 'Submitted Yesterday',
   pending: 'Pending Yesterday',
+  submitted_today: 'Submitted Today',
+  needs_attention: 'Needs Attention',
 }
+
+const AI_RANGE_PRESETS = [
+  { label: '7 Days', days: 7 },
+  { label: '14 Days', days: 14 },
+  { label: '30 Days', days: 30 },
+] as const
 
 function formatDisplayDate(iso: string) {
   const [year, month, day] = iso.split('-')
@@ -72,6 +90,11 @@ export default function MentorDashboardScreen() {
   const styles = useMemo(() => createStyles(colors), [colors])
   const [filter, setFilter] = useState<MentorDevoteeFilter>('all')
   const [search, setSearch] = useState('')
+  const [aiExpanded, setAiExpanded] = useState(false)
+  const [aiDays, setAiDays] = useState<number>(7)
+  const [selectedDevoteeIds, setSelectedDevoteeIds] = useState<string[] | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null)
 
   const devoteesQuery = useMentorDevotees()
 
@@ -128,6 +151,81 @@ export default function MentorDashboardScreen() {
   const submittedYesterday = summaries.filter((summary) => summary.hasSubmittedYesterday).length
   const pendingYesterday = totalAssigned - submittedYesterday
 
+  const effectiveSelectedIds = useMemo(
+    () => selectedDevoteeIds ?? summaries.map((s) => s.devoteeId),
+    [selectedDevoteeIds, summaries],
+  )
+
+  const toggleDevoteeSelection = (devoteeId: string) => {
+    setAiStatusMessage(null)
+    setSelectedDevoteeIds((prev) => {
+      const current = prev ?? summaries.map((s) => s.devoteeId)
+      return current.includes(devoteeId)
+        ? current.filter((id) => id !== devoteeId)
+        : [...current, devoteeId]
+    })
+  }
+
+  async function buildMentorPrompt(): Promise<string | null> {
+    const chosenSummaries = summaries.filter((s) => effectiveSelectedIds.includes(s.devoteeId))
+    if (chosenSummaries.length === 0) {
+      setAiStatusMessage('Select at least one devotee to analyze.')
+      return null
+    }
+    setAiBusy(true)
+    setAiStatusMessage(null)
+    try {
+      const range = getLastNDaysRange(aiDays)
+      const devotees = await Promise.all(
+        chosenSummaries.map(async (s) => ({
+          devoteeName: s.fullName,
+          reports: await supabaseSadhanaReportRepository.listFullReportsInRange(
+            s.devoteeId,
+            range.fromDate,
+            range.toDate,
+          ),
+        })),
+      )
+      return buildSadhanaAiPrompt({
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+        devotees,
+      })
+    } catch {
+      setAiStatusMessage('Could not load Sadhana reports for AI analysis.')
+      return null
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  async function handleLaunchMentorAi(provider: AiProvider) {
+    const prompt = await buildMentorPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+    } catch {
+      // Ignore clipboard failure if opening URL succeeds
+    }
+    setAiStatusMessage(`Prompt copied & opening ${AI_PROVIDER_LABELS[provider]}…`)
+    try {
+      await Linking.openURL(buildAiProviderUrl(provider, prompt))
+    } catch {
+      setAiStatusMessage('Prompt copied to clipboard! Paste it into your AI app.')
+    }
+  }
+
+  async function handleCopyMentorAiPrompt() {
+    const prompt = await buildMentorPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+      setAiStatusMessage('AI analysis prompt copied to clipboard!')
+    } catch {
+      setAiStatusMessage('Could not copy prompt to clipboard.')
+    }
+  }
+
   return (
       <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
         <View style={styles.header}>
@@ -162,6 +260,107 @@ export default function MentorDashboardScreen() {
                   <Text style={styles.statLabel}>Pending Yesterday</Text>
                 </View>
               </View>
+            </Card>
+
+            <Card title="AI Sadhana Analysis (Mentor Mode)">
+              <Text style={styles.rowMuted}>
+                Analyze one or multiple devotees&apos; Sadhana logs with ChatGPT, Gemini, or Claude.
+              </Text>
+              <Button
+                title={
+                  aiExpanded
+                    ? 'Hide AI Analysis Options'
+                    : `Configure AI Analysis (${effectiveSelectedIds.length}/${summaries.length} devotees)`
+                }
+                variant="outline"
+                onPress={() => setAiExpanded((prev) => !prev)}
+              />
+              {aiExpanded ? (
+                <View style={styles.aiContainer}>
+                  <Text style={styles.aiSectionLabel}>1. Select Date Range</Text>
+                  <View style={styles.filterRow}>
+                    {AI_RANGE_PRESETS.map((preset) => (
+                      <Button
+                        key={preset.days}
+                        title={preset.label}
+                        variant={aiDays === preset.days ? 'primary' : 'outline'}
+                        onPress={() => setAiDays(preset.days)}
+                      />
+                    ))}
+                  </View>
+
+                  <View style={styles.aiDevoteeHeader}>
+                    <Text style={styles.aiSectionLabel}>
+                      2. Select Devotees ({effectiveSelectedIds.length} selected)
+                    </Text>
+                    <View style={styles.aiQuickSelectRow}>
+                      <Pressable
+                        onPress={() => setSelectedDevoteeIds(summaries.map((s) => s.devoteeId))}
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.aiQuickActionText}>Select All</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setSelectedDevoteeIds([])}
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.aiQuickActionText}>Clear</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  <View style={styles.devoteeChipWrap}>
+                    {summaries.map((summary) => {
+                      const isSelected = effectiveSelectedIds.includes(summary.devoteeId)
+                      return (
+                        <Pressable
+                          key={summary.devoteeId}
+                          onPress={() => toggleDevoteeSelection(summary.devoteeId)}
+                          style={[
+                            styles.devoteeChip,
+                            isSelected ? styles.devoteeChipSelected : null,
+                          ]}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: isSelected }}
+                        >
+                          <Text
+                            style={[
+                              styles.devoteeChipText,
+                              isSelected ? styles.devoteeChipTextSelected : null,
+                            ]}
+                          >
+                            {isSelected ? '✓ ' : ''}
+                            {summary.fullName}
+                          </Text>
+                        </Pressable>
+                      )
+                    })}
+                  </View>
+
+                  <Text style={styles.aiSectionLabel}>3. Open in AI Assistant</Text>
+                  <View style={styles.filterRow}>
+                    {AI_PROVIDERS.map((provider) => (
+                      <Button
+                        key={provider}
+                        title={AI_PROVIDER_LABELS[provider]}
+                        variant="primary"
+                        disabled={aiBusy || effectiveSelectedIds.length === 0}
+                        onPress={() => void handleLaunchMentorAi(provider)}
+                      />
+                    ))}
+                    <Button
+                      title="Copy Prompt"
+                      variant="outline"
+                      disabled={aiBusy || effectiveSelectedIds.length === 0}
+                      onPress={() => void handleCopyMentorAiPrompt()}
+                    />
+                  </View>
+
+                  {aiStatusMessage ? (
+                    <Text style={styles.aiStatusText}>{aiStatusMessage}</Text>
+                  ) : null}
+                </View>
+              ) : null}
             </Card>
 
             <View style={styles.filterRow}>
@@ -260,6 +459,65 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: spacing.sm,
+    },
+    aiContainer: {
+      gap: spacing.sm,
+      paddingTop: spacing.xs,
+    },
+    aiSectionLabel: {
+      fontSize: fontSize.xs,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+      color: colors.muted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    aiDevoteeHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    aiQuickSelectRow: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    aiQuickActionText: {
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
+      color: colors.primary,
+    },
+    devoteeChipWrap: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+    },
+    devoteeChip: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      borderRadius: radius.full,
+      paddingHorizontal: spacing.sm + 2,
+      paddingVertical: 6,
+    },
+    devoteeChipSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primarySoft,
+    },
+    devoteeChipText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      color: colors.foreground,
+    },
+    devoteeChipTextSelected: {
+      color: colors.primary,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+    },
+    aiStatusText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      color: colors.primary,
     },
     searchInput: {
       borderWidth: 1,

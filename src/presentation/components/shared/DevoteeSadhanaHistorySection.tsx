@@ -1,4 +1,4 @@
-import { Calendar, Eye, FileSpreadsheet, Printer } from 'lucide-react'
+import { Calendar, Copy, ExternalLink, Eye, FileSpreadsheet, Printer, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useQueryClient } from '@tanstack/react-query'
@@ -6,12 +6,17 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@sadhana-connect/auth'
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import {
+  AI_PROVIDERS,
+  AI_PROVIDER_LABELS,
+  buildAiProviderUrl,
+  buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
   buildSadhanaRangeExportFilename,
   getLastNDaysRange,
   sadhanaQueryKeys,
   useDevoteeReportHistory,
   validateDateRange,
+  type AiProvider,
   type SadhanaDateRange,
 } from '@sadhana-connect/sadhana'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
@@ -72,6 +77,8 @@ export function DevoteeSadhanaHistorySection({
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   const [exportError, setExportError] = useState(false)
   const [showMissedDates, setShowMissedDates] = useState(false)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null)
   const [rangePrintTarget, setRangePrintTarget] = useState<{
     reports: SadhanaReport[]
     fromDate: string
@@ -88,6 +95,23 @@ export function DevoteeSadhanaHistorySection({
   const allDates = validation.valid ? buildDateRangeList(range.fromDate, range.toDate) : []
   const filledDates = new Set(historyQuery.data?.map((report) => report.reportDate) ?? [])
   const missedDates = allDates.filter((date) => !filledDates.has(date))
+
+  const historyEntries = historyQuery.data ?? []
+  const reportedCount = historyEntries.length
+  const completionPct =
+    allDates.length > 0 ? Math.round((reportedCount / allDates.length) * 100) : 0
+  const avgRounds =
+    reportedCount > 0
+      ? (historyEntries.reduce((sum, r) => sum + r.totalRounds, 0) / reportedCount).toFixed(1)
+      : '—'
+  const avgReading =
+    reportedCount > 0
+      ? `${Math.round(historyEntries.reduce((sum, r) => sum + r.readingMinutes, 0) / reportedCount)}m`
+      : '—'
+  const avgHearing =
+    reportedCount > 0
+      ? `${Math.round(historyEntries.reduce((sum, r) => sum + r.hearingMinutes, 0) / reportedCount)}m`
+      : '—'
 
   async function fetchFullRangeReports(): Promise<SadhanaReport[]> {
     return queryClient.fetchQuery({
@@ -144,12 +168,70 @@ export function DevoteeSadhanaHistorySection({
       const reports = await fetchFullRangeReports()
       downloadTextFile(
         buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'csv'),
-        buildSadhanaHistoryCsv(reports),
+        buildSadhanaHistoryCsv(reports, devoteeName),
       )
     } catch {
       setExportError(true)
     } finally {
       setIsExportingCsv(false)
+    }
+  }
+
+  async function buildDevoteeAiPrompt(): Promise<string | null> {
+    if (!validation.valid) return null
+    setAiBusy(true)
+    setAiStatusMessage(null)
+    try {
+      const reports = await fetchFullRangeReports()
+      return buildSadhanaAiPrompt({
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+        devotees: [
+          {
+            devoteeName: devoteeName || 'Devotee',
+            reports,
+          },
+        ],
+      })
+    } catch {
+      setExportError(true)
+      return null
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  async function handleOpenAiProvider(provider: AiProvider) {
+    const popup = window.open('about:blank', '_blank')
+    const prompt = await buildDevoteeAiPrompt()
+    if (!prompt) {
+      popup?.close()
+      return
+    }
+    try {
+      await navigator.clipboard?.writeText(prompt)
+    } catch {
+      // Ignore clipboard failure
+    }
+    const targetUrl = buildAiProviderUrl(provider, prompt)
+    if (popup) {
+      popup.location.href = targetUrl
+    } else {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer')
+    }
+    setAiStatusMessage(
+      `Opened ${AI_PROVIDER_LABELS[provider]} (prompt also copied to clipboard).`,
+    )
+  }
+
+  async function handleCopyAiPrompt() {
+    const prompt = await buildDevoteeAiPrompt()
+    if (!prompt) return
+    try {
+      await navigator.clipboard?.writeText(prompt)
+      setAiStatusMessage('AI analysis prompt copied to clipboard!')
+    } catch {
+      setAiStatusMessage('Could not copy prompt to clipboard.')
     }
   }
 
@@ -278,7 +360,79 @@ export function DevoteeSadhanaHistorySection({
           ) : null}
 
           {validation.valid && historyQuery.isSuccess ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
+              {/* Item 6: Range Analytics Summary */}
+              <div
+                aria-label="Range analytics summary"
+                className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/40 p-3 sm:grid-cols-4"
+              >
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Completion
+                  </span>
+                  <span className="text-base font-bold text-foreground">
+                    {completionPct}%{' '}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      ({reportedCount}/{allDates.length})
+                    </span>
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Avg Rounds
+                  </span>
+                  <span className="text-base font-bold text-foreground">{avgRounds}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Avg Reading
+                  </span>
+                  <span className="text-base font-bold text-foreground">{avgReading}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Avg Hearing
+                  </span>
+                  <span className="text-base font-bold text-foreground">{avgHearing}</span>
+                </div>
+              </div>
+
+              {/* Single-devotee AI Analysis */}
+              <div className="flex flex-col gap-2 rounded-lg border border-primary/20 bg-primary/[0.02] p-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                  <Sparkles className="size-3.5" aria-hidden="true" />
+                  <span>AI Sadhana Analysis</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {AI_PROVIDERS.map((provider) => (
+                    <Button
+                      key={provider}
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={aiBusy}
+                      onClick={() => void handleOpenAiProvider(provider)}
+                    >
+                      <ExternalLink className="mr-1.5 size-3.5" aria-hidden="true" />
+                      {AI_PROVIDER_LABELS[provider]}
+                    </Button>
+                  ))}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={aiBusy}
+                    onClick={() => void handleCopyAiPrompt()}
+                  >
+                    <Copy className="mr-1.5 size-3.5" aria-hidden="true" />
+                    Copy Prompt
+                  </Button>
+                </div>
+                {aiStatusMessage ? (
+                  <p className="text-xs font-medium text-primary">{aiStatusMessage}</p>
+                ) : null}
+              </div>
+
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm text-muted-foreground">
                   {missedDates.length === 0

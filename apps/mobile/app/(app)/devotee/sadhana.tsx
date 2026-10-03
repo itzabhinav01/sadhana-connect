@@ -21,6 +21,7 @@ import { DateTimeField } from '../../../src/presentation/components/DateTimeFiel
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { NumberField } from '../../../src/presentation/components/NumberField'
+import { SadhanaDateStrip } from '../../../src/presentation/components/SadhanaDateStrip'
 import { SadhanaReportComments } from '../../../src/presentation/components/SadhanaReportComments'
 import { StickyFooterBar } from '../../../src/presentation/components/StickyFooterBar'
 import { TextField } from '../../../src/presentation/components/TextField'
@@ -98,7 +99,11 @@ function computeInitialExpanded(
 }
 
 export default function SadhanaFormScreen() {
-  const params = useLocalSearchParams<{ date?: string; prefillRounds?: string }>()
+  const params = useLocalSearchParams<{
+    date?: string
+    prefillRounds?: string
+    openComments?: string
+  }>()
   const paramDate = params.date ?? getLocalDateIso()
   const [selectedDate, setSelectedDate] = useState(paramDate)
   const [syncedParamDate, setSyncedParamDate] = useState(paramDate)
@@ -117,10 +122,11 @@ export default function SadhanaFormScreen() {
 
   return (
     <SadhanaFormBody
-      key={`${selectedDate}-${existingReport.data?.id ?? 'new'}-${prefillRounds ?? ''}`}
+      key={`${selectedDate}-${existingReport.data?.id ?? 'new'}-${prefillRounds ?? ''}-${params.openComments ?? ''}`}
       date={selectedDate}
       existingReport={existingReport.data ?? null}
       prefillRounds={prefillRounds}
+      initialOpenComments={params.openComments === '1'}
       onDateChange={setSelectedDate}
     />
   )
@@ -130,6 +136,7 @@ function SadhanaFormBody({
   date,
   existingReport,
   prefillRounds,
+  initialOpenComments = false,
   onDateChange,
 }: {
   date: string
@@ -138,6 +145,7 @@ function SadhanaFormBody({
   // action — an explicitly devotee-chosen initial value for Total
   // Rounds, matching web's SadhanaReportForm.
   prefillRounds?: number
+  initialOpenComments?: boolean
   onDateChange: (nextDate: string) => void
 }) {
   const router = useRouter()
@@ -162,7 +170,7 @@ function SadhanaFormBody({
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
     computeInitialExpanded(isEditingMode, defaultValues),
   )
-  const [commentsExpanded, setCommentsExpanded] = useState(false)
+  const [commentsExpanded, setCommentsExpanded] = useState(initialOpenComments)
   const toggleSection = (key: SectionKey) =>
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
 
@@ -214,6 +222,12 @@ function SadhanaFormBody({
         {upsertReport.isError ? (
           <ErrorBanner message="Something went wrong saving your sadhana. Please try again." />
         ) : null}
+
+        <SadhanaDateStrip
+          selectedDate={date}
+          hasExistingReport={isEditingMode}
+          onSelectDate={onDateChange}
+        />
 
         <DateTimeField
           control={control}
@@ -295,8 +309,18 @@ function SadhanaFormBody({
         >
           <DateTimeField control={control} name="sleepTime" label="Sleep Time" mode="time" clearable />
           <DateTimeField control={control} name="wakeTime" label="Wake Up" mode="time" clearable />
-          <TextField control={control} name="dayRestMinutes" label="Day Rest (minutes)" keyboardType="numeric" />
-          <TextField control={control} name="totalRestMinutes" label="Total Rest (hours)" keyboardType="numeric" />
+          <NumberField
+            control={control}
+            name="dayRestMinutes"
+            label="Day Rest (minutes)"
+            quickAmounts={[15, 30, 60]}
+          />
+          <NumberField
+            control={control}
+            name="totalRestMinutes"
+            label="Total Rest (hours)"
+            quickAmounts={[5, 6, 7, 8]}
+          />
         </Accordion>
 
         <Accordion

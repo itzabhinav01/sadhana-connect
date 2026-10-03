@@ -54,6 +54,7 @@ export function NumberField<T extends FieldValues>({
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value as string | undefined}
+                placeholder="0"
                 keyboardType="numeric"
                 accessibilityLabel={label}
                 placeholderTextColor={colors.placeholder ?? colors.muted}
@@ -97,8 +98,8 @@ function createStyles(colors: ThemeColors) {
     },
     label: {
       fontSize: fontSize.sm,
-      fontWeight: '500',
-      fontFamily: fontFamily.medium,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     inputRow: {
@@ -108,12 +109,16 @@ function createStyles(colors: ThemeColors) {
     },
     input: {
       flex: 1,
-      borderWidth: 1,
+      minHeight: touchTarget,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
       borderColor: colors.border,
-      borderRadius: 8,
+      borderRadius: 10,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
       fontSize: fontSize.base,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
     inputError: {
@@ -122,8 +127,9 @@ function createStyles(colors: ThemeColors) {
     stepperButton: {
       width: touchTarget,
       height: touchTarget,
-      borderRadius: 8,
-      borderWidth: 1,
+      borderRadius: 10,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',

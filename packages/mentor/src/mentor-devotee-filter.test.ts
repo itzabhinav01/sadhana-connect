@@ -18,8 +18,16 @@ function makeSummary(overrides: Partial<MentorDevoteeSummary>): MentorDevoteeSum
 }
 
 describe('filterMentorDevotees', () => {
-  const submitted = makeSummary({ devoteeId: 'submitted', hasSubmittedYesterday: true })
-  const pending = makeSummary({ devoteeId: 'pending', hasSubmittedYesterday: false })
+  const submitted = makeSummary({
+    devoteeId: 'submitted',
+    hasSubmittedYesterday: true,
+    hasSubmittedToday: true,
+  })
+  const pending = makeSummary({
+    devoteeId: 'pending',
+    hasSubmittedYesterday: false,
+    hasSubmittedToday: false,
+  })
   const summaries = [submitted, pending]
 
   it('"all" returns every devotee unchanged', () => {
@@ -32,5 +40,13 @@ describe('filterMentorDevotees', () => {
 
   it('"pending" returns only devotees who have not submitted yesterday', () => {
     expect(filterMentorDevotees(summaries, 'pending')).toEqual([pending])
+  })
+
+  it('"submitted_today" returns only devotees who submitted today', () => {
+    expect(filterMentorDevotees(summaries, 'submitted_today')).toEqual([submitted])
+  })
+
+  it('"needs_attention" returns devotees who missed both yesterday and today', () => {
+    expect(filterMentorDevotees(summaries, 'needs_attention')).toEqual([pending])
   })
 })

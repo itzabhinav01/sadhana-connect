@@ -33,6 +33,7 @@ import {
 } from '@/presentation/components/ui/form'
 import { Input } from '@/presentation/components/ui/input'
 import { NumberFormField } from '@/presentation/components/NumberFormField'
+import { SadhanaDateStrip } from '@/presentation/pages/sadhana/SadhanaDateStrip'
 import { cn } from '@/shared/utils/cn'
 
 // One accent per practice category — same palette, same scoping rule as
@@ -201,27 +202,38 @@ export function SadhanaReportForm({
           </Alert>
         ) : null}
 
-        <FormField
-          control={form.control}
-          name="reportDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  max={getLocalDateIso()}
-                  {...field}
-                  onChange={(event) => {
-                    field.onChange(event)
-                    onDateChange(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-xs">
+          <SadhanaDateStrip
+            selectedDate={date}
+            hasExistingReport={Boolean(existingReport)}
+            onSelectDate={(nextDate) => {
+              form.setValue('reportDate', nextDate)
+              onDateChange(nextDate)
+            }}
+          />
+
+          <FormField
+            control={form.control}
+            name="reportDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    max={getLocalDateIso()}
+                    {...field}
+                    onChange={(event) => {
+                      field.onChange(event)
+                      onDateChange(event.target.value)
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Accordion
           type="multiple"

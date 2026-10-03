@@ -1,6 +1,20 @@
-import { getLastNDaysRange, useSadhanaAnalytics } from '@sadhana-connect/sadhana'
+import {
+  supabaseAuthRepository,
+  supabaseProfileRepository,
+  supabaseSadhanaReportRepository,
+} from '@sadhana-connect/infra-supabase'
+import {
+  AI_PROVIDERS,
+  AI_PROVIDER_LABELS,
+  buildAiProviderUrl,
+  buildSadhanaAiPrompt,
+  getLastNDaysRange,
+  useSadhanaAnalytics,
+  type AiProvider,
+} from '@sadhana-connect/sadhana'
+import * as Clipboard from 'expo-clipboard'
 import { useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
@@ -33,11 +47,75 @@ export default function AnalyticsScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [selectedDays, setSelectedDays] = useState<number>(30)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiStatusMessage, setAiStatusMessage] = useState<string | null>(null)
   const range = getLastNDaysRange(selectedDays)
 
   const analyticsQuery = useSadhanaAnalytics(range.fromDate, range.toDate)
   const summary = analyticsQuery.data
   const hasSubmittedDays = (summary?.totalReports ?? 0) > 0
+
+  async function buildCurrentUserAiPrompt(): Promise<string | null> {
+    setAiBusy(true)
+    setAiStatusMessage(null)
+    try {
+      const session = await supabaseAuthRepository.getSession()
+      if (!session?.userId) {
+        setAiStatusMessage('Please sign in to generate AI analysis.')
+        return null
+      }
+      const [profile, reports] = await Promise.all([
+        supabaseProfileRepository.getProfile(session.userId),
+        supabaseSadhanaReportRepository.listFullReportsInRange(
+          session.userId,
+          range.fromDate,
+          range.toDate,
+        ),
+      ])
+      return buildSadhanaAiPrompt({
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+        devotees: [
+          {
+            devoteeName: profile?.fullName || 'Devotee',
+            reports,
+          },
+        ],
+      })
+    } catch {
+      setAiStatusMessage('Could not load Sadhana reports for AI analysis.')
+      return null
+    } finally {
+      setAiBusy(false)
+    }
+  }
+
+  async function handleOpenAiProvider(provider: AiProvider) {
+    const prompt = await buildCurrentUserAiPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+    } catch {
+      // Ignore clipboard failure
+    }
+    setAiStatusMessage(`Prompt copied & opening ${AI_PROVIDER_LABELS[provider]}…`)
+    try {
+      await Linking.openURL(buildAiProviderUrl(provider, prompt))
+    } catch {
+      setAiStatusMessage('Prompt copied to clipboard! Paste it into your AI app.')
+    }
+  }
+
+  async function handleCopyAiPrompt() {
+    const prompt = await buildCurrentUserAiPrompt()
+    if (!prompt) return
+    try {
+      await Clipboard.setStringAsync(prompt)
+      setAiStatusMessage('AI analysis prompt copied to clipboard!')
+    } catch {
+      setAiStatusMessage('Could not copy prompt to clipboard.')
+    }
+  }
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.content}>
@@ -60,6 +138,32 @@ export default function AnalyticsScreen() {
         <Text style={styles.mutedLine}>No Sadhana reports found for this range.</Text>
       ) : (
         <>
+          <Card title="AI Sadhana Analysis">
+            <Text style={styles.mutedLine}>
+              Analyze your Sadhana performance ({range.fromDate} to {range.toDate}) in ChatGPT, Gemini, or Claude.
+            </Text>
+            <View style={styles.filterRow}>
+              {AI_PROVIDERS.map((provider) => (
+                <Button
+                  key={provider}
+                  title={AI_PROVIDER_LABELS[provider]}
+                  variant="primary"
+                  disabled={aiBusy}
+                  onPress={() => void handleOpenAiProvider(provider)}
+                />
+              ))}
+              <Button
+                title="Copy Prompt"
+                variant="outline"
+                disabled={aiBusy}
+                onPress={() => void handleCopyAiPrompt()}
+              />
+            </View>
+            {aiStatusMessage ? (
+              <Text style={styles.aiStatusText}>{aiStatusMessage}</Text>
+            ) : null}
+          </Card>
+
           <Card title="Rounds">
             <Sparkline
               data={summary.roundsChartData.map((point) => ({
@@ -183,6 +287,11 @@ function createStyles(colors: ThemeColors) {
       fontSize: fontSize.sm,
       fontFamily: fontFamily.regular,
       color: colors.muted,
+    },
+    aiStatusText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      color: colors.primary,
     },
     statsRow: {
       flexDirection: 'row',

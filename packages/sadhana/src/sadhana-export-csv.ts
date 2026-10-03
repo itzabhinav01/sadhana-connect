@@ -1,34 +1,42 @@
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatTime12Hour } from '@sadhana-connect/shared'
 
-// Excel/Sheets/Numbers all import a plain .csv as a spreadsheet natively
-// — no xlsx-writer dependency needed for "open my sadhana data in
-// Excel." Unlike the PDF/text exports (buildSadhanaReportExportSections),
-// numeric columns here are left as bare numbers rather than "16 Rounds"
-// strings, so a spreadsheet can actually sum/average them.
+const MONTH_SHORT = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
 const CSV_HEADER = [
   'Date',
+  'Chanting',
+  'Reading(MIN)',
+  'Wake Up Time',
+  'Day Rest(MIN)',
+  'Hearing(MIN)',
+  'Reading Srila Prabhupada Book',
+  'Chanting Completion Time',
   'Rounds Before 4:30 AM',
   'Rounds Till 7 AM',
-  'Last Round Time',
-  'Total Rounds',
-  'Reading Minutes',
   'Book Name',
-  'Hearing Minutes',
   'Speaker Name',
   'Sleep Time',
-  'Wake Up',
-  'Day Rest (min)',
-  'Total Rest (hr)',
+  'Total Rest(HR)',
   'Office Going',
   'Office Return',
   'Notes',
   'Signature',
 ]
 
-// RFC 4180: a field is quoted (with internal quotes doubled) only when it
-// contains a comma, quote, or newline — everything else is left bare for
-// a smaller, more readable file.
 function csvField(value: string | number): string {
   const text = String(value)
   if (/[",\n]/.test(text)) {
@@ -37,23 +45,73 @@ function csvField(value: string | number): string {
   return text
 }
 
+function formatCsvDate(isoDate: string): string {
+  const parts = isoDate.split('-')
+  if (parts.length !== 3) return isoDate
+  const [year, monthStr, dayStr] = parts
+  const monthIndex = Number(monthStr) - 1
+  const monthName = MONTH_SHORT[monthIndex] ?? monthStr
+  return `${dayStr.padStart(2, '0')} ${monthName} ${year}`
+}
+
+function formatPositiveOrDash(value: number): number | string {
+  return value > 0 ? value : '-'
+}
+
+function formatTimeOrDash(value: string | null): string {
+  if (!value) return '-'
+  const formatted = formatTime12Hour(value)
+  return formatted || '-'
+}
+
+function averagePositiveNumbers(values: number[]): number | string {
+  const positive = values.filter((v) => v > 0)
+  if (positive.length === 0) return '-'
+  const sum = positive.reduce((acc, v) => acc + v, 0)
+  const avg = sum / positive.length
+  return Math.round(avg * 10) / 10
+}
+
+function averageTimes(times: (string | null)[]): string {
+  const validMinutes: number[] = []
+  for (const time of times) {
+    if (!time) continue
+    const match = /^(\d{1,2}):(\d{2})/.exec(time.trim())
+    if (!match) continue
+    const hours = Number(match[1])
+    const minutes = Number(match[2])
+    if (Number.isInteger(hours) && Number.isInteger(minutes)) {
+      validMinutes.push(hours * 60 + minutes)
+    }
+  }
+  if (validMinutes.length === 0) return '-'
+  const avgTotalMinutes = Math.round(
+    validMinutes.reduce((acc, m) => acc + m, 0) / validMinutes.length,
+  )
+  const normalized = ((avgTotalMinutes % 1440) + 1440) % 1440
+  const hh = String(Math.floor(normalized / 60)).padStart(2, '0')
+  const mm = String(normalized % 60).padStart(2, '0')
+  return formatTime12Hour(`${hh}:${mm}`)
+}
+
 function reportToRow(report: SadhanaReport): string {
   return [
-    report.reportDate,
-    report.roundsBefore430,
-    report.roundsTill7am,
-    formatTime12Hour(report.lastRoundTime),
-    report.totalRounds,
-    report.readingMinutes,
+    formatCsvDate(report.reportDate),
+    formatPositiveOrDash(report.totalRounds),
+    formatPositiveOrDash(report.readingMinutes),
+    formatTimeOrDash(report.wakeTime),
+    formatPositiveOrDash(report.dayRestMinutes),
+    formatPositiveOrDash(report.hearingMinutes),
+    formatPositiveOrDash(report.readingMinutes),
+    formatTimeOrDash(report.lastRoundTime),
+    formatPositiveOrDash(report.roundsBefore430),
+    formatPositiveOrDash(report.roundsTill7am),
     report.bookName ?? '',
-    report.hearingMinutes,
     report.speakerName ?? '',
-    formatTime12Hour(report.sleepTime),
-    formatTime12Hour(report.wakeTime),
-    report.dayRestMinutes,
-    report.totalRestMinutes,
-    formatTime12Hour(report.officeGoingTime),
-    formatTime12Hour(report.officeReturnTime),
+    formatTimeOrDash(report.sleepTime),
+    formatPositiveOrDash(report.totalRestMinutes),
+    formatTimeOrDash(report.officeGoingTime),
+    formatTimeOrDash(report.officeReturnTime),
     report.notes ?? '',
     report.signatureText ?? '',
   ]
@@ -61,12 +119,62 @@ function reportToRow(report: SadhanaReport): string {
     .join(',')
 }
 
-// CRLF line endings (`\r\n`) — the RFC 4180 convention Excel expects;
-// LF-only still opens fine but CRLF avoids any doubt. Oldest -> newest,
-// regardless of the order `reports` arrives in, matching
-// formatSadhanaReportsRangeForText's same sorting guarantee.
-export function buildSadhanaHistoryCsv(reports: SadhanaReport[]): string {
+export interface SadhanaCsvOptions {
+  devoteeName?: string
+  groupName?: string
+  subgroupName?: string
+}
+
+export function buildSadhanaHistoryCsv(
+  reports: SadhanaReport[],
+  options?: SadhanaCsvOptions | string,
+): string {
   const sorted = [...reports].sort((a, b) => a.reportDate.localeCompare(b.reportDate))
-  const rows = [CSV_HEADER.map(csvField).join(','), ...sorted.map(reportToRow)]
-  return rows.join('\r\n')
+  const resolvedOptions: SadhanaCsvOptions =
+    typeof options === 'string' ? { devoteeName: options } : (options ?? {})
+
+  const fallbackName =
+    sorted.find((r) => r.signatureText && r.signatureText.trim() !== '')?.signatureText?.trim() ??
+    'Personal Sadhana'
+  const headerName = resolvedOptions.devoteeName?.trim() || fallbackName
+  const groupName = resolvedOptions.groupName?.trim() || 'Personal Sadhana'
+  const subgroupName = resolvedOptions.subgroupName?.trim() || 'My Sadhana'
+
+  const metadataRows = [
+    [headerName].map(csvField).join(','),
+    ['Group', groupName].map(csvField).join(','),
+    ['Subgroup', subgroupName].map(csvField).join(','),
+    ['Days Reported', sorted.length].map(csvField).join(','),
+    '',
+  ]
+
+  const tableRows = [CSV_HEADER.map(csvField).join(','), ...sorted.map(reportToRow)]
+
+  const averagesRows = [
+    '',
+    'Activity averages',
+    ['Activity', 'Average'].map(csvField).join(','),
+    ['Chanting', averagePositiveNumbers(sorted.map((r) => r.totalRounds))].map(csvField).join(','),
+    ['Reading(MIN)', averagePositiveNumbers(sorted.map((r) => r.readingMinutes))]
+      .map(csvField)
+      .join(','),
+    ['Wake Up Time', averageTimes(sorted.map((r) => r.wakeTime))].map(csvField).join(','),
+    ['Day Rest(MIN)', averagePositiveNumbers(sorted.map((r) => r.dayRestMinutes))]
+      .map(csvField)
+      .join(','),
+    ['Hearing(MIN)', averagePositiveNumbers(sorted.map((r) => r.hearingMinutes))]
+      .map(csvField)
+      .join(','),
+    [
+      'Reading Srila Prabhupada Book',
+      averagePositiveNumbers(sorted.map((r) => r.readingMinutes)),
+    ]
+      .map(csvField)
+      .join(','),
+    ['Chanting Completion Time', averageTimes(sorted.map((r) => r.lastRoundTime))]
+      .map(csvField)
+      .join(','),
+  ]
+
+  return [...metadataRows, ...tableRows, ...averagesRows].join('\r\n')
 }

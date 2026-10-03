@@ -104,8 +104,8 @@ function createStyles(colors: ThemeColors) {
       elevation: 3,
     },
     outline: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
       borderColor: colors.border,
     },
     text: {
