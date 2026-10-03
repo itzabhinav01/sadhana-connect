@@ -1,9 +1,15 @@
 import { useProfile } from '@sadhana-connect/auth'
-import { useNotificationsRealtime, useUnreadNotificationCount } from '@sadhana-connect/notifications'
+import {
+  useNotificationsRealtime,
+  useUnreadNotificationCount,
+  type RealtimeInsertedNotification,
+} from '@sadhana-connect/notifications'
 import { Redirect, Tabs } from 'expo-router'
+import { useCallback, useEffect } from 'react'
 import type { ColorValue } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
+import { dailySadhanaNotificationService } from '../../../src/infrastructure/notifications/daily-sadhana-notification-service'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { Icon } from '../../../src/presentation/components/Icon'
 import type { IconName } from '../../../src/presentation/components/Icon'
@@ -15,24 +21,40 @@ function tabIcon(active: IconName, inactive: IconName) {
   return TabIcon
 }
 
-// RequireRole equivalent: a UX/navigation guard only, not a security
-// boundary. Nested inside (app)/_layout.tsx, which has already resolved
-// the loading/error/disabled-account states, so this only branches on role.
-//
-// 5 primary destinations live in the bottom tab bar (Home, Sadhana,
-// History, Analytics, Alerts) — everything else (Verse, Profile,
-// Settings, Announcements) stays reachable by push but is hidden from
-// the bar via `href: null`, per the approved navigation redesign.
-// Announcements is deliberately NOT a tab: it has a preview on Home, a
-// normal push destination, and a notification click-through target, but
-// no permanent tab slot.
+function resolveNotificationTargetUrl(notification: RealtimeInsertedNotification): string {
+  if (notification.type === 'announcement' && notification.relatedAnnouncementId) {
+    return `/devotee/announcements/${notification.relatedAnnouncementId}`
+  }
+  if (notification.type === 'mentor_comment' || notification.type === 'sadhana_reminder') {
+    return '/devotee/sadhana'
+  }
+  if (notification.type === 'data_retention') {
+    return '/devotee/history'
+  }
+  return '/devotee/notifications'
+}
+
 export default function DevoteeLayout() {
   const profile = useProfile()
   const { colors } = useTheme()
-  // Safe to call unconditionally here (unlike web's AppLayout, which is
-  // shared by every role) — this layout only ever renders for a devotee,
-  // matching Phase 17's devotee-only notifications scope.
-  useNotificationsRealtime()
+  const isDevotee = profile.data?.role === 'devotee'
+
+  useEffect(() => {
+    if (isDevotee) {
+      void dailySadhanaNotificationService.registerPushTokenAsync()
+    }
+  }, [isDevotee])
+
+  const handleRealtimeNotification = useCallback((notification: RealtimeInsertedNotification) => {
+    void dailySadhanaNotificationService.presentAlertNotification({
+      id: notification.id,
+      title: notification.title,
+      body: notification.body,
+      url: resolveNotificationTargetUrl(notification),
+    })
+  }, [])
+
+  useNotificationsRealtime(handleRealtimeNotification)
   const unreadCount = useUnreadNotificationCount()
 
   if (!profile.data || profile.data.role !== 'devotee') {

@@ -1,32 +1,43 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
-import { useAuth } from '@sadhana-connect/auth'
-import { notificationQueryKeys } from './notification-query-keys'
-import { useProfile } from '@sadhana-connect/auth'
+import { useAuth, useProfile } from '@sadhana-connect/auth'
 import { getSupabaseClient } from '@sadhana-connect/infra-supabase'
+import { notificationQueryKeys } from './notification-query-keys'
 
-// Live in-app updates only, while this app is open — NOT push. If the
-// tab is closed, nothing is delivered; the devotee simply sees the
-// notification next time they load /notifications (Phase 17 v1 scope).
-//
-// The `filter` below is an efficiency narrowing, not the authorization
-// boundary: Supabase Realtime evaluates postgres_changes subscriptions
-// under the same RLS policies PostgREST uses, so this client could never
-// receive another recipient's row even without the filter — the real
-// boundary is notifications_select (recipient_id = auth.uid()), unchanged
-// by this hook.
-//
-// Called unconditionally from AppLayout (rules of hooks), but only ever
-// opens a channel for a devotee — notifications are devotee-only in
-// Phase 17 v1, so a mentor/admin session must not hold an idle
-// subscription it will never receive anything on.
-export function useNotificationsRealtime() {
+export interface RealtimeInsertedNotification {
+  id: string
+  type: string
+  title: string
+  body: string | null
+  relatedReportId: string | null
+  relatedAnnouncementId: string | null
+}
+
+interface PostgresInsertPayload {
+  new?: {
+    id?: string
+    type?: string
+    title?: string
+    body?: string | null
+    related_report_id?: string | null
+    related_announcement_id?: string | null
+  }
+}
+
+export function useNotificationsRealtime(
+  onNotificationInserted?: (notification: RealtimeInsertedNotification) => void,
+) {
   const queryClient = useQueryClient()
   const { session } = useAuth()
   const profile = useProfile()
   const userId = session?.userId ?? null
   const isDevotee = profile.data?.role === 'devotee'
+  const callbackRef = useRef(onNotificationInserted)
+
+  useEffect(() => {
+    callbackRef.current = onNotificationInserted
+  }, [onNotificationInserted])
 
   useEffect(() => {
     if (!userId || !isDevotee) return
@@ -53,24 +64,46 @@ export function useNotificationsRealtime() {
           table: 'notifications',
           filter: `recipient_id=eq.${userId}`,
         },
-        () => {
-          // Refetch rather than manually splicing the new row into the
-          // cache — guarantees no duplicate rows regardless of any race
-          // with an in-flight manual fetch or "Load more" page fetch.
+        (payload?: PostgresInsertPayload) => {
           queryClient.invalidateQueries({
             queryKey: notificationQueryKeys.list(userId),
           })
           queryClient.invalidateQueries({
             queryKey: notificationQueryKeys.unreadCount(userId),
           })
+
+          const row = payload?.new
+          if (row && typeof row.id === 'string' && typeof row.title === 'string') {
+            const mapped: RealtimeInsertedNotification = {
+              id: row.id,
+              type: row.type ?? 'system',
+              title: row.title,
+              body: row.body ?? null,
+              relatedReportId: row.related_report_id ?? null,
+              relatedAnnouncementId: row.related_announcement_id ?? null,
+            }
+
+            if (callbackRef.current) {
+              callbackRef.current(mapped)
+            } else if (
+              typeof window !== 'undefined' &&
+              'Notification' in window &&
+              window.Notification.permission === 'granted'
+            ) {
+              try {
+                new window.Notification(mapped.title, {
+                  body: mapped.body ?? undefined,
+                  tag: mapped.id,
+                })
+              } catch {
+                // Ignore in environments that block Notification constructor
+              }
+            }
+          }
         },
       )
       .subscribe()
 
-    // The Supabase JS client handles socket-level reconnection
-    // internally; unsubscribing on unmount/userId change (account
-    // switch) is this hook's own responsibility, so a stale channel from
-    // a previous user is never left listening.
     return () => {
       supabase.removeChannel(channel)
     }
