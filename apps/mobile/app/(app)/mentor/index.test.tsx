@@ -70,11 +70,20 @@ describe('MentorDashboardScreen', () => {
     mockPush.mockReset()
   })
 
-  it('shows a loading screen while pending', async () => {
+  it('shows a loading screen while pending and transitions cleanly to loaded state', async () => {
     mockUseMentorDevotees.mockReturnValue({ isPending: true, isError: false, isSuccess: false, data: undefined })
 
-    const { getByText } = await render(<MentorDashboardScreen />)
+    const { getByText, rerender } = await render(<MentorDashboardScreen />)
     expect(getByText('Loading…')).toBeTruthy()
+
+    mockUseMentorDevotees.mockReturnValue({
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      data: [submittedDevotee],
+    })
+    await rerender(<MentorDashboardScreen />)
+    expect(getByText('Submitted Devotee')).toBeTruthy()
   })
 
   it('shows an error state on failure', async () => {

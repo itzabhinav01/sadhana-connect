@@ -151,10 +151,7 @@ export default function MentorDashboardScreen() {
   const submittedYesterday = summaries.filter((summary) => summary.hasSubmittedYesterday).length
   const pendingYesterday = totalAssigned - submittedYesterday
 
-  const effectiveSelectedIds = useMemo(
-    () => selectedDevoteeIds ?? summaries.map((s) => s.devoteeId),
-    [selectedDevoteeIds, summaries],
-  )
+  const effectiveSelectedIds = selectedDevoteeIds ?? summaries.map((s) => s.devoteeId)
 
   const toggleDevoteeSelection = (devoteeId: string) => {
     setAiStatusMessage(null)
