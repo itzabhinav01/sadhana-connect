@@ -1,4 +1,5 @@
 import { useAuth, useProfile } from '@sadhana-connect/auth'
+import { setConfiguredWhatsAppRecipient } from '@sadhana-connect/sadhana'
 import { Redirect, Stack } from 'expo-router'
 import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
@@ -44,6 +45,8 @@ export default function AppLayout() {
   if (!profile.data.isActive) {
     return <AccountDisabledScreen />
   }
+
+  setConfiguredWhatsAppRecipient(profile.data.whatsappShareNumber)
 
   return (
     <Stack

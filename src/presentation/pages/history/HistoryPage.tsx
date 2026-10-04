@@ -3,13 +3,15 @@ import { useState } from 'react'
 import { flushSync } from 'react-dom'
 
 import { useAuth } from '@sadhana-connect/auth'
-import { formatSadhanaReportsRangeForText } from '@sadhana-connect/sadhana'
-import { buildSadhanaRangeExportFilename } from '@sadhana-connect/sadhana'
 import {
+  buildSadhanaHistoryCsv,
+  buildSadhanaHistorySpreadsheetHtml,
+  buildSadhanaRangeExportFilename,
+  formatSadhanaReportsRangeForText,
+  sadhanaQueryKeys,
   validateDateRange,
   type DateRangeValidationResult,
 } from '@sadhana-connect/sadhana'
-import { sadhanaQueryKeys } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
 import { downloadTextFile } from '@/shared/utils/download-text-file'
@@ -35,6 +37,8 @@ export function HistoryPage() {
   })
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [isExportingText, setIsExportingText] = useState(false)
+  const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [isExportingSheet, setIsExportingSheet] = useState(false)
   const [exportError, setExportError] = useState(false)
   const [rangePrintTarget, setRangePrintTarget] = useState<RangePrintTarget | null>(null)
 
@@ -55,6 +59,8 @@ export function HistoryPage() {
     ? validateDateRange(exportFromDate, exportToDate)
     : { valid: false, error: 'Choose a specific date range (not All time) to export.' }
   const canExportRange = hasConcreteRange && rangeValidation.valid
+  const isAnyExportBusy =
+    isExportingPdf || isExportingText || isExportingCsv || isExportingSheet
 
   // Fetches full reports with all columns for the range export.
   async function fetchRangeReports(): Promise<SadhanaReport[]> {
@@ -110,6 +116,38 @@ export function HistoryPage() {
     }
   }
 
+  async function handleExportRangeCsv() {
+    setExportError(false)
+    setIsExportingCsv(true)
+    try {
+      const reports = await fetchRangeReports()
+      downloadTextFile(
+        buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'csv'),
+        buildSadhanaHistoryCsv(reports),
+      )
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingCsv(false)
+    }
+  }
+
+  async function handleExportRangeColoredSheet() {
+    setExportError(false)
+    setIsExportingSheet(true)
+    try {
+      const reports = await fetchRangeReports()
+      downloadTextFile(
+        buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xls'),
+        buildSadhanaHistorySpreadsheetHtml(reports),
+      )
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingSheet(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -129,7 +167,7 @@ export function HistoryPage() {
           variant="outline"
           size="sm"
           onClick={handleExportRangePdf}
-          disabled={!canExportRange || isExportingPdf || isExportingText}
+          disabled={!canExportRange || isAnyExportBusy}
         >
           {isExportingPdf ? 'Preparing…' : 'Export PDF'}
         </Button>
@@ -137,8 +175,26 @@ export function HistoryPage() {
           type="button"
           variant="outline"
           size="sm"
+          onClick={handleExportRangeColoredSheet}
+          disabled={!canExportRange || isAnyExportBusy}
+        >
+          {isExportingSheet ? 'Preparing…' : 'Colored Sheet (.xls)'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleExportRangeCsv}
+          disabled={!canExportRange || isAnyExportBusy}
+        >
+          {isExportingCsv ? 'Preparing…' : 'Export CSV'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
           onClick={handleExportRangeText}
-          disabled={!canExportRange || isExportingPdf || isExportingText}
+          disabled={!canExportRange || isAnyExportBusy}
         >
           {isExportingText ? 'Preparing…' : 'Export Text'}
         </Button>
@@ -175,3 +231,4 @@ export function HistoryPage() {
     </div>
   )
 }
+

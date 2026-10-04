@@ -1,4 +1,4 @@
-import { Calendar, Copy, ExternalLink, Eye, FileSpreadsheet, Printer, Sparkles } from 'lucide-react'
+import { Calendar, Copy, ExternalLink, Eye, FileSpreadsheet, Printer, Sparkles, Table2 } from 'lucide-react'
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useQueryClient } from '@tanstack/react-query'
@@ -11,6 +11,7 @@ import {
   buildAiProviderUrl,
   buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
+  buildSadhanaHistorySpreadsheetHtml,
   buildSadhanaRangeExportFilename,
   getLastNDaysRange,
   sadhanaQueryKeys,
@@ -73,6 +74,7 @@ export function DevoteeSadhanaHistorySection({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [isExportingSheet, setIsExportingSheet] = useState(false)
   const [previewReports, setPreviewReports] = useState<SadhanaReport[]>([])
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   const [exportError, setExportError] = useState(false)
@@ -177,6 +179,22 @@ export function DevoteeSadhanaHistorySection({
     }
   }
 
+  async function handleExportColoredSheet() {
+    setExportError(false)
+    setIsExportingSheet(true)
+    try {
+      const reports = await fetchFullRangeReports()
+      downloadTextFile(
+        buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xls'),
+        buildSadhanaHistorySpreadsheetHtml(reports, devoteeName),
+      )
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingSheet(false)
+    }
+  }
+
   async function buildDevoteeAiPrompt(): Promise<string | null> {
     if (!validation.valid) return null
     setAiBusy(true)
@@ -257,6 +275,7 @@ export function DevoteeSadhanaHistorySection({
         isPending={isLoadingPreview}
         onPrintPdf={handleExportPdf}
         onDownloadCsv={handleExportCsv}
+        onDownloadColoredSheet={handleExportColoredSheet}
       />
 
       <Card>
@@ -286,6 +305,16 @@ export function DevoteeSadhanaHistorySection({
               >
                 <Printer className="size-4 mr-1.5" aria-hidden="true" />
                 {isExportingPdf ? 'Preparing…' : 'Export PDF'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleExportColoredSheet}
+                disabled={!validation.valid || isExportingSheet}
+              >
+                <Table2 className="size-4 mr-1.5" aria-hidden="true" />
+                {isExportingSheet ? 'Exporting…' : 'Colored Sheet (.xls)'}
               </Button>
               <Button
                 type="button"

@@ -14,7 +14,6 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
-import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { Chip } from '../../../src/presentation/components/Chip'
@@ -52,7 +51,6 @@ const weekStripStyles = StyleSheet.create({
 export default function DashboardScreen() {
   const router = useRouter()
   const navigation = useNavigation()
-  const signOut = useSignOut()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const today = getLocalDateIso()
@@ -64,21 +62,12 @@ export default function DashboardScreen() {
   const announcementsQuery = useAnnouncements()
   const verseQuery = useVerseOfTheDay()
 
-  const handleSignOut = () => {
-    signOut.mutate(undefined, {
-      onSuccess: () => router.replace('/login'),
-    })
-  }
-
   const profileQuery = useProfile()
   const userName = profileQuery.data?.fullName
+  const whatsappShareNumber = profileQuery.data?.whatsappShareNumber
 
-  // The Home tab is the one screen in the tab bar that also shows Profile & Sign
-  // Out in its header (every other tab just gets the ThemeToggle set at
-  // the Tabs navigator level) — set via navigation.setOptions rather
-  // than a <Stack.Screen> override, which only applies inside an actual
-  // Stack navigator and is a no-op here now that this route is hosted by
-  // a Tabs layout.
+  // The Home tab shows Profile & ThemeToggle in its header (Sign Out lives
+  // inside Profile so it cannot be accidentally tapped).
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -90,19 +79,10 @@ export default function DashboardScreen() {
             variant="outline"
           />
           <HeaderThemeToggle />
-          <Button
-            title="Sign Out"
-            pendingTitle="…"
-            size="sm"
-            isPending={signOut.isPending}
-            onPress={handleSignOut}
-            variant="outline"
-          />
         </View>
       ),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
-  }, [navigation, styles, signOut.isPending, router])
+  }, [navigation, styles, router])
 
   if (todayReport.isPending) {
     return <LoadingScreen />
@@ -174,7 +154,7 @@ export default function DashboardScreen() {
                 <Button
                   title="Share to WhatsApp"
                   size="sm"
-                  onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
+                  onPress={() => Linking.openURL(buildWhatsAppShareUrl(report, whatsappShareNumber))}
                   variant="outline"
                 />
               </View>

@@ -3,6 +3,7 @@ import { Outlet, useNavigation } from 'react-router-dom'
 import { useAuth } from '@sadhana-connect/auth'
 import { useNotificationsRealtime } from '@sadhana-connect/notifications'
 import { useProfile } from '@sadhana-connect/auth'
+import { setConfiguredWhatsAppRecipient } from '@sadhana-connect/sadhana'
 import { getBottomTabItemsForRole, getNavItemsForRole } from '@/presentation/navigation/nav-config'
 import { cn } from '@/shared/utils/cn'
 import { AppHeader } from '@/presentation/layouts/AppHeader'
@@ -34,6 +35,8 @@ export function AppLayout() {
   if (!profile.data) {
     return null
   }
+
+  setConfiguredWhatsAppRecipient(profile.data.whatsappShareNumber)
 
   const navItems = getNavItemsForRole(profile.data.role)
   const bottomTabItems = getBottomTabItemsForRole(profile.data.role)

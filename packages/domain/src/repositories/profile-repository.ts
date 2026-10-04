@@ -11,6 +11,10 @@ export interface ProfileRepository {
 
   updateProfile(
     userId: string,
-    updates: { fullName?: string; phoneNumber?: string | null },
+    updates: {
+      fullName?: string
+      phoneNumber?: string | null
+      whatsappShareNumber?: string | null
+    },
   ): Promise<Profile>
 }

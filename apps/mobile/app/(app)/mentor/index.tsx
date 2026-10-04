@@ -24,7 +24,6 @@ import { useLayoutEffect, useMemo, useState } from 'react'
 import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
-import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { Button } from '../../../src/presentation/components/Button'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
@@ -95,7 +94,6 @@ function DevoteeSummaryRow({ summary }: { summary: MentorDevoteeSummary }) {
 }
 
 export default function MentorDashboardScreen() {
-  const signOut = useSignOut()
   const router = useRouter()
   const navigation = useNavigation()
   const { colors } = useTheme()
@@ -111,21 +109,11 @@ export default function MentorDashboardScreen() {
 
   const devoteesQuery = useMentorDevotees()
 
-  const handleSignOut = () => {
-    signOut.mutate(undefined, {
-      onSuccess: () => router.replace('/login'),
-    })
-  }
-
   const profile = useProfile()
   const userName = profile.data?.fullName
 
-  // The Devotees tab is the one screen that also shows Profile & Sign Out in its
-  // header (every other tab just gets the ThemeToggle set at the Tabs
-  // navigator level) — set via navigation.setOptions rather than a
-  // <Stack.Screen> override, which only applies inside an actual Stack
-  // navigator and is a no-op here now that this route is hosted by a
-  // Tabs layout.
+  // The Devotees tab shows Profile & ThemeToggle in its header (Sign Out
+  // lives inside Profile so it cannot be accidentally pressed).
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -137,19 +125,10 @@ export default function MentorDashboardScreen() {
             variant="outline"
           />
           <HeaderThemeToggle />
-          <Button
-            title="Sign Out"
-            pendingTitle="…"
-            size="sm"
-            isPending={signOut.isPending}
-            onPress={handleSignOut}
-            variant="outline"
-          />
         </View>
       ),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSignOut is recreated every render but is stable in effect; re-running per signOut.isPending is what actually needs to trigger the re-render of the header button.
-  }, [navigation, styles, signOut.isPending, router])
+  }, [navigation, styles, router])
 
   if (devoteesQuery.isPending) {
     return <LoadingScreen />

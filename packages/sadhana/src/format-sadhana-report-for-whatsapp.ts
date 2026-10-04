@@ -1,7 +1,11 @@
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatIsoDateAsDdMmYyyy, formatTime12Hour } from '@sadhana-connect/shared'
 
-import { WHATSAPP_RECIPIENT_NUMBER } from './whatsapp-recipient'
+import {
+  WHATSAPP_RECIPIENT_NUMBER,
+  getConfiguredWhatsAppRecipient,
+  normalizeWhatsAppNumber,
+} from './whatsapp-recipient'
 
 // Placeholder for any unset nullable field (approved product decision,
 // Phase 15) — the WhatsApp template's line structure must stay identical
@@ -45,10 +49,18 @@ export function formatSadhanaReportForWhatsApp(report: SadhanaReport): string {
   return lines.join('\n\n')
 }
 
-// The full share URL, including the fixed recipient (Phase 15 — not
-// configurable) and the URL-encoded message. This is the only string a
-// "Share to WhatsApp" action should ever be built from, on any platform.
-export function buildWhatsAppShareUrl(report: SadhanaReport): string {
+// Builds the full WhatsApp share URL using the user's configured recipient
+// number (from Profile) when present, or https://wa.me/?text=... when unset
+// so WhatsApp opens its contact/group picker with the report pre-filled.
+export function buildWhatsAppShareUrl(
+  report: SadhanaReport,
+  recipientNumber?: string | null,
+): string {
   const message = formatSadhanaReportForWhatsApp(report)
-  return `https://wa.me/${WHATSAPP_RECIPIENT_NUMBER}?text=${encodeURIComponent(message)}`
+  const effectiveRecipient =
+    recipientNumber !== undefined
+      ? recipientNumber
+      : (getConfiguredWhatsAppRecipient() ?? WHATSAPP_RECIPIENT_NUMBER)
+  const digits = normalizeWhatsAppNumber(effectiveRecipient)
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
 }

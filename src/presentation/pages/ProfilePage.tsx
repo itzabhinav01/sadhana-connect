@@ -1,12 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LogOut } from 'lucide-react'
+import { LogOut, MessageCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { phoneNumberField, resetPasswordSchema, useAuth, useProfile, useUpdatePassword, type ResetPasswordInput } from '@sadhana-connect/auth'
-import { RECENT_REPORTS_LOOKBACK_LIMIT, useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
+import {
+  RECENT_REPORTS_LOOKBACK_LIMIT,
+  setConfiguredWhatsAppRecipient,
+  useRecentSadhanaReports,
+  useSadhanaStreak,
+} from '@sadhana-connect/sadhana'
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { useSignOut } from '@/application/auth/use-sign-out'
 import { useUpdateProfile } from '@/application/profile/use-update-profile'
@@ -27,6 +32,13 @@ import { Input } from '@/presentation/components/ui/input'
 const profileEditSchema = z.object({
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
   phoneNumber: phoneNumberField,
+  whatsappShareNumber: z
+    .string()
+    .trim()
+    .refine(
+      (val) => val === '' || /^\+?[1-9]\d{6,14}$/.test(val.replace(/[\s-]/g, '')),
+      'Enter a valid WhatsApp phone number with country code (e.g. +919876543210)',
+    ),
 })
 type ProfileEditValues = z.infer<typeof profileEditSchema>
 
@@ -88,10 +100,16 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [whatsappInputOverride, setWhatsappInputOverride] = useState<string | null>(null)
+  const [whatsappSaved, setWhatsappSaved] = useState(false)
+  const [whatsappError, setWhatsappError] = useState<string | null>(null)
+  const whatsappInput =
+    whatsappInputOverride ?? (profileQuery.data?.whatsappShareNumber ?? '')
+  const setWhatsappInput = (value: string) => setWhatsappInputOverride(value)
 
   const form = useForm<ProfileEditValues>({
     resolver: zodResolver(profileEditSchema),
-    defaultValues: { fullName: '', phoneNumber: '' },
+    defaultValues: { fullName: '', phoneNumber: '', whatsappShareNumber: '' },
   })
 
   const passwordForm = useForm<ResetPasswordInput>({
@@ -104,21 +122,57 @@ export function ProfilePage() {
       form.reset({
         fullName: profileQuery.data.fullName ?? '',
         phoneNumber: profileQuery.data.phoneNumber ?? '',
+        whatsappShareNumber: profileQuery.data.whatsappShareNumber ?? '',
       })
+      setConfiguredWhatsAppRecipient(profileQuery.data.whatsappShareNumber)
     }
   }, [profileQuery.data, form])
 
   const onSubmit = form.handleSubmit((values) => {
+    const cleanedWhatsapp = values.whatsappShareNumber.replace(/[\s-]/g, '').trim()
+    const payload: {
+      fullName: string
+      phoneNumber: string | null
+      whatsappShareNumber?: string | null
+    } = {
+      fullName: values.fullName,
+      phoneNumber: values.phoneNumber || null,
+    }
+    if (cleanedWhatsapp || profileQuery.data?.whatsappShareNumber) {
+      payload.whatsappShareNumber = cleanedWhatsapp || null
+    }
+
+    updateProfile.mutate(payload, {
+      onSuccess: () => {
+        setConfiguredWhatsAppRecipient(cleanedWhatsapp || null)
+        setIsEditing(false)
+      },
+    })
+  })
+
+  const handleSaveWhatsAppNumber = () => {
+    setWhatsappSaved(false)
+    setWhatsappError(null)
+    const cleaned = whatsappInput.replace(/[\s-]/g, '').trim()
+    if (cleaned !== '' && !/^\+?[1-9]\d{6,14}$/.test(cleaned)) {
+      setWhatsappError('Enter a valid WhatsApp number with country code (e.g. +919876543210).')
+      return
+    }
+    if (!profileQuery.data) return
     updateProfile.mutate(
       {
-        fullName: values.fullName,
-        phoneNumber: values.phoneNumber || null,
+        fullName: profileQuery.data.fullName,
+        phoneNumber: profileQuery.data.phoneNumber,
+        whatsappShareNumber: cleaned || null,
       },
       {
-        onSuccess: () => setIsEditing(false),
+        onSuccess: () => {
+          setConfiguredWhatsAppRecipient(cleaned || null)
+          setWhatsappSaved(true)
+        },
       },
     )
-  })
+  }
 
   const onPasswordSubmit = passwordForm.handleSubmit((values) => {
     updatePassword.mutate(values.password, {
@@ -197,6 +251,14 @@ export function ProfilePage() {
                     </p>
                   </div>
                   <div>
+                    <span className="text-xs text-muted-foreground">
+                      WhatsApp Number for Sadhana Sharing
+                    </span>
+                    <p className="text-sm font-medium text-foreground">
+                      {profileQuery.data.whatsappShareNumber || 'Not set (opens WhatsApp contact picker)'}
+                    </p>
+                  </div>
+                  <div>
                     <span className="text-xs text-muted-foreground">Designation</span>
                     <p className="text-sm font-medium text-foreground">{ROLE_LABELS[profileQuery.data.role]}</p>
                   </div>
@@ -230,6 +292,23 @@ export function ProfilePage() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="whatsappShareNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>WhatsApp Number to Share Sadhana With</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="e.g. +919876543210 (Mentor / Group number)"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     {updateProfile.isError ? (
                       <Alert variant="destructive">
                         <AlertDescription>
@@ -250,6 +329,7 @@ export function ProfilePage() {
                           form.reset({
                             fullName: profileQuery.data?.fullName ?? '',
                             phoneNumber: profileQuery.data?.phoneNumber ?? '',
+                            whatsappShareNumber: profileQuery.data?.whatsappShareNumber ?? '',
                           })
                         }}
                       >
@@ -259,6 +339,60 @@ export function ProfilePage() {
                   </form>
                 </Form>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <MessageCircle className="size-4 text-emerald-600" aria-hidden="true" />
+                <CardTitle>
+                  <h2>WhatsApp Sadhana Sharing</h2>
+                </CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Set the WhatsApp number (such as your mentor&apos;s number) where your daily Sadhana chart will be sent when you tap &ldquo;Share to WhatsApp&rdquo;. Leave blank to choose a contact in WhatsApp each time.
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 max-w-md">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="whatsapp-share-number-input"
+                  className="text-xs font-medium text-foreground"
+                >
+                  Recipient WhatsApp Number (with country code)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <Input
+                    id="whatsapp-share-number-input"
+                    type="tel"
+                    placeholder="+919876543210"
+                    value={whatsappInput}
+                    onChange={(e) => {
+                      setWhatsappInput(e.target.value)
+                      setWhatsappSaved(false)
+                      setWhatsappError(null)
+                    }}
+                    className="flex-1 min-w-[200px]"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSaveWhatsAppNumber}
+                    disabled={updateProfile.isPending}
+                  >
+                    {updateProfile.isPending ? 'Saving…' : 'Save Number'}
+                  </Button>
+                </div>
+              </div>
+              {whatsappError ? (
+                <p className="text-xs text-destructive">{whatsappError}</p>
+              ) : null}
+              {whatsappSaved ? (
+                <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  WhatsApp sharing number saved! ✅
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -364,16 +498,28 @@ export function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="sm:self-start"
-            onClick={handleSignOut}
-            disabled={signOut.isPending}
-          >
-            <LogOut className="size-4" aria-hidden="true" />
-            {signOut.isPending ? 'Signing out…' : 'Sign out'}
-          </Button>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Account Session</h2>
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Sign out of your account on this device.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Button
+                type="button"
+                variant="destructive"
+                className="sm:self-start"
+                onClick={handleSignOut}
+                disabled={signOut.isPending}
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                {signOut.isPending ? 'Signing out…' : 'Sign out'}
+              </Button>
+            </CardContent>
+          </Card>
         </>
       ) : null}
     </div>

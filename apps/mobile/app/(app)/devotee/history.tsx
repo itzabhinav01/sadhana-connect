@@ -4,6 +4,7 @@ import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase
 import {
   buildSadhanaHistoryCsv,
   buildSadhanaHistoryHtml,
+  buildSadhanaHistorySpreadsheetHtml,
   buildSadhanaRangeExportFilename,
   sadhanaQueryKeys,
   useSadhanaHistory,
@@ -45,6 +46,7 @@ export default function HistoryScreen() {
   const [filters, setFilters] = useState<HistoryFilters>({ fromDate: '', toDate: '' })
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [isExportingSheet, setIsExportingSheet] = useState(false)
   const [exportError, setExportError] = useState(false)
   const today = getLocalDateIso()
 
@@ -66,6 +68,7 @@ export default function HistoryScreen() {
     ? validateDateRange(exportFromDate, exportToDate)
     : { valid: false, error: 'Choose a specific date range (not All time) to export.' }
   const canExportRange = hasConcreteRange && rangeValidation.valid
+  const isAnyExportBusy = isExportingPdf || isExportingCsv || isExportingSheet
 
   async function fetchRangeReports(): Promise<SadhanaReport[]> {
     if (!userId) throw new Error('HistoryScreen: no authenticated user')
@@ -116,6 +119,31 @@ export default function HistoryScreen() {
     }
   }
 
+  async function handleExportRangeColoredSheet() {
+    setExportError(false)
+    setIsExportingSheet(true)
+    try {
+      const rangeReports = await fetchRangeReports()
+      const fileUri =
+        FileSystem.cacheDirectory + buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xls')
+      await FileSystem.writeAsStringAsync(
+        fileUri,
+        buildSadhanaHistorySpreadsheetHtml(rangeReports),
+        {
+          encoding: FileSystem.EncodingType.UTF8,
+        },
+      )
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'application/vnd.ms-excel',
+        dialogTitle: `Sadhana Colored Sheet ${exportFromDate} to ${exportToDate}`,
+      })
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingSheet(false)
+    }
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <DateRangeFields
@@ -148,15 +176,23 @@ export default function HistoryScreen() {
           title="Export PDF"
           pendingTitle="Preparing…"
           isPending={isExportingPdf}
-          disabled={!canExportRange || isExportingPdf || isExportingCsv}
+          disabled={!canExportRange || isAnyExportBusy}
           variant="outline"
           onPress={handleExportRangePdf}
+        />
+        <Button
+          title="Colored Sheet (.xls)"
+          pendingTitle="Preparing…"
+          isPending={isExportingSheet}
+          disabled={!canExportRange || isAnyExportBusy}
+          variant="outline"
+          onPress={handleExportRangeColoredSheet}
         />
         <Button
           title="Export CSV"
           pendingTitle="Preparing…"
           isPending={isExportingCsv}
-          disabled={!canExportRange || isExportingPdf || isExportingCsv}
+          disabled={!canExportRange || isAnyExportBusy}
           variant="outline"
           onPress={handleExportRangeCsv}
         />

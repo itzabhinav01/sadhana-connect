@@ -1,4 +1,4 @@
-import { FileSpreadsheet, Printer } from 'lucide-react'
+import { FileSpreadsheet, Printer, Table2 } from 'lucide-react'
 import type { SadhanaReport } from '@sadhana-connect/domain'
 import { formatIsoDateAsDdMmYyyy } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
@@ -9,7 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/presentation/components/ui/dialog'
-import { ReportSections } from '@/presentation/pages/sadhana/SadhanaExportPrintView'
+import {
+  ReportSections,
+  SadhanaSummarySheetTable,
+} from '@/presentation/pages/sadhana/SadhanaExportPrintView'
 
 interface SadhanaReportPreviewModalProps {
   open: boolean
@@ -21,6 +24,7 @@ interface SadhanaReportPreviewModalProps {
   isPending?: boolean
   onPrintPdf: () => void
   onDownloadCsv: () => void
+  onDownloadColoredSheet?: () => void
 }
 
 export function SadhanaReportPreviewModal({
@@ -33,6 +37,7 @@ export function SadhanaReportPreviewModal({
   isPending = false,
   onPrintPdf,
   onDownloadCsv,
+  onDownloadColoredSheet,
 }: SadhanaReportPreviewModalProps) {
   const sortedReports = [...reports].sort((a, b) => a.reportDate.localeCompare(b.reportDate))
 
@@ -40,6 +45,7 @@ export function SadhanaReportPreviewModal({
   const totalReading = sortedReports.reduce((acc, r) => acc + r.readingMinutes, 0)
   const totalHearing = sortedReports.reduce((acc, r) => acc + r.hearingMinutes, 0)
   const avgRounds = sortedReports.length > 0 ? (totalRounds / sortedReports.length).toFixed(1) : '0'
+  const below16Days = sortedReports.filter((r) => r.totalRounds < 16).length
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,6 +64,18 @@ export function SadhanaReportPreviewModal({
                 </DialogDescription>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
+                {onDownloadColoredSheet ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={onDownloadColoredSheet}
+                    disabled={isPending || reports.length === 0}
+                  >
+                    <Table2 className="size-4 mr-1.5" aria-hidden="true" />
+                    Colored Sheet (.xls)
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
                   size="sm"
@@ -82,7 +100,7 @@ export function SadhanaReportPreviewModal({
 
             {/* Quick Metrics Bar */}
             {!isPending && reports.length > 0 ? (
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 rounded-lg bg-muted/60 p-3 text-center">
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5 rounded-lg bg-muted/60 p-3 text-center">
                 <div>
                   <span className="text-xs text-muted-foreground">Reports</span>
                   <p className="text-sm font-semibold text-foreground">{reports.length} days</p>
@@ -90,6 +108,16 @@ export function SadhanaReportPreviewModal({
                 <div>
                   <span className="text-xs text-muted-foreground">Total Rounds</span>
                   <p className="text-sm font-semibold text-foreground">{totalRounds} ({avgRounds}/day)</p>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground">Below 16 (&lt;16)</span>
+                  <p
+                    className={`text-sm font-bold ${
+                      below16Days > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                    }`}
+                  >
+                    {below16Days} {below16Days === 1 ? 'day' : 'days'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">Reading</span>
@@ -117,7 +145,7 @@ export function SadhanaReportPreviewModal({
               </div>
             ) : (
               <div className="rounded-lg border bg-card p-6 shadow-xs text-card-foreground">
-                <div className="border-b pb-4 mb-6">
+                <div className="border-b-2 border-amber-600 pb-4 mb-4">
                   <h2 className="text-lg font-bold">
                     {devoteeName ? `${devoteeName} — ` : ''}Sadhana Report
                   </h2>
@@ -126,7 +154,9 @@ export function SadhanaReportPreviewModal({
                   </p>
                 </div>
 
-                <div className="flex flex-col divide-y divide-border">
+                <SadhanaSummarySheetTable reports={sortedReports} />
+
+                <div className="mt-6 flex flex-col divide-y divide-border">
                   {sortedReports.map((report) => (
                     <div key={report.id} className="py-6 first:pt-0 last:pb-0">
                       <ReportSections report={report} />
@@ -141,3 +171,4 @@ export function SadhanaReportPreviewModal({
     </Dialog>
   )
 }
+

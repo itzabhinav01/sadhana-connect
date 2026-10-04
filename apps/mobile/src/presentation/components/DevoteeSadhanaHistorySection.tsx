@@ -5,6 +5,7 @@ import {
   buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
   buildSadhanaHistoryHtml,
+  buildSadhanaHistorySpreadsheetHtml,
   buildSadhanaRangeExportFilename,
   getLastNDaysRange,
   sadhanaQueryKeys,
@@ -93,16 +94,28 @@ function ReportDetailCard({
   colors: ThemeColors
 }) {
   const styles = useMemo(() => createStyles(colors), [colors])
+  const isBelow16 = report.totalRounds < 16
 
   return (
     <View style={styles.detailCard}>
-      <Text style={styles.detailDate}>{formatDisplayDate(report.reportDate)}</Text>
+      <View style={styles.detailHeaderRow}>
+        <Text style={styles.detailDate}>{formatDisplayDate(report.reportDate)}</Text>
+        <View style={isBelow16 ? styles.roundsBadgeLow : styles.roundsBadgeOk}>
+          <Text style={isBelow16 ? styles.roundsBadgeTextLow : styles.roundsBadgeTextOk}>
+            {isBelow16 ? `${report.totalRounds}/16 Rounds (<16)` : `${report.totalRounds} Rounds (16+)`}
+          </Text>
+        </View>
+      </View>
 
       {/* Chanting */}
       <View style={styles.sectionBlock}>
         <Text style={styles.sectionHeader}>Chanting</Text>
         <Text style={styles.detailText}>
-          Total: <Text style={styles.boldText}>{report.totalRounds} Rounds</Text> · Before 4:30 AM: {report.roundsBefore430} · Till 7 AM: {report.roundsTill7am}
+          Total:{' '}
+          <Text style={isBelow16 ? styles.roundsTextLow : styles.roundsTextOk}>
+            {report.totalRounds} Rounds
+          </Text>{' '}
+          · Before 4:30 AM: {report.roundsBefore430} · Till 7 AM: {report.roundsTill7am}
         </Text>
         {report.lastRoundTime ? (
           <Text style={styles.detailMuted}>Last round: {formatTime12Hour(report.lastRoundTime)}</Text>
@@ -171,6 +184,7 @@ export function DevoteeSadhanaHistorySection({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [isExportingCsv, setIsExportingCsv] = useState(false)
+  const [isExportingSheet, setIsExportingSheet] = useState(false)
   const [previewReports, setPreviewReports] = useState<SadhanaReport[]>([])
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
   const [exportError, setExportError] = useState(false)
@@ -275,6 +289,31 @@ export function DevoteeSadhanaHistorySection({
     }
   }
 
+  async function handleExportColoredSheet() {
+    setExportError(false)
+    setIsExportingSheet(true)
+    try {
+      const reports = await fetchFullReports()
+      const filename = buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xls')
+      const fileUri = `${FileSystem.cacheDirectory ?? ''}${filename}`
+      await FileSystem.writeAsStringAsync(
+        fileUri,
+        buildSadhanaHistorySpreadsheetHtml(reports, devoteeName),
+        {
+          encoding: FileSystem.EncodingType.UTF8,
+        },
+      )
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'application/vnd.ms-excel',
+        dialogTitle: `Sadhana Colored Sheet ${range.fromDate} to ${range.toDate}`,
+      })
+    } catch {
+      setExportError(true)
+    } finally {
+      setIsExportingSheet(false)
+    }
+  }
+
   async function buildDevoteeAiPrompt(): Promise<string | null> {
     if (!validation.valid) return null
     setAiBusy(true)
@@ -333,6 +372,7 @@ export function DevoteeSadhanaHistorySection({
   const totalRounds = sortedPreviewReports.reduce((acc, r) => acc + r.totalRounds, 0)
   const totalReading = sortedPreviewReports.reduce((acc, r) => acc + r.readingMinutes, 0)
   const totalHearing = sortedPreviewReports.reduce((acc, r) => acc + r.hearingMinutes, 0)
+  const below16Count = sortedPreviewReports.filter((r) => r.totalRounds < 16).length
 
   return (
     <>
@@ -368,6 +408,17 @@ export function DevoteeSadhanaHistorySection({
                 <Text style={styles.metricValue}>{totalRounds}</Text>
               </View>
               <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Below 16 (&lt;16)</Text>
+                <Text
+                  style={[
+                    styles.metricValue,
+                    below16Count > 0 ? styles.roundsTextLow : styles.roundsTextOk,
+                  ]}
+                >
+                  {below16Count}d
+                </Text>
+              </View>
+              <View style={styles.metricItem}>
                 <Text style={styles.metricLabel}>Reading</Text>
                 <Text style={styles.metricValue}>{totalReading}m</Text>
               </View>
@@ -386,6 +437,14 @@ export function DevoteeSadhanaHistorySection({
               pendingTitle="Exporting…"
               isPending={isExportingPdf}
               onPress={handleExportPdf}
+              disabled={isLoadingPreview || previewReports.length === 0}
+            />
+            <Button
+              title="Colored Sheet (.xls)"
+              variant="outline"
+              pendingTitle="Exporting…"
+              isPending={isExportingSheet}
+              onPress={handleExportColoredSheet}
               disabled={isLoadingPreview || previewReports.length === 0}
             />
             <Button
@@ -479,6 +538,22 @@ export function DevoteeSadhanaHistorySection({
                 <Icon name="download-outline" size={15} color={colors.foreground} />
                 <Text style={styles.exportButtonText}>
                   {isExportingPdf ? 'Exporting…' : 'Export PDF'}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.exportButton,
+                  !validation.valid || isExportingSheet ? styles.disabledButton : null,
+                ]}
+                onPress={handleExportColoredSheet}
+                disabled={!validation.valid || isExportingSheet}
+                accessibilityRole="button"
+                accessibilityLabel="Colored Sheet (.xls)"
+              >
+                <Icon name="grid-outline" size={15} color={colors.foreground} />
+                <Text style={styles.exportButtonText}>
+                  {isExportingSheet ? 'Exporting…' : 'Colored Sheet'}
                 </Text>
               </Pressable>
 
@@ -736,6 +811,7 @@ function createStyles(colors: ThemeColors) {
     },
     modalActionBar: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       gap: spacing.sm,
       padding: spacing.sm,
       borderBottomWidth: 1,
@@ -753,14 +829,58 @@ function createStyles(colors: ThemeColors) {
       borderColor: colors.border,
       gap: spacing.sm,
     },
+    detailHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      paddingBottom: spacing.xs,
+      gap: spacing.xs,
+    },
     detailDate: {
       fontSize: fontSize.base,
       fontWeight: '700',
       fontFamily: fontFamily.bold,
       color: colors.foreground,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      paddingBottom: spacing.xs,
+    },
+    roundsBadgeLow: {
+      backgroundColor: '#fef2f2',
+      borderColor: '#fca5a5',
+      borderWidth: 1,
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    roundsBadgeOk: {
+      backgroundColor: '#f0fdf4',
+      borderColor: '#86efac',
+      borderWidth: 1,
+      borderRadius: radius.sm,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+    },
+    roundsBadgeTextLow: {
+      color: '#dc2626',
+      fontSize: fontSize.xs,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+    },
+    roundsBadgeTextOk: {
+      color: '#15803d',
+      fontSize: fontSize.xs,
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+    },
+    roundsTextLow: {
+      color: '#dc2626',
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
+    },
+    roundsTextOk: {
+      color: '#15803d',
+      fontWeight: '700',
+      fontFamily: fontFamily.bold,
     },
     sectionBlock: {
       gap: 2,
@@ -802,3 +922,4 @@ function createStyles(colors: ThemeColors) {
     },
   })
 }
+

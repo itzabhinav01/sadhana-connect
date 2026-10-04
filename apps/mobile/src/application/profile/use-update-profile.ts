@@ -5,6 +5,7 @@ import { supabaseProfileRepository } from '@sadhana-connect/infra-supabase'
 export interface UpdateProfileParams {
   fullName: string
   phoneNumber?: string | null
+  whatsappShareNumber?: string | null
 }
 
 export function useUpdateProfile() {

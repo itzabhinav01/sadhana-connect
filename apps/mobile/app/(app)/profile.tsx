@@ -7,11 +7,16 @@ import {
   useUpdatePassword,
   type ResetPasswordInput,
 } from '@sadhana-connect/auth'
-import { RECENT_REPORTS_LOOKBACK_LIMIT, useRecentSadhanaReports, useSadhanaStreak } from '@sadhana-connect/sadhana'
+import {
+  RECENT_REPORTS_LOOKBACK_LIMIT,
+  setConfiguredWhatsAppRecipient,
+  useRecentSadhanaReports,
+  useSadhanaStreak,
+} from '@sadhana-connect/sadhana'
 import { Stack, useRouter } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { z } from 'zod'
 
 import { useTheme } from '../../src/application/theme/use-theme'
@@ -30,6 +35,13 @@ import type { ThemeColors } from '../../src/shared/theme'
 const profileEditSchema = z.object({
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
   phoneNumber: phoneNumberField,
+  whatsappShareNumber: z
+    .string()
+    .trim()
+    .refine(
+      (val) => val === '' || /^\+?[1-9]\d{6,14}$/.test(val.replace(/[\s-]/g, '')),
+      'Enter a valid WhatsApp phone number with country code (e.g. +919876543210)',
+    ),
 })
 type ProfileEditValues = z.infer<typeof profileEditSchema>
 
@@ -62,12 +74,16 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [whatsappInput, setWhatsappInput] = useState('')
+  const [whatsappSaved, setWhatsappSaved] = useState(false)
+  const [whatsappError, setWhatsappError] = useState<string | null>(null)
 
   const { control, handleSubmit, reset } = useForm<ProfileEditValues>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
       fullName: '',
       phoneNumber: '',
+      whatsappShareNumber: '',
     },
   })
 
@@ -84,21 +100,58 @@ export default function ProfileScreen() {
       reset({
         fullName: profileQuery.data.fullName ?? '',
         phoneNumber: profileQuery.data.phoneNumber ?? '',
+        whatsappShareNumber: profileQuery.data.whatsappShareNumber ?? '',
       })
+      setWhatsappInput(profileQuery.data.whatsappShareNumber ?? '')
+      setConfiguredWhatsAppRecipient(profileQuery.data.whatsappShareNumber)
     }
   }, [profileQuery.data, reset])
 
   const onSubmit = handleSubmit((values) => {
+    const cleanedWhatsapp = values.whatsappShareNumber.replace(/[\s-]/g, '').trim()
+    const payload: {
+      fullName: string
+      phoneNumber: string | null
+      whatsappShareNumber?: string | null
+    } = {
+      fullName: values.fullName,
+      phoneNumber: values.phoneNumber || null,
+    }
+    if (cleanedWhatsapp || profileQuery.data?.whatsappShareNumber) {
+      payload.whatsappShareNumber = cleanedWhatsapp || null
+    }
+
+    updateProfile.mutate(payload, {
+      onSuccess: () => {
+        setConfiguredWhatsAppRecipient(cleanedWhatsapp || null)
+        setIsEditing(false)
+      },
+    })
+  })
+
+  const handleSaveWhatsAppNumber = () => {
+    setWhatsappSaved(false)
+    setWhatsappError(null)
+    const cleaned = whatsappInput.replace(/[\s-]/g, '').trim()
+    if (cleaned !== '' && !/^\+?[1-9]\d{6,14}$/.test(cleaned)) {
+      setWhatsappError('Enter a valid WhatsApp number with country code (e.g. +919876543210).')
+      return
+    }
+    if (!profileQuery.data) return
     updateProfile.mutate(
       {
-        fullName: values.fullName,
-        phoneNumber: values.phoneNumber || null,
+        fullName: profileQuery.data.fullName,
+        phoneNumber: profileQuery.data.phoneNumber,
+        whatsappShareNumber: cleaned || null,
       },
       {
-        onSuccess: () => setIsEditing(false),
+        onSuccess: () => {
+          setConfiguredWhatsAppRecipient(cleaned || null)
+          setWhatsappSaved(true)
+        },
       },
     )
-  })
+  }
 
   const onPasswordSubmit = passwordForm.handleSubmit((values) => {
     updatePassword.mutate(values.password, {
@@ -170,6 +223,15 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
 
           <View style={styles.detailRow}>
+            <Text style={styles.label}>WhatsApp Number for Sadhana Sharing</Text>
+            <Text style={styles.value}>
+              {profile.whatsappShareNumber || 'Not set (opens WhatsApp contact picker)'}
+            </Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.detailRow}>
             <Text style={styles.label}>Designation</Text>
             <Text style={styles.value}>{ROLE_LABELS[profile.role] ?? profile.role}</Text>
           </View>
@@ -188,6 +250,7 @@ export default function ProfileScreen() {
                 reset({
                   fullName: profile.fullName ?? '',
                   phoneNumber: profile.phoneNumber ?? '',
+                  whatsappShareNumber: profile.whatsappShareNumber ?? '',
                 })
                 setIsEditing(true)
               }}
@@ -201,6 +264,37 @@ export default function ProfileScreen() {
               }}
             />
           </View>
+        </Card>
+
+        {/* WhatsApp Sadhana Sharing Card */}
+        <Card title="WhatsApp Sadhana Sharing">
+          <Text style={styles.helperText}>
+            Set the WhatsApp number (such as your mentor&apos;s number) to share your daily Sadhana chart with. Leave blank to choose any contact in WhatsApp.
+          </Text>
+          <TextInput
+            style={styles.whatsappInput}
+            placeholder="e.g. +919876543210"
+            placeholderTextColor={colors.placeholder ?? colors.muted}
+            value={whatsappInput}
+            onChangeText={(text) => {
+              setWhatsappInput(text)
+              setWhatsappSaved(false)
+              setWhatsappError(null)
+            }}
+            keyboardType="phone-pad"
+            accessibilityLabel="Recipient WhatsApp Number"
+          />
+          {whatsappError ? <Text style={styles.errorInline}>{whatsappError}</Text> : null}
+          {whatsappSaved ? (
+            <Text style={styles.successText}>WhatsApp sharing number saved! ✅</Text>
+          ) : null}
+          <Button
+            title="Save WhatsApp Number"
+            size="sm"
+            pendingTitle="Saving…"
+            isPending={updateProfile.isPending}
+            onPress={handleSaveWhatsAppNumber}
+          />
         </Card>
 
         {/* Devotee Sadhana Snapshot */}
@@ -222,24 +316,27 @@ export default function ProfileScreen() {
         ) : null}
 
         {/* Settings & Preferences */}
-        {profile.role === 'devotee' ? (
-          <Button
-            title="Settings & Reminders"
-            variant="outline"
-            accessibilityLabel="Settings"
-            onPress={() => router.push('/devotee/settings')}
-          />
-        ) : null}
+        <Button
+          title="Settings & Reminders"
+          variant="outline"
+          accessibilityLabel="Settings"
+          onPress={() => router.push('/devotee/settings')}
+        />
 
         <AppUpdateSection />
 
-        <Button
-          title="Sign Out"
-          pendingTitle="Signing out…"
-          isPending={signOut.isPending}
-          variant="destructive"
-          onPress={handleSignOut}
-        />
+        <Card title="Account Session">
+          <Text style={styles.helperText}>
+            Sign out of your Sadhana Connect account on this device.
+          </Text>
+          <Button
+            title="Sign Out"
+            pendingTitle="Signing out…"
+            isPending={signOut.isPending}
+            variant="destructive"
+            onPress={handleSignOut}
+          />
+        </Card>
 
         {/* Edit Profile Modal */}
         <Modal visible={isEditing} transparent animationType="slide" onRequestClose={() => setIsEditing(false)}>
@@ -260,6 +357,14 @@ export default function ProfileScreen() {
                 name="phoneNumber"
                 label="Phone Number"
                 placeholder="+919876543210"
+                keyboardType="phone-pad"
+              />
+
+              <TextField
+                control={control}
+                name="whatsappShareNumber"
+                label="WhatsApp Number for Sadhana Sharing"
+                placeholder="Mentor / Group WhatsApp number"
                 keyboardType="phone-pad"
               />
 
@@ -412,6 +517,27 @@ function createStyles(colors: ThemeColors) {
       gap: spacing.sm,
       marginTop: spacing.sm,
       flexWrap: 'wrap',
+    },
+    helperText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.regular,
+      color: colors.muted,
+    },
+    whatsappInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 4,
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
+      color: colors.foreground,
+    },
+    errorInline: {
+      fontSize: fontSize.xs,
+      color: colors.destructive,
+      fontFamily: fontFamily.medium,
     },
     successBox: {
       backgroundColor: colors.successBackground,

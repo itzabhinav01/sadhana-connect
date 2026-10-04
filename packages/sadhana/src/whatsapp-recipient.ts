@@ -1,5 +1,21 @@
-// Fixed recipient for the "Share to WhatsApp" action (Phase 15, approved
-// product decision). Not configurable in this phase — see
-// format-sadhana-report-for-whatsapp.ts for the message this number
-// receives, and CLAUDE.md's WHATSAPP SHARE section for the source spec.
-export const WHATSAPP_RECIPIENT_NUMBER = '919354671988'
+// Default recipient for "Share to WhatsApp" when a user has not yet
+// configured a custom WhatsApp Share Number in their Profile. Kept empty
+// so no personal phone number is hardcoded in the public repository; when
+// empty, wa.me/?text=... opens WhatsApp's native contact picker.
+export const WHATSAPP_RECIPIENT_NUMBER = ''
+
+let configuredRecipientNumber: string | null = null
+
+export function setConfiguredWhatsAppRecipient(phoneNumber?: string | null): void {
+  configuredRecipientNumber = phoneNumber?.trim() ? phoneNumber.trim() : null
+}
+
+export function getConfiguredWhatsAppRecipient(): string | null {
+  return configuredRecipientNumber
+}
+
+export function normalizeWhatsAppNumber(phoneNumber?: string | null): string {
+  return (phoneNumber ?? '').replace(/\D/g, '')
+}
+
+

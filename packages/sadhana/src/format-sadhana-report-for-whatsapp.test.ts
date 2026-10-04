@@ -275,11 +275,19 @@ describe('formatSadhanaReportForWhatsApp — 12-hour time formatting', () => {
 })
 
 describe('buildWhatsAppShareUrl', () => {
-  it('builds the exact wa.me URL with the fixed recipient number', () => {
+  it('builds a wa.me URL without a hardcoded personal number when no recipient is provided', () => {
     const url = buildWhatsAppShareUrl(makeReport())
 
-    expect(url.startsWith(`https://wa.me/${WHATSAPP_RECIPIENT_NUMBER}?text=`)).toBe(true)
-    expect(WHATSAPP_RECIPIENT_NUMBER).toBe('919354671988')
+    expect(WHATSAPP_RECIPIENT_NUMBER).toBe('')
+    expect(url.startsWith('https://wa.me/?text=')).toBe(true)
+  })
+
+  it('builds the exact wa.me URL with a configured recipient number', () => {
+    const report = makeReport()
+    const url = buildWhatsAppShareUrl(report, '+91 98765 43210')
+    const message = formatSadhanaReportForWhatsApp(report)
+
+    expect(url).toBe(`https://wa.me/919876543210?text=${encodeURIComponent(message)}`)
   })
 
   it('URL-encodes the message exactly as encodeURIComponent would', () => {

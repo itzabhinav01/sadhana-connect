@@ -1,4 +1,4 @@
-export type SadhanaExportExtension = 'pdf' | 'txt' | 'csv'
+export type SadhanaExportExtension = 'pdf' | 'txt' | 'csv' | 'xls'
 
 // reportDate/fromDate/toDate are always already-local 'YYYY-MM-DD'
 // strings (report.reportDate, or a History filter date) — no Date object

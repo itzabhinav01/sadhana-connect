@@ -5,7 +5,6 @@ import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
-import { useSignOut } from '../../../src/application/auth/use-sign-out'
 import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
@@ -29,15 +28,8 @@ export default function AdminHomeScreen() {
   const router = useRouter()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
-  const signOut = useSignOut()
   const profile = useProfile()
   const summaryQuery = useAdminDashboardSummary()
-
-  const handleSignOut = () => {
-    signOut.mutate(undefined, {
-      onSuccess: () => router.replace('/login'),
-    })
-  }
 
   const userName = profile.data?.fullName
 
@@ -54,14 +46,6 @@ export default function AdminHomeScreen() {
                 variant="outline"
               />
               <HeaderThemeToggle />
-              <Button
-                title="Sign Out"
-                pendingTitle="…"
-                size="sm"
-                isPending={signOut.isPending}
-                onPress={handleSignOut}
-                variant="outline"
-              />
             </View>
           ),
         }}

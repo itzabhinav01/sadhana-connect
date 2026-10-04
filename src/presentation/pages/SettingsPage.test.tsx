@@ -12,11 +12,17 @@ vi.mock('@/presentation/pages/SettingsInstallSection', () => ({
 }))
 
 describe('SettingsPage', () => {
-  it('renders title, daily reminder section, and install section', () => {
+  it('renders title, daily reminder section, install section, and About GitHub card', () => {
     render(<SettingsPage />)
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
     expect(screen.getByTestId('daily-reminder-card')).toBeInTheDocument()
     expect(screen.getByTestId('install-section')).toBeInTheDocument()
+    expect(screen.getByText('About Sadhana Connect')).toBeInTheDocument()
+    const githubLink = screen.getByRole('link', { name: /view on github/i })
+    expect(githubLink).toHaveAttribute(
+      'href',
+      'https://github.com/itzabhinav01/sadhana-connect',
+    )
   })
 })

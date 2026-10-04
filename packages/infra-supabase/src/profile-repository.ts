@@ -9,9 +9,11 @@ interface ProfileRow {
   temple_group_id: string | null
   is_active: boolean
   phone_number: string | null
+  whatsapp_share_number?: string | null
 }
 
-const SELECT_COLUMNS = 'id, full_name, role, temple_group_id, is_active, phone_number'
+const SELECT_COLUMNS =
+  'id, full_name, role, temple_group_id, is_active, phone_number, whatsapp_share_number'
 
 function mapProfile(row: ProfileRow, templeGroupIds?: string[]): Profile {
   const effectiveGroupIds =
@@ -28,6 +30,7 @@ function mapProfile(row: ProfileRow, templeGroupIds?: string[]): Profile {
     templeGroupIds: effectiveGroupIds,
     isActive: row.is_active,
     phoneNumber: row.phone_number,
+    whatsappShareNumber: row.whatsapp_share_number ?? null,
   }
 }
 
@@ -77,6 +80,9 @@ export const supabaseProfileRepository: ProfileRepository = {
     }
     if (updates.phoneNumber !== undefined) {
       patch.phone_number = updates.phoneNumber
+    }
+    if (updates.whatsappShareNumber !== undefined) {
+      patch.whatsapp_share_number = updates.whatsappShareNumber
     }
 
     const { data, error } = await getSupabaseClient()
