@@ -5,7 +5,7 @@ import {
   buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
   buildSadhanaHistoryHtml,
-  buildSadhanaHistorySpreadsheetHtml,
+  buildSadhanaHistoryXlsxBase64,
   buildSadhanaRangeExportFilename,
   getLastNDaysRange,
   sadhanaQueryKeys,
@@ -294,17 +294,18 @@ export function DevoteeSadhanaHistorySection({
     setIsExportingSheet(true)
     try {
       const reports = await fetchFullReports()
-      const filename = buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xls')
+      const filename = buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xlsx')
       const fileUri = `${FileSystem.cacheDirectory ?? ''}${filename}`
       await FileSystem.writeAsStringAsync(
         fileUri,
-        buildSadhanaHistorySpreadsheetHtml(reports, devoteeName),
+        buildSadhanaHistoryXlsxBase64(reports, devoteeName),
         {
-          encoding: FileSystem.EncodingType.UTF8,
+          encoding: FileSystem.EncodingType.Base64,
         },
       )
       await Sharing.shareAsync(fileUri, {
-        mimeType: 'application/vnd.ms-excel',
+        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        UTI: 'org.openxmlformats.spreadsheetml.sheet',
         dialogTitle: `Sadhana Colored Sheet ${range.fromDate} to ${range.toDate}`,
       })
     } catch {
@@ -440,7 +441,7 @@ export function DevoteeSadhanaHistorySection({
               disabled={isLoadingPreview || previewReports.length === 0}
             />
             <Button
-              title="Colored Sheet (.xls)"
+              title="Colored Sheet (.xlsx)"
               variant="outline"
               pendingTitle="Exporting…"
               isPending={isExportingSheet}
@@ -549,7 +550,7 @@ export function DevoteeSadhanaHistorySection({
                 onPress={handleExportColoredSheet}
                 disabled={!validation.valid || isExportingSheet}
                 accessibilityRole="button"
-                accessibilityLabel="Colored Sheet (.xls)"
+                accessibilityLabel="Colored Sheet (.xlsx)"
               >
                 <Icon name="grid-outline" size={15} color={colors.foreground} />
                 <Text style={styles.exportButtonText}>

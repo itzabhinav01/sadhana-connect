@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom'
 import { useAuth } from '@sadhana-connect/auth'
 import {
   buildSadhanaHistoryCsv,
-  buildSadhanaHistorySpreadsheetHtml,
+  buildSadhanaHistoryXlsxBytes,
   buildSadhanaRangeExportFilename,
   formatSadhanaReportsRangeForText,
   sadhanaQueryKeys,
@@ -14,7 +14,7 @@ import {
 } from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase'
-import { downloadTextFile } from '@/shared/utils/download-text-file'
+import { downloadBinaryFile, downloadTextFile } from '@/shared/utils/download-text-file'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import {
@@ -76,13 +76,6 @@ export function HistoryPage() {
     })
   }
 
-  // flushSync forces the range print view to actually be in the DOM
-  // before window.print() runs. Cleared again immediately afterward — see
-  // the matching comment in HistoryReportList.tsx (row-level export) for
-  // why: otherwise this range print view stays mounted, and a later
-  // row-level export in the same session would print both documents
-  // together, since both would be visibility:visible under the global
-  // print CSS at once.
   async function handleExportRangePdf() {
     setExportError(false)
     setIsExportingPdf(true)
@@ -137,9 +130,9 @@ export function HistoryPage() {
     setIsExportingSheet(true)
     try {
       const reports = await fetchRangeReports()
-      downloadTextFile(
-        buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xls'),
-        buildSadhanaHistorySpreadsheetHtml(reports),
+      downloadBinaryFile(
+        buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xlsx'),
+        buildSadhanaHistoryXlsxBytes(reports),
       )
     } catch {
       setExportError(true)
@@ -178,7 +171,7 @@ export function HistoryPage() {
           onClick={handleExportRangeColoredSheet}
           disabled={!canExportRange || isAnyExportBusy}
         >
-          {isExportingSheet ? 'Preparing…' : 'Colored Sheet (.xls)'}
+          {isExportingSheet ? 'Preparing…' : 'Colored Sheet (.xlsx)'}
         </Button>
         <Button
           type="button"

@@ -15,3 +15,24 @@ export function downloadTextFile(filename: string, content: string): void {
 
   URL.revokeObjectURL(url)
 }
+
+export function downloadBinaryFile(
+  filename: string,
+  bytes: Uint8Array,
+  mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+): void {
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+  const blob = new Blob([copy.buffer], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(url)
+}
+

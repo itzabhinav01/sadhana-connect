@@ -1,7 +1,9 @@
 import { useAnnouncements } from '@sadhana-connect/announcements'
 import { useProfile } from '@sadhana-connect/auth'
+import type { SadhanaReport } from '@sadhana-connect/domain'
 import {
   buildWhatsAppShareUrl,
+  getConfiguredWhatsAppRecipient,
   useRecentSadhanaReports,
   useSadhanaReport,
   useSadhanaStreak,
@@ -10,7 +12,7 @@ import {
 import { formatVerseCitation, useVerseOfTheDay } from '@sadhana-connect/verse'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useNavigation, useRouter } from 'expo-router'
-import { useLayoutEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
@@ -22,6 +24,7 @@ import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderTh
 import { Icon } from '../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { SadhanaReportRow } from '../../../src/presentation/components/SadhanaReportRow'
+import { WhatsAppShareModal } from '../../../src/presentation/components/WhatsAppShareModal'
 import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
@@ -65,6 +68,20 @@ export default function DashboardScreen() {
   const profileQuery = useProfile()
   const userName = profileQuery.data?.fullName
   const whatsappShareNumber = profileQuery.data?.whatsappShareNumber
+  const [whatsAppModalReport, setWhatsAppModalReport] = useState<SadhanaReport | null>(null)
+
+  const handleShareWhatsApp = (targetReport: SadhanaReport) => {
+    const effectiveNumber = whatsappShareNumber || getConfiguredWhatsAppRecipient()
+    if (effectiveNumber) {
+      void Linking.openURL(buildWhatsAppShareUrl(targetReport, effectiveNumber))
+      return
+    }
+    if (profileQuery.data && (whatsappShareNumber === null || whatsappShareNumber === '')) {
+      setWhatsAppModalReport(targetReport)
+      return
+    }
+    void Linking.openURL(buildWhatsAppShareUrl(targetReport, whatsappShareNumber))
+  }
 
   // The Home tab shows Profile & ThemeToggle in its header (Sign Out lives
   // inside Profile so it cannot be accidentally tapped).
@@ -154,7 +171,7 @@ export default function DashboardScreen() {
                 <Button
                   title="Share to WhatsApp"
                   size="sm"
-                  onPress={() => Linking.openURL(buildWhatsAppShareUrl(report, whatsappShareNumber))}
+                  onPress={() => handleShareWhatsApp(report)}
                   variant="outline"
                 />
               </View>
@@ -264,6 +281,14 @@ export default function DashboardScreen() {
         </Card>
 
         <AppUpdateSection />
+
+        {whatsAppModalReport ? (
+          <WhatsAppShareModal
+            visible={whatsAppModalReport !== null}
+            report={whatsAppModalReport}
+            onClose={() => setWhatsAppModalReport(null)}
+          />
+        ) : null}
       </ScrollView>
   )
 }

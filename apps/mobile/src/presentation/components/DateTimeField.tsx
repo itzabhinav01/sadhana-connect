@@ -54,7 +54,7 @@ export function DateTimeField<T extends FieldValues>({
   clearable = false,
   onValueChange,
 }: DateTimeFieldProps<T>) {
-  const { colors } = useTheme()
+  const { colors, resolvedTheme } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [isPickerOpen, setIsPickerOpen] = useState(false)
 
@@ -103,6 +103,8 @@ export function DateTimeField<T extends FieldValues>({
                 value={parseStoredValue(stringValue, mode)}
                 mode={mode}
                 display="default"
+                themeVariant={resolvedTheme}
+                accentColor={colors.primary}
                 maximumDate={mode === 'date' ? new Date() : undefined}
                 onChange={handleChange}
               />

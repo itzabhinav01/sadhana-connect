@@ -4,6 +4,7 @@ import { useTheme } from '../../application/theme/use-theme'
 import { fontFamily, fontSize, radius, spacing } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { useAppUpdates } from '../hooks/use-app-updates'
+import { AppUpdateModal } from './AppUpdateModal'
 import { Button } from './Button'
 
 export function AppUpdateSection() {
@@ -14,9 +15,11 @@ export function AppUpdateSection() {
     isChecking,
     isDownloading,
     isUpdateAvailable,
+    updatePrompt,
+    dismissUpdatePrompt,
     checkForUpdates,
     downloadAndApplyUpdate,
-  } = useAppUpdates({ promptUserOnUpdate: false })
+  } = useAppUpdates({ promptUserOnUpdate: false, useThemedModal: true })
 
   return (
     <View style={styles.container}>
@@ -54,6 +57,12 @@ export function AppUpdateSection() {
           />
         </View>
       )}
+      <AppUpdateModal
+        prompt={updatePrompt}
+        isDownloading={isDownloading}
+        onUpdateNow={() => void downloadAndApplyUpdate()}
+        onDismiss={dismissUpdatePrompt}
+      />
     </View>
   )
 }

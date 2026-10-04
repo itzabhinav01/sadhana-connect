@@ -4,7 +4,7 @@ import { supabaseSadhanaReportRepository } from '@sadhana-connect/infra-supabase
 import {
   buildSadhanaHistoryCsv,
   buildSadhanaHistoryHtml,
-  buildSadhanaHistorySpreadsheetHtml,
+  buildSadhanaHistoryXlsxBase64,
   buildSadhanaRangeExportFilename,
   sadhanaQueryKeys,
   useSadhanaHistory,
@@ -125,16 +125,17 @@ export default function HistoryScreen() {
     try {
       const rangeReports = await fetchRangeReports()
       const fileUri =
-        FileSystem.cacheDirectory + buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xls')
+        FileSystem.cacheDirectory + buildSadhanaRangeExportFilename(exportFromDate, exportToDate, 'xlsx')
       await FileSystem.writeAsStringAsync(
         fileUri,
-        buildSadhanaHistorySpreadsheetHtml(rangeReports),
+        buildSadhanaHistoryXlsxBase64(rangeReports),
         {
-          encoding: FileSystem.EncodingType.UTF8,
+          encoding: FileSystem.EncodingType.Base64,
         },
       )
       await Sharing.shareAsync(fileUri, {
-        mimeType: 'application/vnd.ms-excel',
+        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        UTI: 'org.openxmlformats.spreadsheetml.sheet',
         dialogTitle: `Sadhana Colored Sheet ${exportFromDate} to ${exportToDate}`,
       })
     } catch {
@@ -181,7 +182,7 @@ export default function HistoryScreen() {
           onPress={handleExportRangePdf}
         />
         <Button
-          title="Colored Sheet (.xls)"
+          title="Colored Sheet (.xlsx)"
           pendingTitle="Preparing…"
           isPending={isExportingSheet}
           disabled={!canExportRange || isAnyExportBusy}

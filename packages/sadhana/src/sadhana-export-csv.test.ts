@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSadhanaHistoryCsv } from './sadhana-export-csv'
+import {
+  buildSadhanaHistoryCsv,
+  buildSadhanaHistoryXlsxBase64,
+  buildSadhanaHistoryXlsxBytes,
+} from './sadhana-export-csv'
 import type { SadhanaReport } from '@sadhana-connect/domain'
 
 function makeReport(overrides: Partial<SadhanaReport> = {}): SadhanaReport {
@@ -97,5 +101,32 @@ describe('buildSadhanaHistoryCsv', () => {
     const idx2 = csv.indexOf('10 Jan 2026')
     expect(idx1).toBeGreaterThan(-1)
     expect(idx2).toBeGreaterThan(idx1)
+  })
+
+  it('builds a valid OpenXML .xlsx ZIP workbook with styles and worksheet entries', () => {
+    const bytes = buildSadhanaHistoryXlsxBytes(
+      [
+        makeReport({ id: 'r1', reportDate: '2026-01-05', totalRounds: 12 }),
+        makeReport({ id: 'r2', reportDate: '2026-01-06', totalRounds: 16 }),
+      ],
+      'Abhinav Sharma',
+    )
+
+    // ZIP local file header signature: PK\x03\x04
+    expect(bytes[0]).toBe(0x50)
+    expect(bytes[1]).toBe(0x4b)
+    expect(bytes[2]).toBe(0x03)
+    expect(bytes[3]).toBe(0x04)
+
+    const rawText = new TextDecoder().decode(bytes)
+    expect(rawText).toContain('[Content_Types].xml')
+    expect(rawText).toContain('xl/styles.xml')
+    expect(rawText).toContain('xl/worksheets/sheet1.xml')
+    expect(rawText).toContain('Abhinav Sharma')
+    expect(rawText).toContain('FFFEE2E2') // Red fill for < 16 rounds
+    expect(rawText).toContain('FFDCFCE7') // Green fill for >= 16 rounds
+
+    const b64 = buildSadhanaHistoryXlsxBase64([makeReport()], 'Abhinav Sharma')
+    expect(b64.startsWith('UEsDB')).toBe(true)
   })
 })

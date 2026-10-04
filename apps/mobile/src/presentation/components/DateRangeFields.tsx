@@ -24,7 +24,7 @@ export function DateRangeFields({
   onFromDateChange,
   onToDateChange,
 }: DateRangeFieldsProps) {
-  const { colors } = useTheme()
+  const { colors, resolvedTheme } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const [openPicker, setOpenPicker] = useState<'from' | 'to' | null>(null)
   const today = getLocalDateIso()
@@ -71,6 +71,8 @@ export function DateRangeFields({
           value={(openPicker === 'from' ? fromDate : toDate) ? new Date((openPicker === 'from' ? fromDate : toDate) + 'T00:00:00') : new Date()}
           mode="date"
           display="default"
+          themeVariant={resolvedTheme}
+          accentColor={colors.primary}
           maximumDate={new Date(today + 'T00:00:00')}
           onChange={handleChange}
         />

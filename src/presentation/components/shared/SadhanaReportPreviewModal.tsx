@@ -73,7 +73,7 @@ export function SadhanaReportPreviewModal({
                     disabled={isPending || reports.length === 0}
                   >
                     <Table2 className="size-4 mr-1.5" aria-hidden="true" />
-                    Colored Sheet (.xls)
+                    Colored Sheet (.xlsx)
                   </Button>
                 ) : null}
                 <Button

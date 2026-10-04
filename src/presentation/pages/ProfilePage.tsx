@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LogOut, MessageCircle } from 'lucide-react'
+import { Contact, LogOut, MessageCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -15,6 +15,11 @@ import {
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { useSignOut } from '@/application/auth/use-sign-out'
 import { useUpdateProfile } from '@/application/profile/use-update-profile'
+import {
+  WebPhoneContactPickerSection,
+  normalizePhoneNumberForWhatsApp,
+  tryPickWebPhoneContact,
+} from '@/presentation/components/shared/WhatsAppShareModal'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Avatar, AvatarFallback } from '@/presentation/components/ui/avatar'
 import { Button } from '@/presentation/components/ui/button'
@@ -103,6 +108,7 @@ export function ProfilePage() {
   const [whatsappInputOverride, setWhatsappInputOverride] = useState<string | null>(null)
   const [whatsappSaved, setWhatsappSaved] = useState(false)
   const [whatsappError, setWhatsappError] = useState<string | null>(null)
+  const [showContactHelper, setShowContactHelper] = useState(false)
   const whatsappInput =
     whatsappInputOverride ?? (profileQuery.data?.whatsappShareNumber ?? '')
   const setWhatsappInput = (value: string) => setWhatsappInputOverride(value)
@@ -383,8 +389,40 @@ export function ProfilePage() {
                   >
                     {updateProfile.isPending ? 'Saving…' : 'Save Number'}
                   </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={async () => {
+                      setWhatsappSaved(false)
+                      setWhatsappError(null)
+                      const picked = await tryPickWebPhoneContact()
+                      if (picked) {
+                        setWhatsappInput(picked.phone)
+                        form.setValue('whatsappShareNumber', picked.phone)
+                        return
+                      }
+                      setShowContactHelper((prev) => !prev)
+                    }}
+                  >
+                    <Contact className="size-3.5" aria-hidden="true" />
+                    {showContactHelper ? 'Hide Contacts Helper' : 'Add from Phone Contacts'}
+                  </Button>
                 </div>
               </div>
+              {showContactHelper ? (
+                <WebPhoneContactPickerSection
+                  onSelectNumber={(phone) => {
+                    const normalized = normalizePhoneNumberForWhatsApp(phone)
+                    setWhatsappInput(normalized)
+                    form.setValue('whatsappShareNumber', normalized)
+                    setWhatsappSaved(false)
+                    setWhatsappError(null)
+                  }}
+                  onClose={() => setShowContactHelper(false)}
+                />
+              ) : null}
               {whatsappError ? (
                 <p className="text-xs text-destructive">{whatsappError}</p>
               ) : null}

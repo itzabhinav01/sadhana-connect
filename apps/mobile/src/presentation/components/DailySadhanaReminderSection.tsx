@@ -20,7 +20,7 @@ const PRESET_TIMES = [
 ]
 
 export function DailySadhanaReminderSection() {
-  const { colors } = useTheme()
+  const { colors, resolvedTheme } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const {
     isLoading,
@@ -109,6 +109,8 @@ export function DailySadhanaReminderSection() {
                 value={pickerDate}
                 mode="time"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                themeVariant={resolvedTheme}
+                accentColor={colors.primary}
                 onChange={handleTimeChange}
               />
               {Platform.OS === 'ios' ? (

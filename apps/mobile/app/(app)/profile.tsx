@@ -29,6 +29,11 @@ import { Chip } from '../../src/presentation/components/Chip'
 import { ErrorBanner } from '../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
 import { TextField } from '../../src/presentation/components/TextField'
+import {
+  PhoneContactPickerSection,
+  normalizePhoneNumberForWhatsApp,
+  tryPickNativePhoneContact,
+} from '../../src/presentation/components/WhatsAppShareModal'
 import { fontFamily, fontSize, radius, spacing } from '../../src/shared/theme'
 import type { ThemeColors } from '../../src/shared/theme'
 
@@ -77,8 +82,9 @@ export default function ProfileScreen() {
   const [whatsappInput, setWhatsappInput] = useState('')
   const [whatsappSaved, setWhatsappSaved] = useState(false)
   const [whatsappError, setWhatsappError] = useState<string | null>(null)
+  const [showContactHelper, setShowContactHelper] = useState(false)
 
-  const { control, handleSubmit, reset } = useForm<ProfileEditValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<ProfileEditValues>({
     resolver: zodResolver(profileEditSchema),
     defaultValues: {
       fullName: '',
@@ -288,13 +294,47 @@ export default function ProfileScreen() {
           {whatsappSaved ? (
             <Text style={styles.successText}>WhatsApp sharing number saved! ✅</Text>
           ) : null}
-          <Button
-            title="Save WhatsApp Number"
-            size="sm"
-            pendingTitle="Saving…"
-            isPending={updateProfile.isPending}
-            onPress={handleSaveWhatsAppNumber}
-          />
+          {showContactHelper ? (
+            <PhoneContactPickerSection
+              onSelectNumber={(phone) => {
+                const normalized = normalizePhoneNumberForWhatsApp(phone)
+                setWhatsappInput(normalized)
+                setValue('whatsappShareNumber', normalized)
+                setWhatsappSaved(false)
+                setWhatsappError(null)
+              }}
+              onClose={() => setShowContactHelper(false)}
+            />
+          ) : null}
+          <View style={styles.buttonRow}>
+            <Button
+              title="Save WhatsApp Number"
+              size="sm"
+              pendingTitle="Saving…"
+              isPending={updateProfile.isPending}
+              onPress={handleSaveWhatsAppNumber}
+            />
+            <Button
+              title={
+                showContactHelper
+                  ? 'Hide Contacts Helper'
+                  : 'Add from Phone Contacts'
+              }
+              size="sm"
+              variant="outline"
+              onPress={async () => {
+                setWhatsappSaved(false)
+                setWhatsappError(null)
+                const picked = await tryPickNativePhoneContact()
+                if (picked) {
+                  setWhatsappInput(picked.phone)
+                  setValue('whatsappShareNumber', picked.phone)
+                  return
+                }
+                setShowContactHelper((prev) => !prev)
+              }}
+            />
+          </View>
         </Card>
 
         {/* Devotee Sadhana Snapshot */}
@@ -366,6 +406,22 @@ export default function ProfileScreen() {
                 label="WhatsApp Number for Sadhana Sharing"
                 placeholder="Mentor / Group WhatsApp number"
                 keyboardType="phone-pad"
+              />
+
+              <Button
+                title="Add WhatsApp Number from Phone Contacts"
+                size="sm"
+                variant="outline"
+                onPress={async () => {
+                  const picked = await tryPickNativePhoneContact()
+                  if (picked) {
+                    setValue('whatsappShareNumber', picked.phone)
+                    setWhatsappInput(picked.phone)
+                  } else {
+                    setIsEditing(false)
+                    setShowContactHelper(true)
+                  }
+                }}
               />
 
               {updateProfile.isError ? (

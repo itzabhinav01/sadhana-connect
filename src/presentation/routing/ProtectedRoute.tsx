@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
-import { useAuth } from '@sadhana-connect/auth'
-import { useProfile } from '@sadhana-connect/auth'
+import { useAuth, useProfile } from '@sadhana-connect/auth'
+import { setConfiguredWhatsAppRecipient } from '@sadhana-connect/sadhana'
 import { AccountDisabledPage } from '@/presentation/pages/AccountDisabledPage'
 
 function LoadingScreen() {
@@ -45,6 +45,8 @@ export function ProtectedRoute() {
   if (!profile.data.isActive) {
     return <AccountDisabledPage />
   }
+
+  setConfiguredWhatsAppRecipient(profile.data.whatsappShareNumber)
 
   return <Outlet />
 }

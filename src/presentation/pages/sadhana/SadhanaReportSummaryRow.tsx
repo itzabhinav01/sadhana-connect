@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
+import {
+  buildWhatsAppShareUrl,
+  shouldPromptForWhatsAppRecipient,
+} from '@sadhana-connect/sadhana'
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { formatIsoDateLong } from '@sadhana-connect/shared'
+import { WhatsAppShareModal } from '@/presentation/components/shared/WhatsAppShareModal'
 import { SadhanaReportComments } from '@/presentation/pages/sadhana/SadhanaReportComments'
 
 function formatDisplayDate(iso: string) {
@@ -42,6 +46,7 @@ export function SadhanaReportSummaryRow({
   onExportText,
 }: SadhanaReportSummaryRowProps) {
   const [showComments, setShowComments] = useState(false)
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
   const sleepLabel = formatTime(report.sleepTime)
   const wakeLabel = formatTime(report.wakeTime)
   const dateLabel = formatDisplayDate(report.reportDate)
@@ -78,6 +83,12 @@ export function SadhanaReportSummaryRow({
             href={buildWhatsAppShareUrl(report)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => {
+              if (shouldPromptForWhatsAppRecipient()) {
+                e.preventDefault()
+                setShowWhatsAppModal(true)
+              }
+            }}
             className="rounded-md border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             Share to WhatsApp
@@ -113,6 +124,13 @@ export function SadhanaReportSummaryRow({
       </div>
       {showComments ? (
         <SadhanaReportComments sadhanaReportId={report.id} />
+      ) : null}
+      {showWhatsAppModal ? (
+        <WhatsAppShareModal
+          open={showWhatsAppModal}
+          report={report}
+          onClose={() => setShowWhatsAppModal(false)}
+        />
       ) : null}
     </div>
   )

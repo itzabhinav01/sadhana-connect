@@ -1,10 +1,15 @@
 import { Flame } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { buildWhatsAppShareUrl } from '@sadhana-connect/sadhana'
-import { useSadhanaReport } from '@sadhana-connect/sadhana'
-import { useSadhanaStreak } from '@sadhana-connect/sadhana'
+import {
+  buildWhatsAppShareUrl,
+  shouldPromptForWhatsAppRecipient,
+  useSadhanaReport,
+  useSadhanaStreak,
+} from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
+import { WhatsAppShareModal } from '@/presentation/components/shared/WhatsAppShareModal'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Card,
@@ -18,6 +23,7 @@ export function TodaySadhanaCard() {
   const reportQuery = useSadhanaReport(today)
   const streakQuery = useSadhanaStreak()
   const streakValue = streakQuery.data ?? 0
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
 
   return (
     <Card>
@@ -97,11 +103,24 @@ export function TodaySadhanaCard() {
                   href={buildWhatsAppShareUrl(reportQuery.data)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (shouldPromptForWhatsAppRecipient()) {
+                      e.preventDefault()
+                      setShowWhatsAppModal(true)
+                    }
+                  }}
                 >
                   Share to WhatsApp
                 </a>
               </Button>
             </div>
+            {showWhatsAppModal ? (
+              <WhatsAppShareModal
+                open={showWhatsAppModal}
+                report={reportQuery.data}
+                onClose={() => setShowWhatsAppModal(false)}
+              />
+            ) : null}
           </>
         ) : null}
       </CardContent>

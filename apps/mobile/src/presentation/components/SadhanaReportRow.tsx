@@ -3,6 +3,8 @@ import {
   buildSadhanaReportHtml,
   buildWhatsAppShareUrl,
   formatSadhanaReportForText,
+  getConfiguredWhatsAppRecipient,
+  shouldPromptForWhatsAppRecipient,
 } from '@sadhana-connect/sadhana'
 import { formatTime12Hour } from '@sadhana-connect/shared'
 import * as Print from 'expo-print'
@@ -15,6 +17,7 @@ import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { SadhanaReportComments } from './SadhanaReportComments'
+import { WhatsAppShareModal } from './WhatsAppShareModal'
 
 interface SadhanaReportRowProps {
   report: SadhanaReport
@@ -31,7 +34,21 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
   const [isExportingPdf, setIsExportingPdf] = useState(false)
   const [exportError, setExportError] = useState(false)
   const [commentsOpen, setCommentsOpen] = useState(false)
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
   const hasSleepInfo = Boolean(report.sleepTime || report.wakeTime)
+
+  const handleShareWhatsApp = () => {
+    const effectiveNumber = getConfiguredWhatsAppRecipient()
+    if (effectiveNumber) {
+      void Linking.openURL(buildWhatsAppShareUrl(report, effectiveNumber))
+      return
+    }
+    if (shouldPromptForWhatsAppRecipient()) {
+      setShowWhatsAppModal(true)
+      return
+    }
+    void Linking.openURL(buildWhatsAppShareUrl(report))
+  }
 
   const handleExportText = () => {
     Share.share({ message: formatSadhanaReportForText(report) })
@@ -77,7 +94,7 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
       </Pressable>
       <View style={styles.actionsRow}>
         <Pressable
-          onPress={() => Linking.openURL(buildWhatsAppShareUrl(report))}
+          onPress={handleShareWhatsApp}
           accessibilityRole="button"
           accessibilityLabel={`Share ${report.reportDate} report to WhatsApp`}
           style={styles.actionLink}
@@ -127,6 +144,13 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
       ) : null}
       {variant === 'detailed' && commentsOpen ? (
         <SadhanaReportComments sadhanaReportId={report.id} />
+      ) : null}
+      {showWhatsAppModal ? (
+        <WhatsAppShareModal
+          visible={showWhatsAppModal}
+          report={report}
+          onClose={() => setShowWhatsAppModal(false)}
+        />
       ) : null}
     </View>
   )

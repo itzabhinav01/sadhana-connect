@@ -11,7 +11,7 @@ import {
   buildAiProviderUrl,
   buildSadhanaAiPrompt,
   buildSadhanaHistoryCsv,
-  buildSadhanaHistorySpreadsheetHtml,
+  buildSadhanaHistoryXlsxBytes,
   buildSadhanaRangeExportFilename,
   getLastNDaysRange,
   sadhanaQueryKeys,
@@ -34,7 +34,7 @@ import { SadhanaReportPreviewModal } from '@/presentation/components/shared/Sadh
 import { SendReminderForm } from '@/presentation/components/shared/SendReminderForm'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
 import { SadhanaExportPrintView } from '@/presentation/pages/sadhana/SadhanaExportPrintView'
-import { downloadTextFile } from '@/shared/utils/download-text-file'
+import { downloadBinaryFile, downloadTextFile } from '@/shared/utils/download-text-file'
 
 type RangeOption = '7' | '14' | '30' | 'custom'
 
@@ -184,9 +184,9 @@ export function DevoteeSadhanaHistorySection({
     setIsExportingSheet(true)
     try {
       const reports = await fetchFullRangeReports()
-      downloadTextFile(
-        buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xls'),
-        buildSadhanaHistorySpreadsheetHtml(reports, devoteeName),
+      downloadBinaryFile(
+        buildSadhanaRangeExportFilename(range.fromDate, range.toDate, 'xlsx'),
+        buildSadhanaHistoryXlsxBytes(reports, devoteeName),
       )
     } catch {
       setExportError(true)
@@ -314,7 +314,7 @@ export function DevoteeSadhanaHistorySection({
                 disabled={!validation.valid || isExportingSheet}
               >
                 <Table2 className="size-4 mr-1.5" aria-hidden="true" />
-                {isExportingSheet ? 'Exporting…' : 'Colored Sheet (.xls)'}
+                {isExportingSheet ? 'Exporting…' : 'Colored Sheet (.xlsx)'}
               </Button>
               <Button
                 type="button"

@@ -18,6 +18,7 @@ import { ThemeProvider } from '../src/application/theme/theme-provider'
 import { useTheme } from '../src/application/theme/use-theme'
 import { dailySadhanaNotificationService } from '../src/infrastructure/notifications/daily-sadhana-notification-service'
 import { secureSessionStorage } from '../src/infrastructure/local-storage/secure-session-storage'
+import { AppUpdateModal } from '../src/presentation/components/AppUpdateModal'
 import { useAppUpdates } from '../src/presentation/hooks/use-app-updates'
 import { env } from '../src/shared/config/env'
 import { fontFamily } from '../src/shared/theme'
@@ -82,7 +83,16 @@ export default function RootLayout() {
   })
 
   const router = useRouter()
-  useAppUpdates({ checkOnMount: true, promptUserOnUpdate: true })
+  const {
+    updatePrompt,
+    isDownloading,
+    downloadAndApplyUpdate,
+    dismissUpdatePrompt,
+  } = useAppUpdates({
+    checkOnMount: true,
+    promptUserOnUpdate: true,
+    useThemedModal: true,
+  })
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -117,6 +127,12 @@ export default function RootLayout() {
         <AuthProvider>
           <Stack screenOptions={{ headerShown: false }} />
           <ThemedStatusBar />
+          <AppUpdateModal
+            prompt={updatePrompt}
+            isDownloading={isDownloading}
+            onUpdateNow={() => void downloadAndApplyUpdate()}
+            onDismiss={dismissUpdatePrompt}
+          />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
