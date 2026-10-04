@@ -6,13 +6,30 @@ import {
 } from '@sadhana-connect/notifications'
 import { Redirect, Tabs } from 'expo-router'
 import { useCallback, useEffect } from 'react'
-import type { ColorValue } from 'react-native'
+import { Image, StyleSheet, type ColorValue } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { dailySadhanaNotificationService } from '../../../src/infrastructure/notifications/daily-sadhana-notification-service'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { Icon } from '../../../src/presentation/components/Icon'
 import type { IconName } from '../../../src/presentation/components/Icon'
+import { spacing } from '../../../src/shared/theme'
+
+const appLogo = require('../../../assets/logo.png')
+
+function HeaderBrandLogo() {
+  return <Image source={appLogo} style={headerLogoStyles.logo} resizeMode="contain" />
+}
+
+const headerLogoStyles = StyleSheet.create({
+  logo: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    marginLeft: spacing.md,
+    marginRight: 2,
+  },
+})
 
 function tabIcon(active: IconName, inactive: IconName) {
   function TabIcon({ focused, color }: { focused: boolean; color: ColorValue }) {
@@ -63,6 +80,7 @@ export default function MentorLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.card },
         headerTintColor: colors.foreground,
+        headerLeft: () => <HeaderBrandLogo />,
         headerRight: () => <HeaderThemeToggle />,
         sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.primary,

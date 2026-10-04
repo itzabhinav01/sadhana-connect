@@ -1,8 +1,24 @@
 import { useProfile } from '@sadhana-connect/auth'
 import { Redirect, Stack } from 'expo-router'
+import { Image, StyleSheet } from 'react-native'
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
+
+const appLogo = require('../../../assets/logo.png')
+
+function HeaderBrandLogo() {
+  return <Image source={appLogo} style={headerLogoStyles.logo} resizeMode="contain" />
+}
+
+const headerLogoStyles = StyleSheet.create({
+  logo: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+})
 
 // RequireRole equivalent: a UX/navigation guard only, not a security
 // boundary. Nested inside (app)/_layout.tsx, which has already resolved
@@ -24,7 +40,10 @@ export default function AdminLayout() {
         headerRight: () => <HeaderThemeToggle />,
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Admin' }} />
+      <Stack.Screen
+        name="index"
+        options={{ title: 'Admin', headerLeft: () => <HeaderBrandLogo /> }}
+      />
       <Stack.Screen name="users/index" options={{ title: 'Users' }} />
       <Stack.Screen name="users/[id]" options={{ title: 'User' }} />
       <Stack.Screen name="assignments" options={{ title: 'Mentor Assignments' }} />

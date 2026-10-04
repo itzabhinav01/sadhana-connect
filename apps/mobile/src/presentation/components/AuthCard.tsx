@@ -6,7 +6,6 @@ import { useTheme } from '../../application/theme/use-theme'
 import { fontSize, radius, spacing, fontFamily } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const appLogo = require('../../../assets/logo.png')
 
 interface AuthCardProps {
