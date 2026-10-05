@@ -75,31 +75,41 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
   }
 
   return (
-    <View style={styles.row}>
+    <View style={variant === 'detailed' ? styles.detailedCard : styles.row}>
       <Pressable
         onPress={() => router.push({ pathname: '/devotee/sadhana', params: { date: report.reportDate } })}
         accessibilityRole="button"
         accessibilityLabel={`Sadhana report for ${report.reportDate}`}
+        style={styles.reportHeaderPressable}
       >
-        <Text style={styles.date}>{report.reportDate}</Text>
+        <View style={styles.dateHeaderRow}>
+          <Text style={styles.date}>{report.reportDate}</Text>
+          {variant === 'detailed' && hasSleepInfo ? (
+            <Text style={styles.sleepBadge}>
+              {formatTime12Hour(report.sleepTime)} → {formatTime12Hour(report.wakeTime)}
+            </Text>
+          ) : null}
+        </View>
         <Text style={styles.summary}>
           {report.totalRounds} rounds · {report.readingMinutes}m reading · {report.hearingMinutes}m
           hearing
         </Text>
-        {variant === 'detailed' && hasSleepInfo ? (
-          <Text style={styles.muted}>
-            {formatTime12Hour(report.sleepTime)} → {formatTime12Hour(report.wakeTime)}
-          </Text>
-        ) : null}
       </Pressable>
-      <View style={styles.actionsRow}>
+      <View
+        style={[
+          styles.actionsRow,
+          variant === 'detailed' ? styles.actionsRowDetailed : null,
+        ]}
+      >
         <Pressable
           onPress={handleShareWhatsApp}
           accessibilityRole="button"
           accessibilityLabel={`Share ${report.reportDate} report to WhatsApp`}
-          style={styles.actionLink}
+          style={[styles.actionLink, styles.actionLinkPrimary]}
         >
-          <Text style={styles.actionLinkText}>Share to WhatsApp</Text>
+          <Text style={[styles.actionLinkText, styles.actionLinkTextPrimary]} numberOfLines={1}>
+            Share to WhatsApp
+          </Text>
         </Pressable>
         {variant === 'detailed' ? (
           <>
@@ -110,7 +120,7 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
               accessibilityLabel={`Export ${report.reportDate} report as PDF`}
               style={styles.actionLink}
             >
-              <Text style={styles.actionLinkText}>
+              <Text style={styles.actionLinkText} numberOfLines={1}>
                 {isExportingPdf ? 'Preparing…' : 'Export PDF'}
               </Text>
             </Pressable>
@@ -120,7 +130,9 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
               accessibilityLabel={`Export ${report.reportDate} report as text`}
               style={styles.actionLink}
             >
-              <Text style={styles.actionLinkText}>Export Text</Text>
+              <Text style={styles.actionLinkText} numberOfLines={1}>
+                Export Text
+              </Text>
             </Pressable>
             <Pressable
               onPress={() => setCommentsOpen((current) => !current)}
@@ -130,9 +142,9 @@ export function SadhanaReportRow({ report, variant = 'compact' }: SadhanaReportR
                   ? `Hide comments for ${report.reportDate}`
                   : `Comments for ${report.reportDate}`
               }
-              style={styles.actionLink}
+              style={[styles.actionLink, commentsOpen ? styles.actionLinkActive : null]}
             >
-              <Text style={styles.actionLinkText}>
+              <Text style={styles.actionLinkText} numberOfLines={1}>
                 {commentsOpen ? 'Hide comments' : 'Comments'}
               </Text>
             </Pressable>
@@ -160,9 +172,27 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     row: {
       paddingVertical: spacing.sm,
-      borderBottomWidth: 1,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
-      gap: 2,
+      gap: 4,
+    },
+    detailedCard: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      paddingHorizontal: spacing.sm + 4,
+      paddingVertical: spacing.sm + 2,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 6,
+    },
+    reportHeaderPressable: {
+      gap: 3,
+    },
+    dateHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
     },
     date: {
       fontSize: fontSize.base,
@@ -170,33 +200,57 @@ function createStyles(colors: ThemeColors) {
       fontFamily: fontFamily.semiBold,
       color: colors.foreground,
     },
-    summary: {
-      fontSize: fontSize.sm,
-      color: colors.foreground,
+    sleepBadge: {
+      fontSize: 11,
+      fontFamily: fontFamily.regular,
+      color: colors.muted,
     },
-    muted: {
-      fontSize: fontSize.sm,
+    summary: {
+      fontSize: fontSize.xs + 1,
+      fontFamily: fontFamily.regular,
       color: colors.muted,
     },
     actionsRow: {
       flexDirection: 'row',
+      alignItems: 'center',
       flexWrap: 'wrap',
-      gap: spacing.xs,
-      marginTop: spacing.xs,
+      gap: 6,
+      marginTop: 2,
+    },
+    actionsRowDetailed: {
+      flexWrap: 'nowrap',
+      paddingTop: 6,
+      marginTop: 2,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
     },
     actionLink: {
-      paddingVertical: 4,
-      paddingHorizontal: 10,
+      paddingVertical: 5,
+      paddingHorizontal: 8,
       borderRadius: 6,
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
-      backgroundColor: colors.mutedBackground,
+      backgroundColor: colors.surfaceSubtle,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionLinkPrimary: {
+      backgroundColor: colors.primarySoft,
+      borderColor: colors.primary,
+    },
+    actionLinkActive: {
+      borderColor: colors.primary,
     },
     actionLinkText: {
-      fontSize: fontSize.xs,
+      fontSize: 11,
       fontFamily: fontFamily.medium,
       fontWeight: '500',
-      color: colors.link,
+      color: colors.foreground,
+    },
+    actionLinkTextPrimary: {
+      color: colors.primary,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
     },
     errorLine: {
       fontSize: fontSize.sm,

@@ -152,54 +152,62 @@ export function HistoryPage() {
         </p>
       </div>
 
-      <HistoryFilterBar filters={filters} onChange={setFilters} />
+      <div className="rounded-xl border border-border bg-card p-4 shadow-xs flex flex-col gap-3.5">
+        <HistoryFilterBar filters={filters} onChange={setFilters} />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportRangePdf}
-          disabled={!canExportRange || isAnyExportBusy}
-        >
-          {isExportingPdf ? 'Preparing…' : 'Export PDF'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportRangeColoredSheet}
-          disabled={!canExportRange || isAnyExportBusy}
-        >
-          {isExportingSheet ? 'Preparing…' : 'Colored Sheet (.xlsx)'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportRangeCsv}
-          disabled={!canExportRange || isAnyExportBusy}
-        >
-          {isExportingCsv ? 'Preparing…' : 'Export CSV'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleExportRangeText}
-          disabled={!canExportRange || isAnyExportBusy}
-        >
-          {isExportingText ? 'Preparing…' : 'Export Text'}
-        </Button>
-        {!canExportRange ? (
-          <p className="text-xs text-muted-foreground">
-            {hasConcreteRange
-              ? rangeValidation.valid
-                ? null
-                : rangeValidation.error
-              : 'Choose a specific date range (not All time) to export.'}
-          </p>
-        ) : null}
+        <div className="border-t border-border/60 pt-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={handleExportRangePdf}
+              disabled={!canExportRange || isAnyExportBusy}
+            >
+              {isExportingPdf ? 'Preparing…' : 'Export PDF'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
+              onClick={handleExportRangeColoredSheet}
+              disabled={!canExportRange || isAnyExportBusy}
+            >
+              {isExportingSheet ? 'Preparing…' : 'Colored Sheet (.xlsx)'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={handleExportRangeCsv}
+              disabled={!canExportRange || isAnyExportBusy}
+            >
+              {isExportingCsv ? 'Preparing…' : 'Export CSV'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={handleExportRangeText}
+              disabled={!canExportRange || isAnyExportBusy}
+            >
+              {isExportingText ? 'Preparing…' : 'Export Text'}
+            </Button>
+          </div>
+          {!canExportRange ? (
+            <p className="text-xs text-muted-foreground">
+              {hasConcreteRange
+                ? rangeValidation.valid
+                  ? null
+                  : rangeValidation.error
+                : 'Choose a specific date range (not All time) to export.'}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       {exportError ? (
