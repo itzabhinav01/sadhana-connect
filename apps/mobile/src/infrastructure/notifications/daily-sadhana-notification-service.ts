@@ -119,13 +119,17 @@ export const dailySadhanaNotificationService = {
       const expoPushToken = tokenResponse?.data
       if (!expoPushToken) return null
 
-      await getSupabaseClient().rpc('register_push_token', {
+      const { error } = await getSupabaseClient().rpc('register_push_token', {
         p_expo_push_token: expoPushToken,
         p_platform: Platform.OS === 'ios' ? 'ios' : 'android',
       })
+      if (error) {
+        console.warn('Failed to save push token in database:', error.message)
+      }
 
       return expoPushToken
-    } catch {
+    } catch (err) {
+      console.warn('registerPushTokenAsync encountered an error:', err)
       return null
     }
   },

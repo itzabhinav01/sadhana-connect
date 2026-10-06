@@ -6,6 +6,7 @@ export interface UpdatePromptState {
   type: 'update-available' | 'up-to-date' | 'error' | 'info'
   title: string
   message: string
+  changelog?: string[]
 }
 
 export interface UseAppUpdatesOptions {
@@ -92,7 +93,12 @@ export function useAppUpdates(options: UseAppUpdatesOptions = {}) {
             const title = 'Update Available 🎉'
             const message =
               'A new update of Sadhana Connect is ready with the latest improvements. Would you like to download and restart now?'
-            setUpdatePrompt({ type: 'update-available', title, message })
+            setUpdatePrompt({
+              type: 'update-available',
+              title,
+              message,
+              changelog: result.changelog,
+            })
             if (!useThemedModal && promptUserOnUpdate) {
               Alert.alert(title, message, [
                 { text: 'Later', style: 'cancel' },

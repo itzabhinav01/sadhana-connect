@@ -1,10 +1,11 @@
 import { useAuth, useProfile } from '@sadhana-connect/auth'
 import { setConfiguredWhatsAppRecipient } from '@sadhana-connect/sadhana'
 import { Redirect, Stack } from 'expo-router'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '../../src/application/theme/use-theme'
+import { dailySadhanaNotificationService } from '../../src/infrastructure/notifications/daily-sadhana-notification-service'
 import { AccountDisabledScreen } from '../../src/presentation/components/AccountDisabledScreen'
 import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
 import { fontSize, spacing } from '../../src/shared/theme'
@@ -19,6 +20,14 @@ export default function AppLayout() {
   const profile = useProfile()
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
+
+  const isActiveUser = Boolean(session && profile.data?.isActive)
+
+  useEffect(() => {
+    if (isActiveUser) {
+      void dailySadhanaNotificationService.registerPushTokenAsync()
+    }
+  }, [isActiveUser])
 
   if (isSessionLoading) {
     return <LoadingScreen />

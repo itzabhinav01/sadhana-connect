@@ -29,6 +29,7 @@ vi.mock('@sadhana-connect/sadhana', async (importOriginal) => {
 
 vi.mock('@sadhana-connect/auth', () => ({
   useAuth: useAuthMock,
+  useProfile: () => ({ data: { whatsappShareNumber: null }, isPending: false }),
 }))
 
 vi.mock('@sadhana-connect/infra-supabase', () => ({

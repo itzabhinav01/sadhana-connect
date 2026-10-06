@@ -73,6 +73,23 @@ export function AppUpdateModal({
 
           <Text style={styles.message}>{prompt.message}</Text>
 
+          {isUpdateAvailable && prompt.changelog && prompt.changelog.length > 0 && (
+            <View style={styles.changelogBox}>
+              <View style={styles.changelogHeader}>
+                <Icon name="sparkles-outline" size={14} color={colors.primary} />
+                <Text style={styles.changelogTitle}>What&apos;s New</Text>
+              </View>
+              <View style={styles.changelogList}>
+                {prompt.changelog.map((item, index) => (
+                  <View key={index} style={styles.changelogItem}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <Text style={styles.changelogText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
           <View style={styles.actions}>
             {isUpdateAvailable ? (
               <>
@@ -174,6 +191,47 @@ function createStyles(colors: ThemeColors) {
       fontFamily: fontFamily.regular,
       color: colors.muted,
       lineHeight: 20,
+    },
+    changelogBox: {
+      backgroundColor: colors.cardMuted ?? colors.primarySoft,
+      borderRadius: radius.md,
+      padding: spacing.sm + 2,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.xs,
+    },
+    changelogHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    changelogTitle: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+      color: colors.primary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    changelogList: {
+      gap: 4,
+    },
+    changelogItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 6,
+    },
+    bulletDot: {
+      fontSize: fontSize.sm,
+      color: colors.primary,
+      lineHeight: 18,
+    },
+    changelogText: {
+      flex: 1,
+      fontSize: fontSize.xs + 1,
+      fontFamily: fontFamily.regular,
+      color: colors.foreground,
+      lineHeight: 18,
     },
     actions: {
       gap: spacing.xs + 2,

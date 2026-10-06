@@ -47,11 +47,12 @@ const SCOPE_LABEL: Record<AnnouncementScope, string> = {
 // Unlike the mentor form, a Super Admin genuinely chooses scope — RLS
 // (private.can_publish_announcement's is_super_admin() branch) allows
 // any scope, so this is the one form on mobile that offers the choice.
-function AdminAnnouncementForm() {
+function AdminAnnouncementForm({ onCreated }: { onCreated?: () => void }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
   const createAnnouncement = useCreateAdminAnnouncement()
   const templeGroupsQuery = useAdminTempleGroups()
+  const [isExpanded, setIsExpanded] = useState(false)
   const [publishNow, setPublishNow] = useState(true)
   const [scope, setScope] = useState<AnnouncementScope>('all')
   const [templeGroupId, setTempleGroupId] = useState('')
@@ -94,96 +95,123 @@ function AdminAnnouncementForm() {
           setPublishNow(true)
           setScope('all')
           setTempleGroupId('')
+          setIsExpanded(false)
+          onCreated?.()
         },
       },
     )
   })
 
   return (
-    <Card title="New Announcement">
-      <TextField control={control} name="title" label="Title" />
+    <Card
+      title="Create Announcement"
+      action={
+        <Button
+          title={isExpanded ? 'Collapse' : '+ New Announcement'}
+          size="sm"
+          variant={isExpanded ? 'ghost' : 'primary'}
+          onPress={() => setIsExpanded(!isExpanded)}
+        />
+      }
+    >
+      {!isExpanded ? (
+        <Text style={styles.mutedLine}>
+          Post updates, notices, and reminders across all users, mentors, or specific temple groups.
+        </Text>
+      ) : (
+        <View style={styles.formContainer}>
+          <TextField control={control} name="title" label="Title" />
 
-      <Controller
-        control={control}
-        name="content"
-        render={({ field: { onChange, value }, fieldState: { error } }) => (
+          <Controller
+            control={control}
+            name="content"
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>Content</Text>
+                <TextInput
+                  style={styles.textArea}
+                  value={value}
+                  onChangeText={onChange}
+                  multiline
+                  placeholder="Enter announcement content…"
+                  placeholderTextColor={colors.placeholder ?? colors.muted}
+                  accessibilityLabel="Content"
+                />
+                {error ? <Text style={styles.errorText}>{error.message}</Text> : null}
+              </View>
+            )}
+          />
+
           <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Content</Text>
-            <TextInput
-              style={styles.textArea}
-              value={value}
-              onChangeText={onChange}
-              multiline
-              placeholder="Enter announcement content…"
-              placeholderTextColor={colors.placeholder ?? colors.muted}
-              accessibilityLabel="Content"
-            />
-            {error ? <Text style={styles.errorText}>{error.message}</Text> : null}
+            <Text style={styles.label}>Target Audience</Text>
+            <View style={styles.optionRow}>
+              {SCOPE_OPTIONS.map((option) => (
+                <Button
+                  key={option.value}
+                  title={option.label}
+                  size="sm"
+                  variant={scope === option.value ? 'primary' : 'outline'}
+                  onPress={() => setScope(option.value)}
+                />
+              ))}
+            </View>
           </View>
-        )}
-      />
 
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Audience</Text>
-        <View style={styles.optionRow}>
-          {SCOPE_OPTIONS.map((option) => (
-            <Button
-              key={option.value}
-              title={option.label}
-              variant={scope === option.value ? 'primary' : 'outline'}
-              onPress={() => setScope(option.value)}
-            />
-          ))}
-        </View>
-      </View>
+          {scope === 'temple_group' ? (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Select Temple Group</Text>
+              <View style={styles.optionRow}>
+                {templeGroupsQuery.data?.map((group) => (
+                  <Button
+                    key={group.id}
+                    title={group.name}
+                    size="sm"
+                    variant={templeGroupId === group.id ? 'primary' : 'outline'}
+                    onPress={() => setTempleGroupId(group.id)}
+                  />
+                ))}
+              </View>
+              {scopeError ? <Text style={styles.errorText}>{scopeError}</Text> : null}
+            </View>
+          ) : null}
 
-      {scope === 'temple_group' ? (
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Temple group</Text>
-          <View style={styles.optionRow}>
-            {templeGroupsQuery.data?.map((group) => (
+          <ExpirationPicker
+            preset={expirationPreset}
+            customDateIso={customExpiresAt || null}
+            onPresetChange={setExpirationPreset}
+            onCustomDateChange={setCustomExpiresAt}
+            error={expirationError}
+          />
+
+          <View style={styles.fieldGroup}>
+            <Text style={styles.label}>Status</Text>
+            <View style={styles.actionsRow}>
               <Button
-                key={group.id}
-                title={group.name}
-                variant={templeGroupId === group.id ? 'primary' : 'outline'}
-                onPress={() => setTempleGroupId(group.id)}
+                title="Publish Immediately"
+                size="sm"
+                variant={publishNow ? 'primary' : 'outline'}
+                onPress={() => setPublishNow(true)}
               />
-            ))}
+              <Button
+                title="Save as Draft"
+                size="sm"
+                variant={!publishNow ? 'primary' : 'outline'}
+                onPress={() => setPublishNow(false)}
+              />
+            </View>
           </View>
-          {scopeError ? <Text style={styles.errorText}>{scopeError}</Text> : null}
+
+          <Button
+            title="Post Announcement"
+            pendingTitle="Posting…"
+            isPending={createAnnouncement.isPending}
+            onPress={onSubmit}
+          />
+          {createAnnouncement.isError ? (
+            <ErrorBanner message="Something went wrong posting this announcement." />
+          ) : null}
         </View>
-      ) : null}
-
-      <ExpirationPicker
-        preset={expirationPreset}
-        customDateIso={customExpiresAt || null}
-        onPresetChange={setExpirationPreset}
-        onCustomDateChange={setCustomExpiresAt}
-        error={expirationError}
-      />
-
-      <View style={styles.actionsRow}>
-        <Button
-          title="Publish now"
-          variant={publishNow ? 'primary' : 'outline'}
-          onPress={() => setPublishNow(true)}
-        />
-        <Button
-          title="Save as draft"
-          variant={!publishNow ? 'primary' : 'outline'}
-          onPress={() => setPublishNow(false)}
-        />
-      </View>
-
-      <Button
-        title="Post Announcement"
-        pendingTitle="Posting…"
-        isPending={createAnnouncement.isPending}
-        onPress={onSubmit}
-      />
-      {createAnnouncement.isError ? (
-        <ErrorBanner message="Something went wrong posting this announcement." />
-      ) : null}
+      )}
     </Card>
   )
 }
@@ -399,6 +427,10 @@ function createStyles(colors: ThemeColors) {
     mutedLine: {
       fontSize: fontSize.sm,
       color: colors.muted,
+    },
+    formContainer: {
+      gap: spacing.md,
+      marginTop: spacing.xs,
     },
     fieldGroup: {
       gap: spacing.xs,
