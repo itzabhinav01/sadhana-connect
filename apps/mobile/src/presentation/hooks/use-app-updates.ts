@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Alert } from 'react-native'
+import { dailySadhanaNotificationService } from '../../infrastructure/notifications/daily-sadhana-notification-service'
 import { appUpdatesService } from '../../infrastructure/updates/app-updates-service'
 
 export interface UpdatePromptState {
@@ -89,6 +90,17 @@ export function useAppUpdates(options: UseAppUpdatesOptions = {}) {
 
         if (result.isAvailable) {
           setIsUpdateAvailable(true)
+
+          void dailySadhanaNotificationService.presentAlertNotification({
+            id: `app-update-${Date.now()}`,
+            title: 'Sadhana Connect Update Available 🚀',
+            body:
+              result.changelog && result.changelog.length > 0
+                ? result.changelog.join(' • ')
+                : 'A new update of Sadhana Connect is ready with improvements.',
+            url: '/settings',
+          })
+
           if (promptUserOnUpdate || isManualCheck) {
             const title = 'Update Available 🎉'
             const message =
