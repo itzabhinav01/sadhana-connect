@@ -41,7 +41,7 @@ describe('AdminAnnouncementForm', () => {
     useCreateAdminAnnouncementMock.mockReturnValue({ mutate, isPending: false, isError: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementForm />)
+    render(<AdminAnnouncementForm defaultOpen />)
     await user.type(screen.getByLabelText('Title'), 'Platform Notice')
     await user.type(screen.getByLabelText('Content'), 'Applies to everyone.')
     await user.click(screen.getByRole('button', { name: /post announcement/i }))
@@ -64,7 +64,7 @@ describe('AdminAnnouncementForm', () => {
     useCreateAdminAnnouncementMock.mockReturnValue({ mutate, isPending: false, isError: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementForm />)
+    render(<AdminAnnouncementForm defaultOpen />)
     await user.type(screen.getByLabelText('Title'), 'Group Notice')
     await user.type(screen.getByLabelText('Content'), 'Body.')
     await selectOption(user, screen.getByLabelText('Audience'), 'A specific temple group')
@@ -79,7 +79,7 @@ describe('AdminAnnouncementForm', () => {
     useCreateAdminAnnouncementMock.mockReturnValue({ mutate, isPending: false, isError: false })
     const user = userEvent.setup()
 
-    render(<AdminAnnouncementForm />)
+    render(<AdminAnnouncementForm defaultOpen />)
     await user.type(screen.getByLabelText('Title'), 'Short Notice')
     await user.type(screen.getByLabelText('Content'), 'Expires soon.')
     await selectOption(user, screen.getByLabelText('Expiration'), '3 days')

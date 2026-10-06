@@ -20,7 +20,8 @@ import {
 // replaces an existing one. Removing a specific mentor from a devotee
 // is a separate action (the per-assignment "Deactivate" control below,
 // or on AdminUserDetailPage's own "Current mentors" panel).
-export function AdminAssignmentForm() {
+export function AdminAssignmentForm({ defaultOpen = false }: { defaultOpen?: boolean } = {}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const [devoteeSearch, setDevoteeSearch] = useState('')
   const [mentorSearch, setMentorSearch] = useState('')
   const [devoteeId, setDevoteeId] = useState('')
@@ -48,6 +49,7 @@ export function AdminAssignmentForm() {
         onSuccess: () => {
           setDevoteeId('')
           setMentorId('')
+          setIsOpen(false)
         },
         onError: (error) => {
           if (error instanceof MentorCapReachedError) {
@@ -59,8 +61,28 @@ export function AdminAssignmentForm() {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-4">
-      <h2 className="text-lg font-semibold text-foreground">Assign a Mentor</h2>
+    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Assign a Mentor</h2>
+          {!isOpen && (
+            <p className="text-xs text-muted-foreground">
+              Connect devotees with mentors to guide their daily sadhana.
+            </p>
+          )}
+        </div>
+        <Button
+          type="button"
+          variant={isOpen ? 'ghost' : 'outline'}
+          size="sm"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? 'Collapse' : '+ New Assignment'}
+        </Button>
+      </div>
+
+      {isOpen && (
+        <div className="flex flex-col gap-3 pt-2">
 
       <div className="flex flex-col gap-1">
         <label htmlFor="assignment-devotee-search" className="text-sm font-medium text-foreground">
@@ -128,6 +150,8 @@ export function AdminAssignmentForm() {
       {assign.isSuccess ? (
         <p className="text-xs text-emerald-600 dark:text-emerald-400">Assignment saved.</p>
       ) : null}
+        </div>
+      )}
     </div>
   )
 }

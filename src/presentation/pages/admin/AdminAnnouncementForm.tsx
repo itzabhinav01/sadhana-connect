@@ -29,9 +29,16 @@ import { Textarea } from '@/presentation/components/ui/textarea'
 // Unlike the mentor form, a Super Admin genuinely chooses scope — RLS
 // (private.can_publish_announcement's is_super_admin() branch) allows any
 // scope, so this is the one form in the app that offers the choice.
-export function AdminAnnouncementForm() {
+export function AdminAnnouncementForm({
+  onCreated,
+  defaultOpen = false,
+}: {
+  onCreated?: () => void
+  defaultOpen?: boolean
+} = {}) {
   const createAnnouncement = useCreateAdminAnnouncement()
   const templeGroupsQuery = useAdminTempleGroups()
+  const [isOpen, setIsOpen] = useState(defaultOpen)
   const [publishNow, setPublishNow] = useState(true)
   const [scope, setScope] = useState<AnnouncementScope>('all')
   const [templeGroupId, setTempleGroupId] = useState('')
@@ -71,6 +78,8 @@ export function AdminAnnouncementForm() {
           form.reset()
           setExpirationPreset('never')
           setCustomExpiresAt('')
+          setIsOpen(false)
+          onCreated?.()
         },
       },
     )
@@ -78,13 +87,22 @@ export function AdminAnnouncementForm() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>
-          <h2>New Announcement</h2>
+          <h2 className="text-lg font-semibold">New Announcement</h2>
         </CardTitle>
+        <Button
+          type="button"
+          variant={isOpen ? 'ghost' : 'outline'}
+          size="sm"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? 'Collapse' : '+ Create Announcement'}
+        </Button>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
+      {isOpen ? (
+        <CardContent className="pt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label htmlFor="admin-announcement-title" className="text-sm font-medium text-foreground">
               Title
@@ -205,6 +223,7 @@ export function AdminAnnouncementForm() {
           ) : null}
         </form>
       </CardContent>
+      ) : null}
     </Card>
   )
 }

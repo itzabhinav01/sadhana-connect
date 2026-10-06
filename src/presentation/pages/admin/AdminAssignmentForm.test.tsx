@@ -64,7 +64,7 @@ describe('AdminAssignmentForm', () => {
     })
     const user = userEvent.setup()
 
-    render(<AdminAssignmentForm />)
+    render(<AdminAssignmentForm defaultOpen />)
 
     await selectOption(user, screen.getByRole('combobox', { name: 'Devotee' }), 'Test Devotee')
     await selectOption(user, screen.getByRole('combobox', { name: 'Mentor' }), 'Test Mentor')
@@ -82,7 +82,7 @@ describe('AdminAssignmentForm', () => {
     })
     const user = userEvent.setup()
 
-    render(<AdminAssignmentForm />)
+    render(<AdminAssignmentForm defaultOpen />)
 
     await selectOption(user, screen.getByRole('combobox', { name: 'Devotee' }), 'Test Devotee')
     await selectOption(user, screen.getByRole('combobox', { name: 'Mentor' }), 'Test Mentor')
@@ -110,7 +110,7 @@ describe('AdminAssignmentForm', () => {
     })
     const user = userEvent.setup()
 
-    render(<AdminAssignmentForm />)
+    render(<AdminAssignmentForm defaultOpen />)
 
     await selectOption(user, screen.getByRole('combobox', { name: 'Devotee' }), 'Test Devotee')
     await selectOption(user, screen.getByRole('combobox', { name: 'Mentor' }), 'Test Mentor')
