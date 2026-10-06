@@ -172,9 +172,17 @@ export default function AdminAssignmentsScreen() {
         }
       >
         {!isCreatorOpen ? (
-          <Text style={styles.mutedLine}>
-            {activeCount} active mentoring {activeCount === 1 ? 'relationship' : 'relationships'}. Assign devotees to mentors to guide their daily sadhana.
-          </Text>
+          <View style={{ gap: spacing.sm, marginTop: 4 }}>
+            <Text style={styles.mutedLine}>
+              {activeCount} active mentoring {activeCount === 1 ? 'relationship' : 'relationships'}. Assign devotees to mentors to guide their daily sadhana.
+            </Text>
+            <Button
+              title="+ New Assignment"
+              size="sm"
+              variant="primary"
+              onPress={() => setIsCreatorOpen(true)}
+            />
+          </View>
         ) : (
           <View style={styles.creatorForm}>
             <UserSearchPicker

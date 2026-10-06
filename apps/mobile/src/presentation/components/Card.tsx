@@ -8,16 +8,20 @@ import type { ThemeColors } from '../../shared/theme'
 
 interface CardProps {
   title: string
+  action?: ReactNode
   children: ReactNode
 }
 
-export function Card({ title, children }: CardProps) {
+export function Card({ title, action, children }: CardProps) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>{title}</Text>
+        {action}
+      </View>
       <View style={styles.content}>{children}</View>
     </View>
   )
@@ -38,12 +42,19 @@ function createStyles(colors: ThemeColors) {
       shadowOffset: { width: 0, height: 3 },
       elevation: 2,
     },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+    },
     title: {
       fontSize: fontSize.base,
       fontWeight: '700',
       fontFamily: fontFamily.bold,
       color: colors.foreground,
       letterSpacing: 0.2,
+      flexShrink: 1,
     },
     content: {
       gap: spacing.xs,

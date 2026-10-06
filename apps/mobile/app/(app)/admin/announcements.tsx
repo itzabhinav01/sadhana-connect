@@ -115,9 +115,17 @@ function AdminAnnouncementForm({ onCreated }: { onCreated?: () => void }) {
       }
     >
       {!isExpanded ? (
-        <Text style={styles.mutedLine}>
-          Post updates, notices, and reminders across all users, mentors, or specific temple groups.
-        </Text>
+        <View style={{ gap: spacing.sm, marginTop: 4 }}>
+          <Text style={styles.mutedLine}>
+            Post updates, notices, and reminders across all users, mentors, or specific temple groups.
+          </Text>
+          <Button
+            title="+ New Announcement"
+            size="sm"
+            variant="primary"
+            onPress={() => setIsExpanded(true)}
+          />
+        </View>
       ) : (
         <View style={styles.formContainer}>
           <TextField control={control} name="title" label="Title" />
