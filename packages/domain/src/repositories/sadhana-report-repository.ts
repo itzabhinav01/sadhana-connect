@@ -31,6 +31,7 @@ export interface UpsertSadhanaReportParams {
   bookName: string | null
   hearingMinutes: number
   speakerName: string | null
+  studyHours?: number
   sleepTime: string | null
   wakeTime: string | null
   dayRestMinutes: number

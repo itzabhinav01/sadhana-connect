@@ -234,8 +234,8 @@ describe('SadhanaReportForm', () => {
     )
 
     await user.click(screen.getByRole('button', { name: /^rest$/i }))
-    await user.type(screen.getByLabelText(/day rest/i), '500')
-    await user.type(screen.getByLabelText(/total rest/i), '1')
+    await user.type(screen.getByLabelText(/^day rest \(minutes\)$/i), '500')
+    await user.type(screen.getByLabelText(/^total rest \(hours\)$/i), '1')
     await user.click(screen.getByRole('button', { name: /notes & signature/i }))
     await user.type(screen.getByLabelText(/^signature$/i), 'Test Devotee')
     await user.click(screen.getByRole('button', { name: /save sadhana/i }))
@@ -388,9 +388,38 @@ describe('SadhanaReportForm', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: /study/i }))
+    await user.click(screen.getByRole('button', { name: /reading/i }))
 
     expect(screen.getByLabelText(/book name/i)).toBeInTheDocument()
+  })
+
+  it('expands Study section after Hearing with quick buttons 1, 2, 3, 4 and supports decimals for Study and Total Rest', async () => {
+    const user = userEvent.setup()
+    render(
+      <SadhanaReportForm
+        date="2026-01-15"
+        existingReport={null}
+        onDateChange={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /^study$/i }))
+    expect(screen.getByRole('button', { name: 'Set Study (hours) to 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set Study (hours) to 2' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set Study (hours) to 3' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set Study (hours) to 4' })).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/^study \(hours\)$/i), '2.5')
+
+    await user.click(screen.getByRole('button', { name: /^rest$/i }))
+    await user.type(screen.getByLabelText(/^total rest \(hours\)$/i), '6.5')
+
+    await user.click(screen.getByRole('button', { name: /save sadhana/i }))
+
+    await waitFor(() => expect(mutateMock).toHaveBeenCalledTimes(1))
+    const [params] = mutateMock.mock.calls[0]
+    expect(params.studyHours).toBe(2.5)
+    expect(params.totalRestMinutes).toBe(6.5)
   })
 
   it('auto-expands only the sections that already contain data on an existing report', () => {
@@ -403,6 +432,7 @@ describe('SadhanaReportForm', () => {
           bookName: null,
           hearingMinutes: 0,
           speakerName: null,
+          studyHours: 0,
         }}
         onDateChange={vi.fn()}
       />,
@@ -410,8 +440,9 @@ describe('SadhanaReportForm', () => {
 
     // Chanting has real data (16 rounds) — expanded.
     expect(screen.getByLabelText(/^total rounds$/i)).toBeInTheDocument()
-    // Study is all-zero/empty — collapsed.
+    // Reading and Study are all-zero/empty — collapsed.
     expect(screen.queryByLabelText(/book name/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^study \(hours\)$/i)).not.toBeInTheDocument()
   })
 
   it('adjusts Rounds before 4:30 AM with the +/- stepper buttons', async () => {

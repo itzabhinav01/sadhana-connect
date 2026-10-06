@@ -2,7 +2,7 @@ import type { SadhanaReport } from '@sadhana-connect/domain'
 import type { UpsertSadhanaReportParams } from '@sadhana-connect/domain'
 import type { SadhanaReportFormInput } from './sadhana-report-schema'
 
-function toInt(value: string): number {
+function toNumber(value: string): number {
   return value === '' ? 0 : Number(value)
 }
 
@@ -15,18 +15,19 @@ export function formValuesToUpsertParams(
 ): UpsertSadhanaReportParams {
   return {
     reportDate: values.reportDate,
-    roundsBefore430: toInt(values.roundsBefore430),
-    roundsTill7am: toInt(values.roundsTill7am),
+    roundsBefore430: toNumber(values.roundsBefore430),
+    roundsTill7am: toNumber(values.roundsTill7am),
     lastRoundTime: toNullable(values.lastRoundTime),
-    totalRounds: toInt(values.totalRounds),
-    readingMinutes: toInt(values.readingMinutes),
+    totalRounds: toNumber(values.totalRounds),
+    readingMinutes: toNumber(values.readingMinutes),
     bookName: toNullable(values.bookName),
-    hearingMinutes: toInt(values.hearingMinutes),
+    hearingMinutes: toNumber(values.hearingMinutes),
     speakerName: toNullable(values.speakerName),
+    studyHours: toNumber(values.studyHours),
     sleepTime: toNullable(values.sleepTime),
     wakeTime: toNullable(values.wakeTime),
-    dayRestMinutes: toInt(values.dayRestMinutes),
-    totalRestMinutes: toInt(values.totalRestMinutes),
+    dayRestMinutes: toNumber(values.dayRestMinutes),
+    totalRestMinutes: toNumber(values.totalRestMinutes),
     officeGoingTime: toNullable(values.officeGoingTime),
     officeReturnTime: toNullable(values.officeReturnTime),
     notes: toNullable(values.notes),
@@ -47,6 +48,7 @@ export function reportToFormValues(
     bookName: report.bookName ?? '',
     hearingMinutes: String(report.hearingMinutes),
     speakerName: report.speakerName ?? '',
+    studyHours: String(report.studyHours ?? 0),
     sleepTime: report.sleepTime ?? '',
     wakeTime: report.wakeTime ?? '',
     dayRestMinutes: String(report.dayRestMinutes),
@@ -69,6 +71,7 @@ export function emptyFormValues(reportDate: string): SadhanaReportFormInput {
     bookName: '',
     hearingMinutes: '',
     speakerName: '',
+    studyHours: '',
     sleepTime: '',
     wakeTime: '',
     dayRestMinutes: '',

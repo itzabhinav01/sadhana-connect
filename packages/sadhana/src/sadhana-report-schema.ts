@@ -28,12 +28,29 @@ function nonNegativeIntField(label: string) {
     })
 }
 
+// Decimal-capable fields (Total Rest hours and Study hours) accept blank,
+// whole numbers (e.g. "2"), or decimals with up to 2 decimal places
+// (e.g. "1.5", "6.25").
+function nonNegativeDecimalField(label: string) {
+  return z
+    .string()
+    .trim()
+    .refine((value) => value === '' || /^\d+(\.\d{1,2})?$/.test(value), {
+      message: `${label} must be a valid number (e.g. 2 or 2.5)`,
+    })
+    .refine((value) => value === '' || Number(value) <= SMALLINT_MAX, {
+      message: `${label} must be ${SMALLINT_MAX} or fewer`,
+    })
+}
+
 const optionalTimeField = z.string().trim()
 const optionalTextField = z.string().trim()
 
 // rounds_before_4_30am, rounds_till_7am, and total_rounds are validated
 // independently — no cross-field check relates them (approved product
 // decision, Phase 6). Same for day_rest_minutes vs total_rest_minutes.
+// Every section (Chanting, Reading, Hearing, Study, Rest, Schedule, Details)
+// is completely optional; only reportDate is required.
 export const sadhanaReportSchema = z.object({
   reportDate: z
     .string()
@@ -49,10 +66,11 @@ export const sadhanaReportSchema = z.object({
   bookName: optionalTextField,
   hearingMinutes: nonNegativeIntField('Hearing minutes'),
   speakerName: optionalTextField,
+  studyHours: nonNegativeDecimalField('Study hours'),
   sleepTime: optionalTimeField,
   wakeTime: optionalTimeField,
   dayRestMinutes: nonNegativeIntField('Day rest minutes'),
-  totalRestMinutes: nonNegativeIntField('Total rest hours'),
+  totalRestMinutes: nonNegativeDecimalField('Total rest hours'),
   officeGoingTime: optionalTimeField,
   officeReturnTime: optionalTimeField,
   notes: optionalTextField,

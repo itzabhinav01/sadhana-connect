@@ -67,6 +67,14 @@ export function buildSadhanaReportExportSections(
         { label: 'Speaker Name', value: orDash(report.speakerName) },
       ],
     },
+    ...(report.studyHours && report.studyHours > 0
+      ? [
+          {
+            title: 'Study',
+            fields: [{ label: 'Study Hours', value: `${report.studyHours} hr` }],
+          },
+        ]
+      : []),
     {
       title: 'Rest & Sleep',
       fields: [

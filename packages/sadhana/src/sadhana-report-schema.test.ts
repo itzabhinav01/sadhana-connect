@@ -14,10 +14,11 @@ function validInput(overrides: Partial<Record<string, string>> = {}) {
     bookName: 'Bhagavad Gita',
     hearingMinutes: '30',
     speakerName: 'HG Devotee Prabhu',
+    studyHours: '2',
     sleepTime: '22:00',
     wakeTime: '03:30',
     dayRestMinutes: '20',
-    totalRestMinutes: '360',
+    totalRestMinutes: '6.5',
     officeGoingTime: '09:00',
     officeReturnTime: '18:00',
     notes: 'Good day',
@@ -31,12 +32,16 @@ describe('sadhanaReportSchema', () => {
     expect(sadhanaReportSchema.safeParse(validInput()).success).toBe(true)
   })
 
-  it('accepts blank optional numeric/text/time fields', () => {
+  it('accepts blank optional numeric/text/time fields across all sections', () => {
     const result = sadhanaReportSchema.safeParse(
       validInput({
+        roundsBefore430: '',
+        roundsTill7am: '',
+        totalRounds: '',
         lastRoundTime: '',
         bookName: '',
         speakerName: '',
+        studyHours: '',
         sleepTime: '',
         wakeTime: '',
         officeGoingTime: '',
@@ -50,6 +55,25 @@ describe('sadhanaReportSchema', () => {
       }),
     )
     expect(result.success).toBe(true)
+  })
+
+  it('accepts decimal values for studyHours and totalRestMinutes', () => {
+    const result = sadhanaReportSchema.safeParse(
+      validInput({
+        studyHours: '2.5',
+        totalRestMinutes: '6.75',
+      }),
+    )
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid decimal values for studyHours and totalRestMinutes', () => {
+    expect(
+      sadhanaReportSchema.safeParse(validInput({ studyHours: '2.555' })).success,
+    ).toBe(false)
+    expect(
+      sadhanaReportSchema.safeParse(validInput({ totalRestMinutes: 'abc' })).success,
+    ).toBe(false)
   })
 
   it('rejects a future report date', () => {

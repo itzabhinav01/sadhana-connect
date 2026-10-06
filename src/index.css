@@ -47,6 +47,8 @@
   --reading-soft: #fffbeb;
   --hearing: #0d9488;
   --hearing-soft: #f0fdfa;
+  --study: #2563eb;
+  --study-soft: #eff6ff;
   --rest: #9333ea;
   --rest-soft: #faf5ff;
   --schedule: #475569;
@@ -96,6 +98,8 @@
   --reading-soft: #2e2410;
   --hearing: #2dd4bf;
   --hearing-soft: #0f2a27;
+  --study: #60a5fa;
+  --study-soft: #172554;
   --rest: #c084fc;
   --rest-soft: #2a1a3d;
   --schedule: #94a3b8;
@@ -145,6 +149,8 @@
   --color-reading-soft: var(--reading-soft);
   --color-hearing: var(--hearing);
   --color-hearing-soft: var(--hearing-soft);
+  --color-study: var(--study);
+  --color-study-soft: var(--study-soft);
   --color-rest: var(--rest);
   --color-rest-soft: var(--rest-soft);
   --color-schedule: var(--schedule);

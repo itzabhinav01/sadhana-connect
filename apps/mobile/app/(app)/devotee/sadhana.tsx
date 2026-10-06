@@ -28,7 +28,7 @@ import { TextField } from '../../../src/presentation/components/TextField'
 import { spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
-type SectionKey = 'chanting' | 'reading' | 'hearing' | 'rest' | 'schedule' | 'details'
+type SectionKey = 'chanting' | 'reading' | 'hearing' | 'study' | 'rest' | 'schedule' | 'details'
 type ExpandedState = Record<SectionKey, boolean>
 
 function parsePrefillRoundsParam(value: string | undefined): number | undefined {
@@ -51,6 +51,7 @@ const FIELD_SECTION: Record<keyof SadhanaReportFormInput, SectionKey | undefined
   bookName: 'reading',
   hearingMinutes: 'hearing',
   speakerName: 'hearing',
+  studyHours: 'study',
   sleepTime: 'rest',
   wakeTime: 'rest',
   dayRestMinutes: 'rest',
@@ -75,6 +76,7 @@ function computeInitialExpanded(
       chanting: true,
       reading: false,
       hearing: false,
+      study: false,
       rest: false,
       schedule: false,
       details: false,
@@ -88,6 +90,7 @@ function computeInitialExpanded(
       base.lastRoundTime !== '',
     reading: isPositive(base.readingMinutes) || base.bookName !== '',
     hearing: isPositive(base.hearingMinutes) || base.speakerName !== '',
+    study: isPositive(base.studyHours),
     rest:
       base.sleepTime !== '' ||
       base.wakeTime !== '' ||
@@ -154,6 +157,7 @@ function SadhanaFormBody({
   const chantingAccent = useSectionAccent('chanting')
   const readingAccent = useSectionAccent('reading')
   const hearingAccent = useSectionAccent('hearing')
+  const studyAccent = useSectionAccent('study')
   const restAccent = useSectionAccent('rest')
   const scheduleAccent = useSectionAccent('schedule')
   const upsertReport = useUpsertSadhanaReport()
@@ -177,6 +181,7 @@ function SadhanaFormBody({
   const totalRounds = useWatch({ control, name: 'totalRounds' })
   const readingMinutes = useWatch({ control, name: 'readingMinutes' })
   const hearingMinutes = useWatch({ control, name: 'hearingMinutes' })
+  const studyHours = useWatch({ control, name: 'studyHours' })
   const dayRestMinutes = useWatch({ control, name: 'dayRestMinutes' })
   const totalRestMinutes = useWatch({ control, name: 'totalRestMinutes' })
   const officeGoingTime = useWatch({ control, name: 'officeGoingTime' })
@@ -185,6 +190,7 @@ function SadhanaFormBody({
   const chantingSummary = isPositive(totalRounds ?? '') ? `${totalRounds} rounds` : 'Not logged'
   const readingSummary = isPositive(readingMinutes ?? '') ? `${readingMinutes} min` : 'Not logged'
   const hearingSummary = isPositive(hearingMinutes ?? '') ? `${hearingMinutes} min` : 'Not logged'
+  const studySummary = isPositive(studyHours ?? '') ? `${studyHours} hr` : 'Not logged'
   const restSummary = isPositive(totalRestMinutes ?? '')
     ? `${totalRestMinutes} hr total rest`
     : isPositive(dayRestMinutes ?? '')
@@ -301,6 +307,22 @@ function SadhanaFormBody({
         </Accordion>
 
         <Accordion
+          title="Study"
+          accent={studyAccent}
+          expanded={expanded.study}
+          onToggle={() => toggleSection('study')}
+          summary={studySummary}
+        >
+          <NumberField
+            control={control}
+            name="studyHours"
+            label="Study (hours)"
+            allowDecimal
+            quickAmounts={[1, 2, 3, 4]}
+          />
+        </Accordion>
+
+        <Accordion
           title="Rest & Sleep"
           accent={restAccent}
           expanded={expanded.rest}
@@ -319,6 +341,7 @@ function SadhanaFormBody({
             control={control}
             name="totalRestMinutes"
             label="Total Rest (hours)"
+            allowDecimal
             quickAmounts={[5, 6, 7, 8]}
           />
         </Accordion>

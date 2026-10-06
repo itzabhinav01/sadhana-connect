@@ -33,6 +33,7 @@ describe('SADHANA_REPORT_SELECT_COLUMNS (getReportByDate/upsertReport/listRecent
       'book_name',
       'hearing_minutes',
       'speaker_name',
+      'study_hours',
       'sleep_time',
       'wake_time',
       'day_rest_minutes',
@@ -46,7 +47,7 @@ describe('SADHANA_REPORT_SELECT_COLUMNS (getReportByDate/upsertReport/listRecent
     ]) {
       expect(fullColumns).toContain(column)
     }
-    expect(fullColumns).toHaveLength(21)
+    expect(fullColumns).toHaveLength(22)
   })
 })
 

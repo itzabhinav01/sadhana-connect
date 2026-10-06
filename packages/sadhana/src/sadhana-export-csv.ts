@@ -29,6 +29,7 @@ const CSV_HEADER = [
   'Rounds Till 7 AM',
   'Book Name',
   'Speaker Name',
+  'Study(HR)',
   'Sleep Time',
   'Total Rest(HR)',
   'Office Going',
@@ -124,6 +125,7 @@ function reportToRow(report: SadhanaReport): string {
     formatPositiveOrDash(report.roundsTill7am),
     report.bookName ?? '',
     report.speakerName ?? '',
+    formatPositiveOrDash(report.studyHours ?? 0),
     formatTimeOrDash(report.sleepTime),
     formatPositiveOrDash(report.totalRestMinutes),
     formatTimeOrDash(report.officeGoingTime),
@@ -182,6 +184,9 @@ export function buildSadhanaHistoryCsv(
       .map(csvField)
       .join(','),
     ['Hearing(MIN)', averagePositiveNumbers(sorted.map((r) => r.hearingMinutes))]
+      .map(csvField)
+      .join(','),
+    ['Study(HR)', averagePositiveNumbers(sorted.map((r) => r.studyHours ?? 0))]
       .map(csvField)
       .join(','),
     [
@@ -246,6 +251,7 @@ export function buildSadhanaHistorySpreadsheetHtml(
         <td style="${cellStyle}text-align:center;">${escapeHtml(formatPositiveOrDash(report.roundsTill7am))}</td>
         <td style="${cellStyle}">${escapeHtml(report.bookName ?? '')}</td>
         <td style="${cellStyle}">${escapeHtml(report.speakerName ?? '')}</td>
+        <td style="${cellStyle}text-align:center;">${escapeHtml(formatPositiveOrDash(report.studyHours ?? 0))}</td>
         <td style="${cellStyle}text-align:center;">${escapeHtml(formatTimeOrDash(report.sleepTime))}</td>
         <td style="${cellStyle}text-align:center;">${escapeHtml(formatPositiveOrDash(report.totalRestMinutes))}</td>
         <td style="${cellStyle}text-align:center;">${escapeHtml(formatTimeOrDash(report.officeGoingTime))}</td>
@@ -680,6 +686,7 @@ export function buildSadhanaHistoryXlsxBytes(
         { value: formatPositiveOrDash(report.roundsTill7am), style: 3 },
         { value: report.bookName ?? '', style: 4 },
         { value: report.speakerName ?? '', style: 4 },
+        { value: formatPositiveOrDash(report.studyHours ?? 0), style: 3 },
         { value: formatTimeOrDash(report.sleepTime), style: 3 },
         { value: formatPositiveOrDash(report.totalRestMinutes), style: 3 },
         { value: formatTimeOrDash(report.officeGoingTime), style: 3 },
@@ -733,6 +740,12 @@ export function buildSadhanaHistoryXlsxBytes(
   )
   xmlRows.push(
     buildSheetRowXml(rowNum++, [
+      { value: 'Study(HR)', style: 7 },
+      { value: averagePositiveNumbers(sorted.map((r) => r.studyHours ?? 0)), style: 8 },
+    ]),
+  )
+  xmlRows.push(
+    buildSheetRowXml(rowNum++, [
       { value: 'Reading Srila Prabhupada Book', style: 7 },
       { value: averagePositiveNumbers(sorted.map((r) => r.readingMinutes)), style: 8 },
     ]),
@@ -750,7 +763,7 @@ export function buildSadhanaHistoryXlsxBytes(
     ]),
   )
   xmlRows.push(
-    buildSheetRowXml(rowNum++, [
+    buildSheetRowXml(rowNum, [
       { value: 'Days Below 16 Rounds (<16)', style: 5 },
       { value: daysBelow16, style: 5 },
     ]),

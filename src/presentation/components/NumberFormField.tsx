@@ -21,6 +21,7 @@ interface NumberFormFieldProps<T extends FieldValues> {
   // fields get one on both platforms.
   showStepper?: boolean
   quickAmounts?: number[]
+  allowDecimal?: boolean
   helpText?: string
 }
 
@@ -30,6 +31,7 @@ export function NumberFormField<T extends FieldValues>({
   label,
   showStepper = false,
   quickAmounts,
+  allowDecimal = false,
   helpText,
 }: NumberFormFieldProps<T>) {
   return (
@@ -56,10 +58,14 @@ export function NumberFormField<T extends FieldValues>({
               ) : null}
               <FormControl>
                 <Input
-                  inputMode="numeric"
-                  placeholder="0"
+                  inputMode={allowDecimal ? 'decimal' : 'numeric'}
+                  placeholder={allowDecimal ? '0 (e.g. 2.5)' : '0'}
                   className="bg-card font-medium"
                   {...field}
+                  onChange={(event) => {
+                    const raw = event.target.value
+                    field.onChange(allowDecimal ? raw.replace(',', '.') : raw)
+                  }}
                 />
               </FormControl>
               {showStepper ? (

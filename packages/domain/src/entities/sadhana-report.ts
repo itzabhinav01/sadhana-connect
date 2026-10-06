@@ -14,6 +14,7 @@ export interface SadhanaReport {
   bookName: string | null
   hearingMinutes: number
   speakerName: string | null
+  studyHours?: number
   sleepTime: string | null // 'HH:mm'
   wakeTime: string | null // 'HH:mm'
   dayRestMinutes: number

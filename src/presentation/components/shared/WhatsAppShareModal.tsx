@@ -12,6 +12,7 @@ import { useUpdateProfile } from '@/application/profile/use-update-profile'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function normalizePhoneNumberForWhatsApp(raw: string): string {
   const trimmed = raw.trim()
   if (!trimmed) return ''
@@ -31,11 +32,13 @@ export function normalizePhoneNumberForWhatsApp(raw: string): string {
   return `+${digits}`
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function isValidWhatsAppNumber(value: string): boolean {
   const cleaned = value.replace(/[\s-]/g, '').trim()
   return /^\+?[1-9]\d{6,14}$/.test(cleaned)
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function extractPhoneFromText(text: string): string | null {
   if (!text) return null
   const match = text.match(/(?:\+?\d[\d\s\-()]{6,18}\d)/)
@@ -51,6 +54,7 @@ interface WebNavigatorContacts {
   ) => Promise<Array<{ name?: string[]; tel?: string[] }>>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export async function tryPickWebPhoneContact(): Promise<{
   name?: string
   phone: string
@@ -224,24 +228,29 @@ interface WhatsAppShareModalProps {
   onClose: () => void
 }
 
+const useSafeProfile: () => ReturnType<typeof useProfile> | undefined =
+  typeof useProfile === 'function' ? useProfile : () => undefined
+
 export function WhatsAppShareModal({ open, report, onClose }: WhatsAppShareModalProps) {
-  const profileQuery = typeof useProfile === 'function' ? useProfile() : undefined
+  if (!open || !report) return null
+  return <WhatsAppShareModalBody key={report.id} report={report} onClose={onClose} />
+}
+
+function WhatsAppShareModalBody({
+  report,
+  onClose,
+}: {
+  report: SadhanaReport
+  onClose: () => void
+}) {
+  const profileQuery = useSafeProfile()
   const updateProfile = useUpdateProfile()
-  const [phoneInput, setPhoneInput] = useState('')
+  const [phoneInput, setPhoneInput] = useState(
+    () => profileQuery?.data?.whatsappShareNumber ?? '',
+  )
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [showContactHelper, setShowContactHelper] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (open) {
-      setPhoneInput(profileQuery?.data?.whatsappShareNumber ?? '')
-      setSelectedName(null)
-      setShowContactHelper(false)
-      setErrorMessage(null)
-    }
-  }, [open, profileQuery?.data?.whatsappShareNumber])
-
-  if (!open || !report) return null
 
   const handlePickFromContacts = async () => {
     setErrorMessage(null)

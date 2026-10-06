@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BookOpen, Briefcase, Moon, PenLine, Repeat } from 'lucide-react'
+import { BookOpen, Briefcase, GraduationCap, Headphones, Moon, PenLine, Repeat } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -44,10 +44,12 @@ const SECTION_STYLE: Record<
   { border: string; background: string; text: string }
 > = {
   chanting: { border: 'border-l-chanting', background: 'bg-chanting-soft', text: 'text-chanting' },
-  study: { border: 'border-l-reading', background: 'bg-reading-soft', text: 'text-reading' },
+  reading: { border: 'border-l-reading', background: 'bg-reading-soft', text: 'text-reading' },
+  hearing: { border: 'border-l-hearing', background: 'bg-hearing-soft', text: 'text-hearing' },
+  study: { border: 'border-l-study', background: 'bg-study-soft', text: 'text-study' },
   rest: { border: 'border-l-rest', background: 'bg-rest-soft', text: 'text-rest' },
   day: { border: 'border-l-schedule', background: 'bg-schedule-soft', text: 'text-schedule' },
-  notes: { border: 'border-l-hearing', background: 'bg-hearing-soft', text: 'text-hearing' },
+  notes: { border: 'border-l-schedule', background: 'bg-muted/40', text: 'text-muted-foreground' },
 }
 
 interface SadhanaReportFormProps {
@@ -60,22 +62,21 @@ interface SadhanaReportFormProps {
   prefillRounds?: number
 }
 
-type SectionKey = 'chanting' | 'study' | 'rest' | 'day' | 'notes'
+type SectionKey = 'chanting' | 'reading' | 'hearing' | 'study' | 'rest' | 'day' | 'notes'
 
-// Same five content groups this form has always had (unchanged) — only
-// their presentation (always-visible sections -> a collapsible
-// Accordion) changes here, mirroring the pattern already shipped on
-// mobile.
+// Mirrors mobile's section structure: Chanting, Reading, Hearing, Study,
+// Rest, Day, Notes & Signature — none of the sections are compulsory.
 const FIELD_SECTION: Record<keyof SadhanaReportFormInput, SectionKey | undefined> = {
   reportDate: undefined,
   roundsBefore430: 'chanting',
   roundsTill7am: 'chanting',
   lastRoundTime: 'chanting',
   totalRounds: 'chanting',
-  readingMinutes: 'study',
-  bookName: 'study',
-  hearingMinutes: 'study',
-  speakerName: 'study',
+  readingMinutes: 'reading',
+  bookName: 'reading',
+  hearingMinutes: 'hearing',
+  speakerName: 'hearing',
+  studyHours: 'study',
   sleepTime: 'rest',
   wakeTime: 'rest',
   dayRestMinutes: 'rest',
@@ -111,7 +112,13 @@ function computeInitialOpenSections(
   ) {
     open.push('chanting')
   }
-  if (isPositive(base.readingMinutes) || base.bookName !== '' || isPositive(base.hearingMinutes) || base.speakerName !== '') {
+  if (isPositive(base.readingMinutes) || base.bookName !== '') {
+    open.push('reading')
+  }
+  if (isPositive(base.hearingMinutes) || base.speakerName !== '') {
+    open.push('hearing')
+  }
+  if (isPositive(base.studyHours)) {
     open.push('study')
   }
   if (
@@ -302,18 +309,18 @@ export function SadhanaReportForm({
           </AccordionItem>
 
           <AccordionItem
-            value="study"
+            value="reading"
             className={cn(
               'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.study.border,
-              SECTION_STYLE.study.background,
+              SECTION_STYLE.reading.border,
+              SECTION_STYLE.reading.background,
             )}
           >
             <AccordionTrigger>
               <span className="flex items-center gap-2">
-                <BookOpen className={cn('size-4', SECTION_STYLE.study.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.study.text)}>
-                  Study
+                <BookOpen className={cn('size-4', SECTION_STYLE.reading.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.reading.text)}>
+                  Reading
                 </span>
               </span>
             </AccordionTrigger>
@@ -339,7 +346,28 @@ export function SadhanaReportForm({
                     </FormItem>
                   )}
                 />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
 
+          <AccordionItem
+            value="hearing"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.hearing.border,
+              SECTION_STYLE.hearing.background,
+            )}
+          >
+            <AccordionTrigger>
+              <span className="flex items-center gap-2">
+                <Headphones className={cn('size-4', SECTION_STYLE.hearing.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.hearing.text)}>
+                  Hearing
+                </span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <NumberFormField
                   control={form.control}
                   name="hearingMinutes"
@@ -359,6 +387,35 @@ export function SadhanaReportForm({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem
+            value="study"
+            className={cn(
+              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+              SECTION_STYLE.study.border,
+              SECTION_STYLE.study.background,
+            )}
+          >
+            <AccordionTrigger>
+              <span className="flex items-center gap-2">
+                <GraduationCap className={cn('size-4', SECTION_STYLE.study.text)} aria-hidden="true" />
+                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.study.text)}>
+                  Study
+                </span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <NumberFormField
+                  control={form.control}
+                  name="studyHours"
+                  label="Study (hours)"
+                  allowDecimal
+                  quickAmounts={[1, 2, 3, 4]}
                 />
               </div>
             </AccordionContent>
@@ -410,32 +467,19 @@ export function SadhanaReportForm({
                   )}
                 />
 
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="dayRestMinutes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Day Rest (minutes)</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Day Rest (minutes)"
+                  quickAmounts={[15, 30, 60]}
                 />
 
-                <FormField
+                <NumberFormField
                   control={form.control}
                   name="totalRestMinutes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Rest (hours)</FormLabel>
-                      <FormControl>
-                        <Input inputMode="numeric" placeholder="e.g. 7" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Total Rest (hours)"
+                  allowDecimal
+                  quickAmounts={[5, 6, 7, 8]}
                 />
               </div>
             </AccordionContent>

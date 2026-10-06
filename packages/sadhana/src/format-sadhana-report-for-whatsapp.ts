@@ -36,6 +36,7 @@ export function formatSadhanaReportForWhatsApp(report: SadhanaReport): string {
     `Book Name :- ${orDash(report.bookName)}`,
     `Hearing :- ${report.hearingMinutes} Mins`,
     `Speaker Name :- ${orDash(report.speakerName)}`,
+    ...(report.studyHours && report.studyHours > 0 ? [`Study :- ${report.studyHours} hr`] : []),
     `Slept at(last night) :- ${formatTime12Hour(report.sleepTime)}`,
     `Wake up :- ${formatTime12Hour(report.wakeTime)}`,
     `Day Rest :- ${report.dayRestMinutes} mins`,

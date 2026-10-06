@@ -122,6 +122,10 @@ function buildPersonPrecomputedStats(
     ),
   ]
 
+  const totalStudy = reports.reduce((sum, r) => sum + (r.studyHours ?? 0), 0)
+  const avgStudy = (totalStudy / count).toFixed(1)
+  const studyDays = reports.filter((r) => (r.studyHours ?? 0) > 0).length
+
   const avgWake = averageTimeFormatted(reports.map((r) => r.wakeTime))
   const avgSleep = averageTimeFormatted(reports.map((r) => r.sleepTime), true)
   const avgDayRest = Math.round(
@@ -137,6 +141,11 @@ function buildPersonPrecomputedStats(
     `  • Chanting: Total ${totalRounds} rounds | Avg ${avgRounds} rounds/reported day | Before 4:30 AM: ${before430Total} rounds (${before430Pct}%) | 4:30–7:00 AM: ${till7amTotal} rounds | Total Morning (<7 AM): ${morningRoundsTotal}/${totalRounds} (${before7amPct}%) | Avg Completion Time: ${avgLastRoundTime}`,
     `  • Reading: Total ${totalReading} min | Avg ${avgReading} min/reported day (${readingDays}/${count} reported days)${books.length > 0 ? ` | Books: ${books.join(', ')}` : ''}`,
     `  • Hearing: Total ${totalHearing} min | Avg ${avgHearing} min/reported day (${hearingDays}/${count} reported days)${speakers.length > 0 ? ` | Speakers: ${speakers.join(', ')}` : ''}`,
+    ...(totalStudy > 0
+      ? [
+          `  • Study: Total ${Math.round(totalStudy * 10) / 10} hr | Avg ${avgStudy} hr/reported day (${studyDays}/${count} reported days)`,
+        ]
+      : []),
     `  • Rest & Schedule: Avg Wake: ${avgWake} | Avg Sleep: ${avgSleep} | Avg Day Rest: ${avgDayRest} min | Avg Total Rest: ${avgTotalRest} hr`,
   ].join('\n')
 }
@@ -153,6 +162,10 @@ function formatReportLine(date: string, report: SadhanaReport | undefined): stri
     `Reading: ${report.readingMinutes} min${report.bookName ? ` (${report.bookName})` : ''}`,
     `Hearing: ${report.hearingMinutes} min${report.speakerName ? ` (${report.speakerName})` : ''}`,
   ]
+
+  if ((report.studyHours ?? 0) > 0) {
+    parts.push(`Study: ${report.studyHours} hr`)
+  }
 
   if (report.wakeTime) {
     parts.push(`Wake Up: ${formatTime12Hour(report.wakeTime)}`)

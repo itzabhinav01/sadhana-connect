@@ -89,20 +89,22 @@ describe('formValuesToUpsertParams', () => {
     expect(params.notes).toBeNull()
   })
 
-  it('keeps rounds and rest fields independent through the round trip', () => {
+  it('keeps rounds, study, and rest fields (including decimals) independent through the round trip', () => {
     const params = formValuesToUpsertParams({
       ...emptyFormValues('2026-01-15'),
       roundsBefore430: '10',
       roundsTill7am: '10',
       totalRounds: '1',
+      studyHours: '2.5',
       dayRestMinutes: '500',
-      totalRestMinutes: '1',
+      totalRestMinutes: '6.5',
       signatureText: 'Test Devotee',
     })
     expect(params.roundsBefore430).toBe(10)
     expect(params.roundsTill7am).toBe(10)
     expect(params.totalRounds).toBe(1)
+    expect(params.studyHours).toBe(2.5)
     expect(params.dayRestMinutes).toBe(500)
-    expect(params.totalRestMinutes).toBe(1)
+    expect(params.totalRestMinutes).toBe(6.5)
   })
 })

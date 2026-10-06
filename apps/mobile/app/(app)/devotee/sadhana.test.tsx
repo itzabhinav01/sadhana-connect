@@ -192,4 +192,29 @@ describe('SadhanaFormScreen', () => {
     // Reading is all-zero/empty — collapsed.
     expect(queryByLabelText('Reading Minutes')).toBeNull()
   })
+
+  it('expands the Study section after Hearing with quick buttons 1, 2, 3, 4 and supports decimals for Study and Total Rest', async () => {
+    const mutate = jest.fn()
+    mockUseUpsertSadhanaReport.mockReturnValue({ mutate, isPending: false, isError: false })
+
+    const { getByRole, getByLabelText } = await render(<SadhanaFormScreen />)
+
+    await fireEvent.press(getByRole('button', { name: /Study/ }))
+    expect(getByRole('button', { name: 'Set Study (hours) to 1' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Set Study (hours) to 2' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Set Study (hours) to 3' })).toBeTruthy()
+    expect(getByRole('button', { name: 'Set Study (hours) to 4' })).toBeTruthy()
+
+    await fireEvent.changeText(getByLabelText('Study (hours)'), '2.5')
+
+    await fireEvent.press(getByRole('button', { name: /Rest & Sleep/ }))
+    await fireEvent.changeText(getByLabelText('Total Rest (hours)'), '6.5')
+
+    await fireEvent.press(getByRole('button', { name: 'Save Sadhana' }))
+
+    expect(mutate).toHaveBeenCalledTimes(1)
+    const params = mutate.mock.calls[0][0]
+    expect(params.studyHours).toBe(2.5)
+    expect(params.totalRestMinutes).toBe(6.5)
+  })
 })

@@ -16,6 +16,7 @@ interface NumberFieldProps<T extends FieldValues> {
   // single quick-amount tap already covers the common case.
   showStepper?: boolean
   quickAmounts?: number[]
+  allowDecimal?: boolean
 }
 
 export function NumberField<T extends FieldValues>({
@@ -24,6 +25,7 @@ export function NumberField<T extends FieldValues>({
   label,
   showStepper = false,
   quickAmounts,
+  allowDecimal = false,
 }: NumberFieldProps<T>) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
@@ -51,11 +53,11 @@ export function NumberField<T extends FieldValues>({
               ) : null}
               <TextInput
                 style={[styles.input, error ? styles.inputError : null]}
-                onChangeText={onChange}
+                onChangeText={(text) => onChange(allowDecimal ? text.replace(',', '.') : text)}
                 onBlur={onBlur}
                 value={value as string | undefined}
-                placeholder="0"
-                keyboardType="numeric"
+                placeholder={allowDecimal ? '0 (e.g. 2.5)' : '0'}
+                keyboardType={allowDecimal ? 'decimal-pad' : 'numeric'}
                 accessibilityLabel={label}
                 placeholderTextColor={colors.placeholder ?? colors.muted}
               />

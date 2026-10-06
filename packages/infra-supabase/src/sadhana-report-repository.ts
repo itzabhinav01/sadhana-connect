@@ -23,6 +23,7 @@ export interface SadhanaReportRow {
   book_name: string | null
   hearing_minutes: number
   speaker_name: string | null
+  study_hours?: number
   sleep_time: string | null
   wake_time: string | null
   day_rest_minutes: number
@@ -36,7 +37,7 @@ export interface SadhanaReportRow {
 }
 
 export const SADHANA_REPORT_SELECT_COLUMNS =
-  'id, profile_id, report_date, rounds_before_4_30am, rounds_till_7am, last_round_time, total_rounds, reading_minutes, book_name, hearing_minutes, speaker_name, sleep_time, wake_time, day_rest_minutes, total_rest_minutes, office_going_time, office_return_time, notes, signature_text, created_at, updated_at'
+  'id, profile_id, report_date, rounds_before_4_30am, rounds_till_7am, last_round_time, total_rounds, reading_minutes, book_name, hearing_minutes, speaker_name, study_hours, sleep_time, wake_time, day_rest_minutes, total_rest_minutes, office_going_time, office_return_time, notes, signature_text, created_at, updated_at'
 
 // Kept as a short local alias so the rest of this file reads the same as
 // before the export.
@@ -70,7 +71,7 @@ function mapRangeSummaryRow(
     readingMinutes: row.reading_minutes,
     hearingMinutes: row.hearing_minutes,
     dayRestMinutes: row.day_rest_minutes,
-    totalRestMinutes: row.total_rest_minutes,
+    totalRestMinutes: Number(row.total_rest_minutes),
   }
 }
 
@@ -113,10 +114,11 @@ export function mapSadhanaReportRow(row: SadhanaReportRow): SadhanaReport {
     bookName: row.book_name,
     hearingMinutes: row.hearing_minutes,
     speakerName: row.speaker_name,
+    studyHours: Number(row.study_hours ?? 0),
     sleepTime: row.sleep_time,
     wakeTime: row.wake_time,
     dayRestMinutes: row.day_rest_minutes,
-    totalRestMinutes: row.total_rest_minutes,
+    totalRestMinutes: Number(row.total_rest_minutes),
     officeGoingTime: row.office_going_time,
     officeReturnTime: row.office_return_time,
     notes: row.notes,
@@ -138,6 +140,7 @@ function mapParamsToRow(profileId: string, params: UpsertSadhanaReportParams) {
     book_name: params.bookName,
     hearing_minutes: params.hearingMinutes,
     speaker_name: params.speakerName,
+    study_hours: params.studyHours ?? 0,
     sleep_time: params.sleepTime,
     wake_time: params.wakeTime,
     day_rest_minutes: params.dayRestMinutes,
