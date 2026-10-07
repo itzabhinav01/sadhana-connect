@@ -82,12 +82,30 @@ describe('RegisterScreen', () => {
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
-  it('does not submit when the phone number is missing the country code', async () => {
+  it('automatically adds +91 when the phone number is entered as 10 digits', async () => {
+    const mutate = jest.fn()
+    mockUseSignUp.mockReturnValue({ mutate, isPending: false, isError: false })
+
+    const { getByLabelText, getByRole } = await render(<RegisterScreen />)
+    await fillForm(getByLabelText, '9876543210')
+    await fireEvent.press(getByRole('button', { name: 'Create account' }))
+
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          phoneNumber: '+919876543210',
+        }),
+        expect.anything(),
+      )
+    })
+  })
+
+  it('does not submit when the phone number is invalid or too short', async () => {
     const mutate = jest.fn()
     mockUseSignUp.mockReturnValue({ mutate, isPending: false, isError: false })
 
     const { getByLabelText, getByRole, findByText } = await render(<RegisterScreen />)
-    await fillForm(getByLabelText, '9876543210')
+    await fillForm(getByLabelText, '12345')
     await fireEvent.press(getByRole('button', { name: 'Create account' }))
 
     await findByText(/enter a valid phone number/i)

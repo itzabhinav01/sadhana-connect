@@ -67,7 +67,7 @@ function UserSearchPicker({ role, label, selectedId, selectedName, onSelect }: U
         autoCapitalize="none"
         accessibilityLabel={`Search ${label.toLowerCase()}`}
       />
-      {isFocused && (
+      {(isFocused || hasInput) && (
         <View style={styles.suggestionsContainer}>
           {usersQuery.isPending && (
             <Text style={styles.suggestionMuted}>Searching {label.toLowerCase()}s…</Text>
@@ -206,7 +206,7 @@ export default function AdminAssignmentsScreen() {
               }}
             />
             <Button
-              title="Assign Devotee to Mentor"
+              title="Assign"
               pendingTitle="Saving Assignment…"
               isPending={assign.isPending}
               disabled={!devoteeId || !mentorId}

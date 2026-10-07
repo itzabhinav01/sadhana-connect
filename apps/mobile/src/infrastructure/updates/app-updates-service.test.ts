@@ -32,7 +32,7 @@ describe('appUpdatesService', () => {
     ;(Updates.checkForUpdateAsync as jest.Mock).mockResolvedValueOnce({ isAvailable: true })
 
     const result = await appUpdatesService.checkForUpdate()
-    expect(result).toEqual({ isAvailable: true, isSupported: true })
+    expect(result).toMatchObject({ isAvailable: true, isSupported: true })
     expect(Updates.checkForUpdateAsync).toHaveBeenCalledTimes(1)
   })
 

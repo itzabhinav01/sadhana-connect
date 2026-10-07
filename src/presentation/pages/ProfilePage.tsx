@@ -5,7 +5,17 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { phoneNumberField, resetPasswordSchema, useAuth, useProfile, useUpdatePassword, type ResetPasswordInput } from '@sadhana-connect/auth'
+import {
+  optionalPhoneNumberField,
+  phoneNumberField,
+  resetPasswordSchema,
+  useAuth,
+  useProfile,
+  useUpdatePassword,
+  normalizePhoneNumber,
+  isValidPhoneNumber,
+  type ResetPasswordInput,
+} from '@sadhana-connect/auth'
 import {
   RECENT_REPORTS_LOOKBACK_LIMIT,
   setConfiguredWhatsAppRecipient,
@@ -37,13 +47,7 @@ import { Input } from '@/presentation/components/ui/input'
 const profileEditSchema = z.object({
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
   phoneNumber: phoneNumberField,
-  whatsappShareNumber: z
-    .string()
-    .trim()
-    .refine(
-      (val) => val === '' || /^\+?[1-9]\d{6,14}$/.test(val.replace(/[\s-]/g, '')),
-      'Enter a valid WhatsApp phone number with country code (e.g. +919876543210)',
-    ),
+  whatsappShareNumber: optionalPhoneNumberField,
 })
 type ProfileEditValues = z.infer<typeof profileEditSchema>
 
@@ -135,22 +139,25 @@ export function ProfilePage() {
   }, [profileQuery.data, form])
 
   const onSubmit = form.handleSubmit((values) => {
-    const cleanedWhatsapp = values.whatsappShareNumber.replace(/[\s-]/g, '').trim()
+    const normalizedPhone = values.phoneNumber ? normalizePhoneNumber(values.phoneNumber) : null
+    const normalizedWhatsapp = values.whatsappShareNumber?.trim()
+      ? normalizePhoneNumber(values.whatsappShareNumber)
+      : null
     const payload: {
       fullName: string
       phoneNumber: string | null
       whatsappShareNumber?: string | null
     } = {
       fullName: values.fullName,
-      phoneNumber: values.phoneNumber || null,
+      phoneNumber: normalizedPhone,
     }
-    if (cleanedWhatsapp || profileQuery.data?.whatsappShareNumber) {
-      payload.whatsappShareNumber = cleanedWhatsapp || null
+    if (normalizedWhatsapp || profileQuery.data?.whatsappShareNumber) {
+      payload.whatsappShareNumber = normalizedWhatsapp || null
     }
 
     updateProfile.mutate(payload, {
       onSuccess: () => {
-        setConfiguredWhatsAppRecipient(cleanedWhatsapp || null)
+        setConfiguredWhatsAppRecipient(normalizedWhatsapp)
         setIsEditing(false)
       },
     })
@@ -159,9 +166,9 @@ export function ProfilePage() {
   const handleSaveWhatsAppNumber = () => {
     setWhatsappSaved(false)
     setWhatsappError(null)
-    const cleaned = whatsappInput.replace(/[\s-]/g, '').trim()
-    if (cleaned !== '' && !/^\+?[1-9]\d{6,14}$/.test(cleaned)) {
-      setWhatsappError('Enter a valid WhatsApp number with country code (e.g. +919876543210).')
+    const normalized = whatsappInput.trim() ? normalizePhoneNumber(whatsappInput) : ''
+    if (normalized !== '' && !isValidPhoneNumber(normalized)) {
+      setWhatsappError('Enter a valid phone number (e.g. 9876543210 or +919876543210).')
       return
     }
     if (!profileQuery.data) return
@@ -169,11 +176,11 @@ export function ProfilePage() {
       {
         fullName: profileQuery.data.fullName,
         phoneNumber: profileQuery.data.phoneNumber,
-        whatsappShareNumber: cleaned || null,
+        whatsappShareNumber: normalized || null,
       },
       {
         onSuccess: () => {
-          setConfiguredWhatsAppRecipient(cleaned || null)
+          setConfiguredWhatsAppRecipient(normalized || null)
           setWhatsappSaved(true)
         },
       },
@@ -292,8 +299,22 @@ export function ProfilePage() {
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input type="tel" placeholder="+919876543210" {...field} />
+                            <Input
+                              type="tel"
+                              placeholder="e.g. 9876543210 or +919876543210"
+                              {...field}
+                              onBlur={(e) => {
+                                field.onBlur()
+                                const val = e.target.value.trim()
+                                if (val) {
+                                  field.onChange(normalizePhoneNumber(val))
+                                }
+                              }}
+                            />
                           </FormControl>
+                          <p className="text-[11px] text-muted-foreground">
+                            10-digit Indian numbers automatically get +91 added.
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -307,10 +328,20 @@ export function ProfilePage() {
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="e.g. +919876543210 (Mentor / Group number)"
+                              placeholder="e.g. 9876543210 or +919876543210 (Mentor / Group number)"
                               {...field}
+                              onBlur={(e) => {
+                                field.onBlur()
+                                const val = e.target.value.trim()
+                                if (val) {
+                                  field.onChange(normalizePhoneNumber(val))
+                                }
+                              }}
                             />
                           </FormControl>
+                          <p className="text-[11px] text-muted-foreground">
+                            10-digit Indian numbers automatically get +91 added.
+                          </p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -372,12 +403,18 @@ export function ProfilePage() {
                   <Input
                     id="whatsapp-share-number-input"
                     type="tel"
-                    placeholder="+919876543210"
+                    placeholder="e.g. 9876543210 or +919876543210"
                     value={whatsappInput}
                     onChange={(e) => {
                       setWhatsappInput(e.target.value)
                       setWhatsappSaved(false)
                       setWhatsappError(null)
+                    }}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim()
+                      if (val) {
+                        setWhatsappInput(normalizePhoneNumber(val))
+                      }
                     }}
                     className="flex-1 min-w-[200px]"
                   />

@@ -1,3 +1,7 @@
+import { normalizePhoneNumber, normalizeWhatsAppNumber } from '@sadhana-connect/shared'
+
+export { normalizePhoneNumber, normalizeWhatsAppNumber }
+
 // Default recipient for "Share to WhatsApp" when a user has not yet
 // configured a custom WhatsApp Share Number in their Profile. Kept empty
 // so no personal phone number is hardcoded in the public repository; when
@@ -11,7 +15,7 @@ export function setConfiguredWhatsAppRecipient(phoneNumber?: string | null): voi
   if (phoneNumber !== undefined) {
     recipientPromptEnabled = true
   }
-  configuredRecipientNumber = phoneNumber?.trim() ? phoneNumber.trim() : null
+  configuredRecipientNumber = phoneNumber?.trim() ? normalizePhoneNumber(phoneNumber.trim()) : null
 }
 
 export function getConfiguredWhatsAppRecipient(): string | null {
@@ -32,8 +36,4 @@ export function shouldPromptForWhatsAppRecipient(
     explicitProfileNumber === '' ||
     recipientPromptEnabled
   )
-}
-
-export function normalizeWhatsAppNumber(phoneNumber?: string | null): string {
-  return (phoneNumber ?? '').replace(/\D/g, '')
 }

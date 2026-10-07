@@ -26,32 +26,13 @@ import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 import { Icon } from './Icon'
 
-export function normalizePhoneNumberForWhatsApp(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-  const hasPlus = trimmed.startsWith('+')
-  const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return ''
+import {
+  isValidPhoneNumber,
+  normalizePhoneNumber,
+} from '@sadhana-connect/shared'
 
-  // 10-digit Indian mobile number (starts with 6-9) -> prefix +91
-  if (!hasPlus && digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
-    return `+91${digits}`
-  }
-  // 11-digit starting with 0 + 10-digit Indian mobile number -> prefix +91
-  if (!hasPlus && digits.length === 11 && /^0[6-9]\d{9}$/.test(digits)) {
-    return `+91${digits.slice(1)}`
-  }
-  // 12-digit starting with 91 -> prefix +
-  if (!hasPlus && digits.length === 12 && /^91[6-9]\d{9}$/.test(digits)) {
-    return `+${digits}`
-  }
-  return `+${digits}`
-}
-
-export function isValidWhatsAppNumber(value: string): boolean {
-  const cleaned = value.replace(/[\s-]/g, '').trim()
-  return /^\+?[1-9]\d{6,14}$/.test(cleaned)
-}
+export const normalizePhoneNumberForWhatsApp = normalizePhoneNumber
+export const isValidWhatsAppNumber = isValidPhoneNumber
 
 export function extractPhoneFromText(text: string): string | null {
   if (!text) return null
@@ -397,16 +378,24 @@ export function WhatsAppShareModal({ visible, report, onClose }: WhatsAppShareMo
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g. +919876543210"
+              placeholder="e.g. 9876543210 or +919876543210"
               placeholderTextColor={colors.placeholder ?? colors.muted}
               value={phoneInput}
               onChangeText={(text) => {
                 setPhoneInput(text)
                 setErrorMessage(null)
               }}
+              onBlur={() => {
+                if (phoneInput.trim()) {
+                  setPhoneInput(normalizePhoneNumber(phoneInput))
+                }
+              }}
               keyboardType="phone-pad"
               accessibilityLabel="WhatsApp Number to Share Sadhana"
             />
+            <Text style={[styles.subtitle, { fontSize: 11, marginTop: -spacing.xs, marginBottom: spacing.xs }]}>
+              10-digit Indian numbers automatically get +91 added.
+            </Text>
             <Button
               title={
                 showContactHelper

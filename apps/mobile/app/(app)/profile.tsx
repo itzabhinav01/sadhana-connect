@@ -1,5 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  isValidPhoneNumber,
+  normalizePhoneNumber,
+  optionalPhoneNumberField,
   phoneNumberField,
   resetPasswordSchema,
   useAuth,
@@ -40,13 +43,7 @@ import type { ThemeColors } from '../../src/shared/theme'
 const profileEditSchema = z.object({
   fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
   phoneNumber: phoneNumberField,
-  whatsappShareNumber: z
-    .string()
-    .trim()
-    .refine(
-      (val) => val === '' || /^\+?[1-9]\d{6,14}$/.test(val.replace(/[\s-]/g, '')),
-      'Enter a valid WhatsApp phone number with country code (e.g. +919876543210)',
-    ),
+  whatsappShareNumber: optionalPhoneNumberField,
 })
 type ProfileEditValues = z.infer<typeof profileEditSchema>
 
@@ -114,22 +111,25 @@ export default function ProfileScreen() {
   }, [profileQuery.data, reset])
 
   const onSubmit = handleSubmit((values) => {
-    const cleanedWhatsapp = values.whatsappShareNumber.replace(/[\s-]/g, '').trim()
+    const normalizedPhone = values.phoneNumber ? normalizePhoneNumber(values.phoneNumber) : null
+    const normalizedWhatsapp = values.whatsappShareNumber?.trim()
+      ? normalizePhoneNumber(values.whatsappShareNumber)
+      : null
     const payload: {
       fullName: string
       phoneNumber: string | null
       whatsappShareNumber?: string | null
     } = {
       fullName: values.fullName,
-      phoneNumber: values.phoneNumber || null,
+      phoneNumber: normalizedPhone,
     }
-    if (cleanedWhatsapp || profileQuery.data?.whatsappShareNumber) {
-      payload.whatsappShareNumber = cleanedWhatsapp || null
+    if (normalizedWhatsapp || profileQuery.data?.whatsappShareNumber) {
+      payload.whatsappShareNumber = normalizedWhatsapp || null
     }
 
     updateProfile.mutate(payload, {
       onSuccess: () => {
-        setConfiguredWhatsAppRecipient(cleanedWhatsapp || null)
+        setConfiguredWhatsAppRecipient(normalizedWhatsapp)
         setIsEditing(false)
       },
     })
@@ -138,9 +138,9 @@ export default function ProfileScreen() {
   const handleSaveWhatsAppNumber = () => {
     setWhatsappSaved(false)
     setWhatsappError(null)
-    const cleaned = whatsappInput.replace(/[\s-]/g, '').trim()
-    if (cleaned !== '' && !/^\+?[1-9]\d{6,14}$/.test(cleaned)) {
-      setWhatsappError('Enter a valid WhatsApp number with country code (e.g. +919876543210).')
+    const normalized = whatsappInput.trim() ? normalizePhoneNumber(whatsappInput) : ''
+    if (normalized !== '' && !isValidPhoneNumber(normalized)) {
+      setWhatsappError('Enter a valid phone number (e.g. 9876543210 or +919876543210).')
       return
     }
     if (!profileQuery.data) return
@@ -148,11 +148,11 @@ export default function ProfileScreen() {
       {
         fullName: profileQuery.data.fullName,
         phoneNumber: profileQuery.data.phoneNumber,
-        whatsappShareNumber: cleaned || null,
+        whatsappShareNumber: normalized || null,
       },
       {
         onSuccess: () => {
-          setConfiguredWhatsAppRecipient(cleaned || null)
+          setConfiguredWhatsAppRecipient(normalized || null)
           setWhatsappSaved(true)
         },
       },
@@ -279,13 +279,18 @@ export default function ProfileScreen() {
           </Text>
           <TextInput
             style={styles.whatsappInput}
-            placeholder="e.g. +919876543210"
+            placeholder="e.g. 9876543210 or +919876543210"
             placeholderTextColor={colors.placeholder ?? colors.muted}
             value={whatsappInput}
             onChangeText={(text) => {
               setWhatsappInput(text)
               setWhatsappSaved(false)
               setWhatsappError(null)
+            }}
+            onBlur={() => {
+              if (whatsappInput.trim()) {
+                setWhatsappInput(normalizePhoneNumber(whatsappInput))
+              }
             }}
             keyboardType="phone-pad"
             accessibilityLabel="Recipient WhatsApp Number"
@@ -404,7 +409,7 @@ export default function ProfileScreen() {
                 control={control}
                 name="whatsappShareNumber"
                 label="WhatsApp Number for Sadhana Sharing"
-                placeholder="Mentor / Group WhatsApp number"
+                placeholder="e.g. +919876543210"
                 keyboardType="phone-pad"
               />
 

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { type SignUpInput, signUpSchema, useSignUp } from '@sadhana-connect/auth'
+import { type SignUpInput, signUpSchema, useSignUp, normalizePhoneNumber } from '@sadhana-connect/auth'
 import { Link, useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -33,7 +33,7 @@ export default function RegisterScreen() {
         email: values.email,
         password: values.password,
         fullName: values.fullName,
-        phoneNumber: values.phoneNumber,
+        phoneNumber: normalizePhoneNumber(values.phoneNumber),
       },
       {
         onSuccess: ({ session }) => {
@@ -78,7 +78,7 @@ export default function RegisterScreen() {
         label="Phone number"
         keyboardType="phone-pad"
         autoComplete="tel"
-        placeholder="+919876543210"
+        placeholder="e.g. 9876543210 or +919876543210"
       />
       <TextField
         control={control}

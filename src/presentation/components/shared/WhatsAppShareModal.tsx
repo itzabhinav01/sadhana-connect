@@ -12,31 +12,16 @@ import { useUpdateProfile } from '@/application/profile/use-update-profile'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function normalizePhoneNumberForWhatsApp(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-  const hasPlus = trimmed.startsWith('+')
-  const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return ''
-
-  if (!hasPlus && digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
-    return `+91${digits}`
-  }
-  if (!hasPlus && digits.length === 11 && /^0[6-9]\d{9}$/.test(digits)) {
-    return `+91${digits.slice(1)}`
-  }
-  if (!hasPlus && digits.length === 12 && /^91[6-9]\d{9}$/.test(digits)) {
-    return `+${digits}`
-  }
-  return `+${digits}`
-}
+import {
+  isValidPhoneNumber,
+  normalizePhoneNumber,
+} from '@sadhana-connect/shared'
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function isValidWhatsAppNumber(value: string): boolean {
-  const cleaned = value.replace(/[\s-]/g, '').trim()
-  return /^\+?[1-9]\d{6,14}$/.test(cleaned)
-}
+export const normalizePhoneNumberForWhatsApp = normalizePhoneNumber
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const isValidWhatsAppNumber = isValidPhoneNumber
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function extractPhoneFromText(text: string): string | null {
@@ -341,13 +326,22 @@ function WhatsAppShareModalBody({
           <Input
             id="modal-whatsapp-phone-input"
             type="tel"
-            placeholder="e.g. +919876543210"
+            placeholder="e.g. 9876543210 or +919876543210"
             value={phoneInput}
             onChange={(e) => {
               setPhoneInput(e.target.value)
               setErrorMessage(null)
             }}
+            onBlur={(e) => {
+              const val = e.target.value.trim()
+              if (val) {
+                setPhoneInput(normalizePhoneNumber(val))
+              }
+            }}
           />
+          <p className="text-[11px] text-muted-foreground">
+            10-digit Indian numbers automatically get +91 added.
+          </p>
           <Button
             type="button"
             size="sm"

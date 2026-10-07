@@ -67,6 +67,41 @@ describe('RegisterPage', () => {
     })
   })
 
+  it('submits with +91 prefix when user inputs only 10 digits', async () => {
+    mutateMock.mockImplementation((_vars, options) => {
+      options?.onSuccess?.({
+        session: {
+          userId: '1',
+          email: 'devotee@example.com',
+          emailConfirmedAt: null,
+        },
+      })
+    })
+
+    render(
+      <MemoryRouter>
+        <RegisterPage />
+      </MemoryRouter>,
+    )
+
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText(/full name/i), 'Indian Devotee')
+    await user.type(screen.getByLabelText(/^email$/i), 'indian@example.com')
+    await user.type(screen.getByLabelText(/phone number/i), '9876543210')
+    await user.type(screen.getByLabelText(/^password$/i), 'password123')
+    await user.type(screen.getByLabelText(/confirm password/i), 'password123')
+    await user.click(screen.getByRole('button', { name: /create account/i }))
+
+    await waitFor(() => {
+      expect(mutateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          phoneNumber: '+919876543210',
+        }),
+        expect.anything(),
+      )
+    })
+  })
+
   it('does not navigate to /check-email on success', async () => {
     mutateMock.mockImplementation((_vars, options) => {
       options?.onSuccess?.({

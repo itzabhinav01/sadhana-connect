@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { type SignUpInput, signUpSchema } from '@sadhana-connect/auth'
+import { type SignUpInput, signUpSchema, normalizePhoneNumber } from '@sadhana-connect/auth'
 import { useSignUp } from '@sadhana-connect/auth'
 import { Alert, AlertDescription } from '@/presentation/components/ui/alert'
 import { Button } from '@/presentation/components/ui/button'
@@ -42,7 +42,7 @@ export function RegisterPage() {
         email: values.email,
         password: values.password,
         fullName: values.fullName,
-        phoneNumber: values.phoneNumber,
+        phoneNumber: normalizePhoneNumber(values.phoneNumber),
       },
       {
         onSuccess: ({ session }) => {
@@ -116,10 +116,20 @@ export function RegisterPage() {
                   <Input
                     type="tel"
                     autoComplete="tel"
-                    placeholder="+919876543210"
+                    placeholder="e.g. 9876543210 or +919876543210"
                     {...field}
+                    onBlur={(e) => {
+                      field.onBlur()
+                      const val = e.target.value.trim()
+                      if (val) {
+                        field.onChange(normalizePhoneNumber(val))
+                      }
+                    }}
                   />
                 </FormControl>
+                <p className="text-[11px] text-muted-foreground">
+                  10-digit Indian numbers automatically get +91 added.
+                </p>
                 <FormMessage />
               </FormItem>
             )}

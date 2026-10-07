@@ -102,7 +102,8 @@ describe('AdminAnnouncementsScreen', () => {
   })
 
   it('shows the create form, always (a Super Admin never needs a temple group prerequisite)', async () => {
-    const { getByRole } = await render(<AdminAnnouncementsScreen />)
+    const { getByRole, getAllByRole } = await render(<AdminAnnouncementsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Announcement' })[0])
     expect(getByRole('button', { name: 'Post Announcement' })).toBeTruthy()
   })
 
@@ -124,7 +125,8 @@ describe('AdminAnnouncementsScreen', () => {
   })
 
   it('rejects an empty title/content without calling the mutation', async () => {
-    const { getByRole, getByText } = await render(<AdminAnnouncementsScreen />)
+    const { getByRole, getAllByRole, getByText } = await render(<AdminAnnouncementsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Announcement' })[0])
     await fireEvent.press(getByRole('button', { name: 'Post Announcement' }))
 
     expect(mockCreateMutate).not.toHaveBeenCalled()
@@ -132,7 +134,8 @@ describe('AdminAnnouncementsScreen', () => {
   })
 
   it('requires a temple group to be selected when scope is "Temple group"', async () => {
-    const { getByRole, getByLabelText, getByText } = await render(<AdminAnnouncementsScreen />)
+    const { getByRole, getAllByRole, getByLabelText, getByText } = await render(<AdminAnnouncementsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Announcement' })[0])
     await fireEvent.changeText(getByLabelText('Title'), 'Group Notice')
     await fireEvent.changeText(getByLabelText('Content'), 'Body.')
     await fireEvent.press(getByRole('button', { name: 'Temple group' }))
@@ -145,7 +148,8 @@ describe('AdminAnnouncementsScreen', () => {
   it('submits with the chosen scope, defaulting to "all", and resets the form on success', async () => {
     mockCreateMutate.mockImplementation((_input, options) => options?.onSuccess?.())
 
-    const { getByRole, getByLabelText } = await render(<AdminAnnouncementsScreen />)
+    const { getByRole, getAllByRole, getByLabelText } = await render(<AdminAnnouncementsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Announcement' })[0])
     await fireEvent.changeText(getByLabelText('Title'), 'Temple Closure Notice')
     await fireEvent.changeText(getByLabelText('Content'), 'The temple will be closed Monday.')
     await fireEvent.press(getByRole('button', { name: 'Post Announcement' }))
@@ -164,7 +168,8 @@ describe('AdminAnnouncementsScreen', () => {
   })
 
   it('submits scope: temple_group with the selected group id', async () => {
-    const { getByRole, getByLabelText } = await render(<AdminAnnouncementsScreen />)
+    const { getByRole, getAllByRole, getByLabelText } = await render(<AdminAnnouncementsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Announcement' })[0])
     await fireEvent.changeText(getByLabelText('Title'), 'Group Notice')
     await fireEvent.changeText(getByLabelText('Content'), 'Body.')
     await fireEvent.press(getByRole('button', { name: 'Temple group' }))

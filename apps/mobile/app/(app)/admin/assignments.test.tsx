@@ -100,7 +100,8 @@ describe('AdminAssignmentsScreen', () => {
       isSuccess: false,
     })
 
-    const { getByRole, getByLabelText } = await render(<AdminAssignmentsScreen />)
+    const { getByRole, getAllByRole, getByLabelText } = await render(<AdminAssignmentsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Assignment' })[0])
 
     await fireEvent.changeText(getByLabelText('Search devotee'), 'Test')
     await fireEvent.press(getByRole('button', { name: 'Select Test Devotee' }))
@@ -123,7 +124,8 @@ describe('AdminAssignmentsScreen', () => {
       isSuccess: false,
     })
 
-    const { getByRole, getByLabelText, getByText } = await render(<AdminAssignmentsScreen />)
+    const { getByRole, getAllByRole, getByLabelText, getByText } = await render(<AdminAssignmentsScreen />)
+    await fireEvent.press(getAllByRole('button', { name: '+ New Assignment' })[0])
 
     await fireEvent.changeText(getByLabelText('Search devotee'), 'Test')
     await fireEvent.press(getByRole('button', { name: 'Select Test Devotee' }))

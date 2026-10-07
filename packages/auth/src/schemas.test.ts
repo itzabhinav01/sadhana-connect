@@ -46,6 +46,17 @@ describe('signUpSchema', () => {
     expect(signUpSchema.safeParse(valid).success).toBe(true)
   })
 
+  it('automatically prefixes a 10-digit phone number with +91 on registration', () => {
+    const result = signUpSchema.safeParse({
+      ...valid,
+      phoneNumber: '9876543210',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.phoneNumber).toBe('+919876543210')
+    }
+  })
+
   it('rejects a password shorter than 8 characters', () => {
     const result = signUpSchema.safeParse({
       ...valid,

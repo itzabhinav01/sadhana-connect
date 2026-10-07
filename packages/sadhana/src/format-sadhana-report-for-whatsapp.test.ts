@@ -290,6 +290,14 @@ describe('buildWhatsAppShareUrl', () => {
     expect(url).toBe(`https://wa.me/919876543210?text=${encodeURIComponent(message)}`)
   })
 
+  it('automatically prefixes a 10-digit Indian recipient with 91 for WhatsApp URL', () => {
+    const report = makeReport()
+    const url = buildWhatsAppShareUrl(report, '9876543210')
+    const message = formatSadhanaReportForWhatsApp(report)
+
+    expect(url).toBe(`https://wa.me/919876543210?text=${encodeURIComponent(message)}`)
+  })
+
   it('URL-encodes the message exactly as encodeURIComponent would', () => {
     const report = makeReport()
     const url = buildWhatsAppShareUrl(report)

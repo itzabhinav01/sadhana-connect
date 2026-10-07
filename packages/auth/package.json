@@ -7,6 +7,7 @@
   "dependencies": {
     "@sadhana-connect/domain": "*",
     "@sadhana-connect/infra-supabase": "*",
+    "@sadhana-connect/shared": "*",
     "@tanstack/react-query": "^5.101.4",
     "react": "^19.2.8",
     "zod": "^3.25.76"
