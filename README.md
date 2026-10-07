@@ -1,290 +1,249 @@
-# Sadhana Connect
+# 🌸 Sadhana Connect
 
-A web and mobile app for ISKCON devotee communities to record, monitor, and
-analyze daily spiritual sadhana — replacing manually submitted WhatsApp
-sadhana reports with a proper devotee → mentor → super admin system.
+An open-source, turnkey spiritual sadhana tracking and mentorship platform for ISKCON devotee communities, temples, youth forums, and spiritual groups worldwide.
 
-This repo is **self-hosted**: there is no shared "Sadhana Connect" server.
-Each devotee group runs its own copy, backed by its own free Supabase
-project and its own free Vercel deployment. Nobody else's data ever touches
-your instance, and you don't touch anyone else's.
+Available across **Web (Responsive PWA)** and **Mobile (Android APK & Over-The-Air Updates)**.
 
 ---
 
-## ⚠️ Before you make your deployment public
+## 🌟 Vision & Architecture
 
-Three things you must do — not optional — before real devotees use your
-instance:
+Sadhana Connect replaces manual, unstructured WhatsApp messages and spreadsheets with a structured, inspiring spiritual dashboard. It is engineered with a **devotee ➔ mentor ➔ super admin** hierarchy that fosters spiritual accountability and association.
 
-1. **Change the WhatsApp recipient number.** It is currently hardcoded to
-   the original developer's own number in
-   `packages/sadhana/src/whatsapp-recipient.ts`. If you skip this, every
-   "Share to WhatsApp" button in your deployment will send devotees' sadhana
-   reports to a stranger's phone. See [Customize](#customize-for-your-group)
-   below.
-2. **Create your own Supabase project and your own Vercel project.** Never
-   reuse someone else's project credentials — you're standing up your own
-   independent instance, with your own database, your own users, and your
-   own admin.
-3. **Pick a license** if you intend to keep this public and want to make
-   clear what others may do with your fork (this repo doesn't ship one by
-   default).
+### 🛡️ 100% Free, Private, and Self-Hosted
+There is no central "Sadhana Connect" server collecting community data. **Every group runs its own independent instance**, powered entirely by:
+- **Free Supabase tier**: PostgreSQL database, authentication, row-level security (RLS), and Edge Functions.
+- **Free Vercel tier**: High-speed global edge hosting for the web app.
+- **Free Expo / EAS tier**: Cloud building and Over-The-Air (OTA) updates for the mobile app.
+
+Your community's devotees, mentors, and reports remain 100% private to your group. Nobody else ever has access to your data.
 
 ---
 
-## What's inside
+## ✨ Features
 
-- **Web app** (`src/`) — React + TypeScript + Vite + Tailwind + shadcn/ui,
-  deployed as a PWA to Vercel.
-- **Mobile app** (`apps/mobile/`) — Expo / React Native, Android-first. See [Mobile App & OTA Updates Guide](apps/mobile/MOBILE_GUIDE.md) for full commands on instant updates, building APKs, and distribution.
-- **Shared logic** (`packages/*`) — domain models, validation, and
-  data-fetching hooks used by both the web and mobile apps.
-- **Backend** — Supabase (Postgres + Auth + Storage + Edge Functions), with
-  every table protected by Row Level Security and every admin-only
-  destructive action gated through a dedicated Edge Function.
-
-You do **not** need to touch most of this to get your own instance running —
-the steps below only need the Supabase and Vercel dashboards, a terminal,
-and about 20–30 minutes. A guided script (`npm run setup`) does the fiddly
-backend wiring for you — see [Setup](#setup) below.
-
-**On privacy and isolation:** this is not a shared service anyone signs up
-for — it's software you deploy for yourself. Every group's database, hosting
-account, URL, and API keys live entirely inside that group's own Supabase
-and Vercel accounts, which only that group's admin can see. Nobody else —
-not other devotee groups, not this repo's maintainer — ever has access to
-them. The one thing every deployment shares is the *code*, same as any
-open-source project.
+- **📿 Daily Japa Tracking**: Track target vs. completed rounds (including before-8-AM counts).
+- **📖 Scripture Reading**: Log minutes spent reading Srila Prabhupada's books and verses.
+- **🎧 Hearing & Lectures**: Track classes, seminars, and kirtan hearing hours.
+- **🎓 Study Hours with Decimal Support**: Designed for students and working professionals to record study/work hours with quick-fill buttons (1h, 2h, 3h, 4h) and precise decimal entry (e.g. 2.5 hours).
+- **⏱️ Sleep & Rest Tracking**: Record rest hours with decimal support (e.g. 6.5 hours).
+- **🌅 Morning Program & Attendance**: Mangala Aarti, Guru Puja, Tulasi Aarti, and Srimad Bhagavatam class attendance.
+- **💬 One-Tap WhatsApp Reports**: Generates beautifully formatted sadhana summaries ready to share with your mentor on WhatsApp. Recipients can be set per devotee profile or chosen via a contact picker.
+- **👥 Mentorship System**: Mentors view daily reports, completion rates, streaks, and attendance summaries for their assigned group of devotees.
+- **👑 Clutter-Free Super Admin Console**: Multi-tier management to create groups, assign mentors, adjust roles, and broadcast announcements.
+- **🔔 Announcements & Push Notifications**: Administrators can push announcements with high-importance alerts delivered directly to devotees' phone lock screens.
+- **📱 Native Mobile Experience**: Built with Expo / React Native featuring instant Over-The-Air (OTA) updates without needing users to reinstall the APK.
 
 ---
 
-## Prerequisites
+## 🏗️ Repository Structure
 
-- [Node.js](https://nodejs.org/) 20 or later, and npm (comes with Node)
-- A free [Supabase](https://supabase.com) account
-- A free [Vercel](https://vercel.com) account (for hosting the web app)
-- [Git](https://git-scm.com/)
-- No prior Supabase/React experience required — just follow the steps in
-  order
-
----
-
-## Setup
-
-### 1. Get the code
-
-```bash
-git clone https://github.com/<your-username>/<your-fork>.git
-cd sadhana-connect
-npm install
+```text
+sadhana-connect/
+├── apps/
+│   └── mobile/              # Expo / React Native Android mobile app
+├── packages/
+│   ├── sadhana/             # Shared business logic, models, validators, formatting
+│   └── ...
+├── src/                     # React 19 + TypeScript + Vite + Tailwind CSS Web App
+├── supabase/
+│   ├── functions/           # Admin Edge Functions (secure role management)
+│   └── migrations/          # Complete PostgreSQL schema & RLS policies
+├── scripts/
+│   └── setup.mjs            # Interactive guided setup CLI
+└── .github/workflows/       # Automated Supabase keep-alive ping workflow
 ```
 
-### 2. Create your Supabase project
+---
 
-1. Go to [supabase.com/dashboard](https://supabase.com/dashboard) → **New
-   project**.
-2. Pick any name/region and a strong database password (save it somewhere —
-   you likely won't need it again, but keep it safe).
-3. Wait for the project to finish provisioning (a couple of minutes).
-4. In the project's dashboard, go to **Project Settings → API**. Keep this
-   tab open — you'll copy four things from it in step 4: the project ref
-   (from the dashboard's URL), the Project URL, the anon/publishable key,
-   and the secret API key.
+## 🚀 Quickstart: Deploying for Your Community
 
-### 3. Create your Vercel project
+Deploying your own instance takes approximately 15–20 minutes. Follow these steps in order:
 
-1. Push your fork to your own GitHub account.
-2. Go to [vercel.com/new](https://vercel.com/new) and import that repo.
-3. Before the first deploy, add two **Environment Variables** (you'll get
-   these exact values in the next step — it's fine to come back and fill
-   these in after step 4 if you'd rather):
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
-4. Deploy. Vercel gives you a URL like `https://your-group.vercel.app` —
-   that's your app's real address, used throughout the next step.
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) (version 20 or higher) and npm.
+- [Git](https://git-scm.com/).
+- A free account on [Supabase](https://supabase.com).
+- A free account on [Vercel](https://vercel.com) (for hosting the web application).
+- *(Optional for Mobile App)* A free account on [Expo](https://expo.dev).
 
-### 4. Run the guided setup
+---
+
+### 2. Fork & Clone
+
+1. Fork this repository to your own GitHub account.
+2. Clone your fork locally:
+   ```bash
+   git clone https://github.com/<your-username>/sadhana-connect.git
+   cd sadhana-connect
+   npm install
+   ```
+
+---
+
+### 3. Create Your Supabase Project
+
+1. Log into [supabase.com/dashboard](https://supabase.com/dashboard) and click **New project**.
+2. Choose your organization, assign a project name, select a nearby database region, and set a strong database password.
+3. Once provisioning completes, navigate to **Project Settings ➔ API**.
+4. Note down:
+   - **Project URL** (e.g. `https://xyzcompany.supabase.co`)
+   - **Project Ref** (the short subdomain from the Project URL, e.g. `xyzcompany`)
+   - **anon / public key**
+   - **service_role / secret key** *(Click 'Reveal' – keep this safe and private)*
+
+---
+
+### 4. Deploy the Web App on Vercel
+
+1. Log into [vercel.com](https://vercel.com) and click **Add New ➔ Project**.
+2. Import your GitHub fork of `sadhana-connect`.
+3. Under **Environment Variables**, add:
+   - `VITE_SUPABASE_URL`: Your Supabase Project URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`: Your Supabase anon / public key
+4. Click **Deploy**. Vercel will build and assign you a production URL (e.g. `https://your-temple.vercel.app`).
+
+---
+
+### 5. Run the Guided Setup CLI
+
+Run the interactive setup tool from your terminal:
 
 ```bash
 npm run setup
 ```
 
-This asks for the four values from step 2 and your Vercel URL from step 3,
-then does everything else on your own machine, against your own project
-only: applies the database schema, configures Supabase Auth's redirect
-URLs, deploys the admin Edge Function, and sets its secrets. At the end it
-offers to promote your account to Super Admin too (see step 5).
+The tool will prompt for your Supabase credentials and your deployed Vercel URL, then automatically:
+- Creates your local `.env` and `apps/mobile/.env`.
+- Logs into your Supabase CLI and links your remote project.
+- Executes all database schema migrations in `supabase/migrations/`.
+- Configures authentication site URLs and redirect URLs.
+- Deploys the `admin-account-actions` Edge Function and sets its secure environment secrets.
 
-It will open a browser tab once, to log the Supabase CLI into *your own*
-Supabase account — nothing is sent to anyone else. If any step fails, fix
-whatever it reports and just run `npm run setup` again; it's safe to repeat.
-
-Prefer to see and run each underlying command yourself instead of trusting
-a script? See [Manual setup](#manual-setup-what-the-script-does) below —
-it's the exact same commands, spelled out.
-
-### 5. Register your account and become Super Admin
-
-Open your Vercel URL (or run `npm run dev` for local testing), click
-**Register**, and create your own account — it comes in as an ordinary
-`devotee` at first, since every fresh instance starts with zero admins by
-design.
-
-If you answered "yes" during `npm run setup`, it already promoted you.
-Otherwise, run this once (shown again at the end of the setup script's
-output too):
-
-```bash
-npx supabase db query --linked "update public.profiles set role = 'super_admin' where id = (select id from auth.users where email = 'YOUR_EMAIL');"
-```
-
-Refresh the app — you now have the full Super Admin panel: create temple
-groups, promote other users to mentor/admin, assign devotees to mentors,
-etc. Every admin after you can be promoted from inside the app itself —
-this step is only ever needed once, for your own first account.
-
-You're live. Share the URL with your devotee group — anyone can register,
-and you (as Super Admin) assign them a mentor and role from the Admin panel.
+*(Prefer running each command manually? See the [Manual CLI Setup](#-manual-cli-setup) section below).*
 
 ---
 
-## Manual setup (what the script does)
+### 6. Register Your Account & Become Super Admin
 
-`npm run setup` is just a thin wrapper around the Supabase CLI — nothing it
-does is hidden. If you'd rather run each step yourself (or the script fails
-partway and you want to finish by hand), here's the equivalent, in order:
+1. Open your live Vercel URL in your browser and click **Register**.
+2. Sign up with your personal email address. New accounts start as a standard devotee.
+3. Promote your account to **Super Admin** by executing this command in your terminal:
+   ```bash
+   npx supabase db query --linked "update public.profiles set role = 'super_admin' where id = (select id from auth.users where email = 'YOUR_EMAIL@EXAMPLE.COM');"
+   ```
+4. Refresh the web app. You now have full access to the **Admin & Super Admin Console**! All subsequent mentors and admins can be promoted directly inside the app UI.
+
+---
+
+## 📱 Setting Up the Mobile App (`apps/mobile`)
+
+The mobile app is an Android-first React Native app powered by Expo. You can build a standalone shareable APK and push instant Over-The-Air updates without needing devotees to reinstall the APK.
+
+### 1. Configure the Mobile Environment
+Navigate to the mobile directory:
+```bash
+cd apps/mobile
+```
+Ensure `apps/mobile/.env` exists with your Supabase credentials (generated automatically if you ran `npm run setup`, or create it from `.env.example`):
+```env
+EXPO_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-publishable-key>
+```
+
+### 2. Connect to Your Own Expo Account
+Run:
+```bash
+npx eas login
+npx eas init
+```
+This automatically links the mobile app to your own Expo account and updates `projectId` and `owner` in `apps/mobile/app.json`.
+
+*(Optional: In `apps/mobile/app.json`, you can customize `"name"`, `"android.package"`, and icons to match your temple or community branding).*
+
+### 3. Build Your Shareable Android APK
+Run:
+```bash
+npx eas-cli build -p android --profile preview
+```
+EAS builds the APK in the cloud. Once complete, it provides a download link and QR code. You can share this link with devotees via WhatsApp or Telegram for direct installation.
+
+### 4. Push Over-The-Air (OTA) Updates
+Whenever you change UI, fix bugs, or adjust questions, you **do not** need to rebuild the APK. Devotees receive the update silently or with an in-app prompt:
+```bash
+npx eas-cli update --branch preview --message "Added study hours & decimal precision"
+```
+
+For more detailed mobile workflows, see the **[Mobile Operations & Deployment Guide](apps/mobile/MOBILE_GUIDE.md)**.
+
+---
+
+## 🔄 Free-Tier Supabase Keep-Alive Ping
+
+Free-tier Supabase projects enter a paused state after 7 consecutive days without database queries. To keep your database permanently active, this repository includes an automated GitHub Actions keep-alive workflow (`.github/workflows/supabase-keep-alive.yml`) that pings your Supabase project API every 3 days.
+
+### How to Enable:
+1. In your GitHub repository fork, go to **Settings ➔ Secrets and variables ➔ Actions**.
+2. Click **New repository secret** and add:
+   - `SUPABASE_URL`: Your Supabase Project URL
+   - `SUPABASE_ANON_KEY`: Your Supabase anon / publishable key
+3. In the **Actions** tab of your repo, select **Supabase Keep-Alive Ping** and click **Run workflow** to verify.
+
+---
+
+## 🎨 Customization for Your Community
+
+- **WhatsApp Sharing Recipient**: Devotees can enter their mentor's WhatsApp number in their **Profile** or choose from their contacts when sharing. To set a community-wide default number, update `WHATSAPP_RECIPIENT_NUMBER` in `packages/sadhana/src/whatsapp-recipient.ts` (e.g. `'919876543210'`).
+- **Web App Branding**: Edit `<title>` in `index.html` and the branding manifest in `vite.config.ts`.
+- **Mobile Branding & Icons**: Replace the icons in `apps/mobile/assets/` (`icon.png`, `adaptive-icon.png`) and update `"name"` in `apps/mobile/app.json`.
+
+---
+
+## ⚙️ Manual CLI Setup
+
+If you prefer executing backend setup commands step-by-step instead of running `npm run setup`:
 
 ```bash
-# Log in and point the CLI at your project
+# 1. Login and link your Supabase project
 npx supabase login
 npx supabase link --project-ref <your-project-ref>
 
-# Apply every file in supabase/migrations/, in order
+# 2. Apply all database migrations
 npx supabase db push
-```
 
-No terminal at all? Open your project's **SQL Editor** in the Supabase
-Dashboard instead and paste-and-run each file in `supabase/migrations/` in
-filename order (`0001_...`, `0002_...`, etc.) — same result, just manual.
-If a migration fails on a `cron.schedule(...)` line, enable the `pg_cron`
-extension under **Database → Extensions** first, then re-run.
-
-```bash
-# Auth redirect URLs — or set Site URL / Redirect URLs by hand under
-# Authentication → URL Configuration in the dashboard
-# (edit supabase/config.toml's site_url / additional_redirect_urls first)
+# 3. Configure authentication redirect URLs
 npx supabase config push
 
-# The admin Edge Function and its secrets
+# 4. Deploy the admin Edge Function
 npx supabase functions deploy admin-account-actions
-npx supabase secrets set SERVICE_ROLE_SECRET_KEY=<your-project's-secret-api-key>
-npx supabase secrets set APP_ORIGIN=https://your-group.vercel.app
-npx supabase secrets set ALLOWED_ORIGINS=https://your-group.vercel.app
+
+# 5. Set required secrets for the Edge Function
+npx supabase secrets set SERVICE_ROLE_SECRET_KEY=<your-secret-key>
+npx supabase secrets set APP_ORIGIN=https://your-temple.vercel.app
+npx supabase secrets set ALLOWED_ORIGINS=https://your-temple.vercel.app
 ```
 
-Get `SERVICE_ROLE_SECRET_KEY`'s value from **Project Settings → API → API
-Keys** — use the **`secret`** key (not `anon`/`publishable`). Do **not** name
-this secret `SUPABASE_SERVICE_ROLE_KEY` — Supabase's CLI reserves that
-prefix, and if your project has legacy API keys disabled (the default for
-new projects), that name silently holds an incompatible legacy value that
-gets rejected.
-
-> **`APP_ORIGIN`/`ALLOWED_ORIGINS` not exactly matching your real deployed
-> URL is the single most common thing to get wrong** — every admin action
-> (disable account, delete account, password recovery link) will silently
-> fail with a generic "Something went wrong" message and no visible reason
-> if they don't match. See [Troubleshooting](#troubleshooting).
-
-```bash
-cp .env.example .env
-# then edit .env:
-#   VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
-#   VITE_SUPABASE_PUBLISHABLE_KEY=<your anon/publishable key>
-```
+> [!IMPORTANT]
+> - `SERVICE_ROLE_SECRET_KEY` must use your project's **`secret`** key from **Project Settings ➔ API** (not `anon`).
+> - `APP_ORIGIN` and `ALLOWED_ORIGINS` must match your exact deployed Vercel domain with `https://` and no trailing slash.
 
 ---
 
-## Customize for your group
+## ❓ Troubleshooting
 
-- **WhatsApp number** (required — see the warning at the top):
-  `packages/sadhana/src/whatsapp-recipient.ts` — replace
-  `WHATSAPP_RECIPIENT_NUMBER` with the number your group actually wants
-  sadhana reports shared to, in international format with no `+` or spaces
-  (e.g. `919876543210`).
-- **App name/branding** (optional): the page title and PWA name are set in
-  `index.html` (`<title>`) and `vite.config.ts` (the `VitePWA` manifest
-  block) — both currently say "Sadhana Connect."
-
-## Automated Keep-Alive & Supabase Inactivity (Free Tier)
-
-### 1. Automatic Keep-Alive Ping (Recommended)
-
-Free-tier Supabase projects automatically pause after 7 consecutive days of zero database activity. To prevent this from ever happening, this repository includes a built-in scheduled GitHub Actions workflow (`.github/workflows/supabase-keep-alive.yml`) that pings your Supabase project's API gateway every 3 days.
-
-To enable it on your GitHub fork:
-1. In your GitHub repository, go to **Settings** ➔ **Secrets and variables** ➔ **Actions**.
-2. Click **New repository secret** and add:
-   - `SUPABASE_URL`: Your Supabase Project URL (e.g. `https://your-ref.supabase.co`)
-   - `SUPABASE_ANON_KEY`: Your Supabase anon/publishable key
-   *(Alternatively, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are also accepted).*
-3. Go to the **Actions** tab in GitHub ➔ select **Supabase Keep-Alive Ping** ➔ click **Run workflow** to test it immediately.
-
-From then on, it runs automatically every 3 days, keeping your database active without requiring any manual effort.
-
-### 2. If your project is already paused
-
-If a project went inactive before keep-alive was configured:
-1. Log into the Supabase Dashboard and open the project — it will show a **"Paused"** status with a **"Restore project"** button.
-2. Click it and wait 1–2 minutes while Supabase spins the database back up.
-3. Once back to "Active," the app will work as before — no changes needed to credentials or settings.
+- **Admin actions (disabling users, password resets) show "Something went wrong"**:
+  Verify that `APP_ORIGIN` and `ALLOWED_ORIGINS` secrets in Supabase match your exact deployed Vercel URL.
+- **Migration fails on `cron.schedule(...)`**:
+  Enable the `pg_cron` extension in your Supabase Dashboard under **Database ➔ Extensions**, then re-run `npx supabase db push`.
+- **Database paused due to inactivity**:
+  Visit your Supabase Dashboard and click **Restore project**. Enable the GitHub Action Keep-Alive Ping to avoid future pauses.
+- **Android APK installation warnings**:
+  Because direct APK downloads bypass the Play Store, devotees should tap **"Download anyway"** and **"Install anyway"** (Google Play Protect verification).
 
 ---
 
-## Mobile App (Android APK & Instant Over-The-Air Updates)
+## 🤝 Contributing & License
 
-The mobile app (`apps/mobile/`) is an **Android-first Expo / React Native application** sharing all business logic and database access with the web app:
+Contributions, improvements, and feature suggestions are welcome! Please open an issue or pull request.
 
-* **Build a Shareable APK (No Android Studio needed)**:
-  ```bash
-  cd apps/mobile
-  npx eas-cli build -p android --profile preview
-  ```
-  EAS builds the APK in the cloud and gives you a direct download link & QR code to share with devotees.
-
-* **Push Instant Updates Inside the App (No APK rebuild)**:
-  ```bash
-  cd apps/mobile
-  npx eas update --auto --message "Describe changes here"
-  ```
-  Devotees receive updates automatically inside their installed app on next launch.
-
-For full step-by-step instructions, see the **[Mobile Operations & Deployment Guide](apps/mobile/MOBILE_GUIDE.md)**.
-
----
-
-## Troubleshooting
-
-**Admin actions (disable/delete account, password recovery link) fail with
-"Something went wrong"** — almost always `ALLOWED_ORIGINS`/`APP_ORIGIN`
-don't exactly match your deployed URL. Re-run `npm run setup` (or the
-`supabase secrets set` commands in [Manual setup](#manual-setup-what-the-script-does))
-with the correct URL. No trailing slash, and `https://`, not `http://`.
-
-**A migration fails on `cron.schedule(...)`** — enable the `pg_cron`
-extension: **Database → Extensions** in your Supabase Dashboard, then re-run
-`npm run setup` (or `npx supabase db push`).
-
-**Password reset emails never arrive** — check **Authentication → URL
-Configuration** in your Supabase Dashboard has your real deployed URL (step 4
-pushes this for you, but it's worth double-checking after a URL change), and
-check Supabase's free-tier email sending limits if you expect high volume
-(consider configuring a custom SMTP provider under **Authentication →
-Email** for a larger group).
-
----
-
-## Architecture, for contributors
-
-This project follows Clean Architecture (domain / application /
-infrastructure / presentation layers) and a strict phase-by-phase
-development process — see `CLAUDE.md` for the full set of conventions if
-you're extending the app rather than just deploying it.
+This project is licensed under the **[MIT License](LICENSE)**. You are free to use, fork, modify, and host Sadhana Connect for your spiritual community.
