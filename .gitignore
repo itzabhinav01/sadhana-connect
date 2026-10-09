@@ -17,6 +17,14 @@ coverage
 .env
 .env.local
 
+# Native and build directories
+android/
+ios/
+.expo/
+apps/mobile/android/
+apps/mobile/ios/
+apps/mobile/.expo/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
