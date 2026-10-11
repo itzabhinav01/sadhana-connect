@@ -27,7 +27,8 @@
       "@sadhana-connect/comments": ["./packages/comments/src"],
       "@sadhana-connect/notifications": ["./packages/notifications/src"],
       "@sadhana-connect/announcements": ["./packages/announcements/src"],
-      "@sadhana-connect/admin": ["./packages/admin/src"]
+      "@sadhana-connect/admin": ["./packages/admin/src"],
+      "@sadhana-connect/books": ["./packages/books/src"]
     },
 
     /* Linting */
@@ -43,6 +44,7 @@
     "packages/auth/src",
     "packages/shared/src",
     "packages/sadhana/src",
-    "packages/verse/src"
+    "packages/verse/src",
+    "packages/books/src"
   ]
 }

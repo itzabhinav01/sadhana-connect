@@ -39,6 +39,13 @@ jest.mock('../../../src/application/auth/use-sign-out', () => ({
   useSignOut: jest.fn(() => ({ mutate: jest.fn(), isPending: false })),
 }))
 
+jest.mock('../../../src/presentation/components/PrabhupadaBooksTrackerSection', () => {
+  const { View } = require('react-native')
+  return {
+    PrabhupadaBooksTrackerSection: () => <View testID="prabhupada-books-tracker" />,
+  }
+})
+
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
 

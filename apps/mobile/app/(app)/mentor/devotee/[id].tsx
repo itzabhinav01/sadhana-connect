@@ -16,6 +16,7 @@ import {
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { Icon } from '../../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
+import { PrabhupadaBooksTrackerSection } from '../../../../src/presentation/components/PrabhupadaBooksTrackerSection'
 import { ReminderForm } from '../../../../src/presentation/components/ReminderForm'
 import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
 import type { ThemeColors } from '../../../../src/shared/theme'
@@ -118,6 +119,12 @@ export default function MentorDevoteeDetailScreen() {
         devoteeId={devoteeId}
         devoteeName={profile.fullName}
         showComments
+      />
+
+      <PrabhupadaBooksTrackerSection
+        profileId={devoteeId}
+        editable={false}
+        title={`${profileQuery.data.fullName}'s Prabhupada Books`}
       />
 
       <ReminderForm devoteeId={devoteeId} />

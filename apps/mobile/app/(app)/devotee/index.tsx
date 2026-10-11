@@ -19,6 +19,7 @@ import { useTheme } from '../../../src/application/theme/use-theme'
 import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { Chip } from '../../../src/presentation/components/Chip'
+import { PrabhupadaBooksDashboardCard } from '../../../src/presentation/components/PrabhupadaBooksDashboardCard'
 import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { HeaderThemeToggle } from '../../../src/presentation/components/HeaderThemeToggle'
 import { Icon } from '../../../src/presentation/components/Icon'
@@ -223,6 +224,9 @@ export default function DashboardScreen() {
             <Text style={styles.mutedLine}>Loading…</Text>
           )}
         </Card>
+
+        {/* Prabhupada Books Reading Card */}
+        <PrabhupadaBooksDashboardCard />
 
         <Card title="Recent Reports">
           {recentReports.data && recentReports.data.length > 0 ? (

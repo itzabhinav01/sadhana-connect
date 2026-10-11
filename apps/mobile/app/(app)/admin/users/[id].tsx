@@ -24,6 +24,7 @@ import { useTheme } from '../../../../src/application/theme/use-theme'
 import { Button } from '../../../../src/presentation/components/Button'
 import { Card } from '../../../../src/presentation/components/Card'
 import { DevoteeSadhanaHistorySection } from '../../../../src/presentation/components/DevoteeSadhanaHistorySection'
+import { PrabhupadaBooksTrackerSection } from '../../../../src/presentation/components/PrabhupadaBooksTrackerSection'
 import { ErrorBanner } from '../../../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../../../src/presentation/components/LoadingScreen'
 import { fontFamily, fontSize, radius, spacing } from '../../../../src/shared/theme'
@@ -89,6 +90,12 @@ function DevoteeInfoPanel({
       </Card>
 
       <DevoteeSadhanaHistorySection devoteeId={devoteeId} devoteeName={devoteeName} />
+
+      <PrabhupadaBooksTrackerSection
+        profileId={devoteeId}
+        editable={false}
+        title={`${devoteeName ?? 'Devotee'}'s Prabhupada Books`}
+      />
     </>
   )
 }

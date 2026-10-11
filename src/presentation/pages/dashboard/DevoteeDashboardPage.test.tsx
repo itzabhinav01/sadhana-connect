@@ -23,6 +23,10 @@ vi.mock('@sadhana-connect/sadhana', () => ({
   useRecentSadhanaReports: useRecentSadhanaReportsMock,
 }))
 
+vi.mock('@/presentation/components/books/PrabhupadaBooksProgressCard', () => ({
+  PrabhupadaBooksProgressCard: () => <div data-testid="prabhupada-books-progress-card" />,
+}))
+
 const weeklyData = {
   startDate: '2026-01-09',
   endDate: '2026-01-15',

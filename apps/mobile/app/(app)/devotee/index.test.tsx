@@ -50,6 +50,13 @@ jest.mock('../../../src/presentation/components/AppUpdateSection', () => {
   }
 })
 
+jest.mock('../../../src/presentation/components/PrabhupadaBooksDashboardCard', () => {
+  const { Text } = require('react-native')
+  return {
+    PrabhupadaBooksDashboardCard: () => <Text>PrabhupadaBooksDashboardCard</Text>,
+  }
+})
+
 const mockPush = jest.fn()
 const mockSetOptions = jest.fn()
 

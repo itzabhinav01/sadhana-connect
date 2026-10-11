@@ -12,6 +12,7 @@ import { getEffectiveTempleGroupIds } from '@sadhana-connect/domain'
 import { formatDateLong } from '@sadhana-connect/shared'
 import { Button } from '@/presentation/components/ui/button'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
+import { PrabhupadaBooksTracker } from '@/presentation/components/books/PrabhupadaBooksTracker'
 import { AdminUserEmailReveal } from '@/presentation/pages/admin/AdminUserEmailReveal'
 import { AdminUserLifecycleControls } from '@/presentation/pages/admin/AdminUserLifecycleControls'
 import { AdminUserPasswordReset } from '@/presentation/pages/admin/AdminUserPasswordReset'
@@ -193,6 +194,12 @@ function DevoteeInfoPanel({
       </div>
 
       <DevoteeSadhanaHistorySection devoteeId={devoteeId} devoteeName={devoteeName} />
+
+      <PrabhupadaBooksTracker
+        profileId={devoteeId}
+        editable={false}
+        title={`${devoteeName ?? 'Devotee'}'s Prabhupada Books Reading`}
+      />
     </div>
   )
 }

@@ -25,6 +25,7 @@ import {
 import type { AppRole } from '@sadhana-connect/domain/entities/profile'
 import { useSignOut } from '@/application/auth/use-sign-out'
 import { useUpdateProfile } from '@/application/profile/use-update-profile'
+import { PrabhupadaBooksTracker } from '@/presentation/components/books/PrabhupadaBooksTracker'
 import {
   WebPhoneContactPickerSection,
   normalizePhoneNumberForWhatsApp,
@@ -203,6 +204,15 @@ export function ProfilePage() {
     })
   }
 
+  useEffect(() => {
+    if (window.location.hash === '#books') {
+      const timer = setTimeout(() => {
+        document.getElementById('books')?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [profileQuery.data?.role])
+
   return (
     <div className="flex flex-col gap-6">
       {profileQuery.isPending ? (
@@ -233,7 +243,14 @@ export function ProfilePage() {
             </div>
           </div>
 
-          {profileQuery.data.role === 'devotee' ? <DevoteeStats /> : null}
+          {profileQuery.data.role === 'devotee' ? (
+            <>
+              <DevoteeStats />
+              <div id="books" className="scroll-mt-6">
+                <PrabhupadaBooksTracker profileId={profileQuery.data.id} editable={true} />
+              </div>
+            </>
+          ) : null}
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">

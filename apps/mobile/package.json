@@ -11,6 +11,7 @@
     "@sadhana-connect/admin": "*",
     "@sadhana-connect/announcements": "*",
     "@sadhana-connect/auth": "*",
+    "@sadhana-connect/books": "*",
     "@sadhana-connect/comments": "*",
     "@sadhana-connect/domain": "*",
     "@sadhana-connect/infra-supabase": "*",

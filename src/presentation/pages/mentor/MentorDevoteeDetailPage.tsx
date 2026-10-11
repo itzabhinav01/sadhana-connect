@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/presentation/components/ui/card'
 import { DevoteeSadhanaHistorySection } from '@/presentation/components/shared/DevoteeSadhanaHistorySection'
+import { PrabhupadaBooksTracker } from '@/presentation/components/books/PrabhupadaBooksTracker'
 import { MentorDevoteeReportRow } from '@/presentation/pages/mentor/MentorDevoteeReportRow'
 
 function formatDisplayDate(iso: string) {
@@ -118,6 +119,12 @@ export function MentorDevoteeDetailPage() {
           <DevoteeSadhanaHistorySection
             devoteeId={devoteeId}
             devoteeName={profileQuery.data.fullName}
+          />
+
+          <PrabhupadaBooksTracker
+            profileId={devoteeId}
+            editable={false}
+            title={`${profileQuery.data.fullName}'s Prabhupada Books Reading`}
           />
         </>
       ) : null}

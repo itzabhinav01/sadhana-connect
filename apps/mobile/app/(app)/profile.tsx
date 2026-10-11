@@ -29,6 +29,7 @@ import { AppUpdateSection } from '../../src/presentation/components/AppUpdateSec
 import { Button } from '../../src/presentation/components/Button'
 import { Card } from '../../src/presentation/components/Card'
 import { Chip } from '../../src/presentation/components/Chip'
+import { PrabhupadaBooksTrackerSection } from '../../src/presentation/components/PrabhupadaBooksTrackerSection'
 import { ErrorBanner } from '../../src/presentation/components/ErrorBanner'
 import { LoadingScreen } from '../../src/presentation/components/LoadingScreen'
 import { TextField } from '../../src/presentation/components/TextField'
@@ -358,6 +359,11 @@ export default function ProfileScreen() {
               </View>
             </View>
           </Card>
+        ) : null}
+
+        {/* Prabhupada Books Reading Tracker */}
+        {profile.role === 'devotee' ? (
+          <PrabhupadaBooksTrackerSection profileId={profile.id} editable={true} />
         ) : null}
 
         {/* Settings & Preferences */}

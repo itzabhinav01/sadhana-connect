@@ -55,6 +55,10 @@ vi.mock('@/application/auth/use-sign-out', () => ({
   useSignOut: useSignOutMock,
 }))
 
+vi.mock('@/presentation/components/books/PrabhupadaBooksTracker', () => ({
+  PrabhupadaBooksTracker: () => <div data-testid="prabhupada-books-tracker" />,
+}))
+
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>()
   return {

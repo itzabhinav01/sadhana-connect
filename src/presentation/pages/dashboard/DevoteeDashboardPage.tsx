@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 
 import { ChartSkeleton } from '@/presentation/components/ChartSkeleton'
+import { PrabhupadaBooksProgressCard } from '@/presentation/components/books/PrabhupadaBooksProgressCard'
 import { RecentReportsList } from '@/presentation/pages/dashboard/RecentReportsList'
 import { TodaySadhanaCard } from '@/presentation/pages/dashboard/TodaySadhanaCard'
 import { WeeklySummaryCard } from '@/presentation/pages/dashboard/WeeklySummaryCard'
@@ -36,6 +37,7 @@ export function DevoteeDashboardPage() {
         </div>
         <div className="flex flex-col gap-6">
           <WeeklySummaryCard />
+          <PrabhupadaBooksProgressCard />
           <RecentReportsList />
         </div>
       </div>
