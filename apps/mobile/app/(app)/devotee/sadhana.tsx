@@ -176,12 +176,48 @@ function SadhanaFormBody({
     [sectionsConfig.customSections],
   )
 
-  const base = existingReport ? reportToFormValues(existingReport) : emptyFormValues(date)
+  const rawBase = existingReport ? reportToFormValues(existingReport) : emptyFormValues(date)
+  const base = {
+    ...rawBase,
+    notes: (rawBase.notes || '').replace(/(?:\r?\n)?\[Additional\]:.*$/s, '').trim(),
+  }
   const defaultValues = prefillRounds !== undefined ? { ...base, totalRounds: String(prefillRounds) } : base
 
   const { control, handleSubmit } = useForm<SadhanaReportFormInput>({
     resolver: zodResolver(sadhanaReportSchema),
     defaultValues,
+  })
+
+  // Cross-device hydration: if local storage has no entry for this date yet
+  // but existing report has [Additional]: in notes, populate the custom fields.
+  useState(() => {
+    if (existingReport?.notes && existingReport.notes.includes('[Additional]:')) {
+      const match = existingReport.notes.match(/\[Additional\]:\s*(.*)$/s)
+      if (match && match[1]) {
+        const items = match[1].split(',').map((s) => s.trim())
+        for (const item of items) {
+          const [rawTitle, ...rest] = item.split(':')
+          const titlePart = rawTitle.trim()
+          const valPart = rest.join(':').trim()
+          const matchedSec = activeCustomSections.find(
+            (s) => s.title.toLowerCase() === titlePart.toLowerCase(),
+          )
+          if (
+            matchedSec &&
+            (customValues[matchedSec.id] === undefined || customValues[matchedSec.id] === '')
+          ) {
+            if (matchedSec.fieldType === 'boolean') {
+              void setCustomFieldValue(matchedSec.id, valPart.toLowerCase() === 'yes')
+            } else {
+              const cleanVal = matchedSec.unit
+                ? valPart.replace(new RegExp(`\\s*${matchedSec.unit}$`, 'i'), '').trim()
+                : valPart
+              void setCustomFieldValue(matchedSec.id, cleanVal)
+            }
+          }
+        }
+      }
+    }
   })
 
   const [expanded, setExpanded] = useState<ExpandedState>(() =>
@@ -219,19 +255,22 @@ function SadhanaFormBody({
         .filter((sec) => customValues[sec.id] !== undefined && customValues[sec.id] !== '' && customValues[sec.id] !== false)
         .map((sec) => `${sec.title}: ${sec.fieldType === 'boolean' ? 'Yes' : customValues[sec.id]}${sec.unit ? ` ${sec.unit}` : ''}`)
 
+      const cleanNotes = (finalValues.notes || '')
+        .replace(/(?:\r?\n)?\[Additional\]:.*$/s, '')
+        .trim()
+
       if (filledCustomItems.length > 0) {
         const customBlock = `[Additional]: ${filledCustomItems.join(', ')}`
-        if (!finalValues.notes.includes('[Additional]:')) {
-          finalValues.notes = finalValues.notes
-            ? `${finalValues.notes}\n${customBlock}`
-            : customBlock
-        }
+        finalValues.notes = cleanNotes ? `${cleanNotes}\n${customBlock}` : customBlock
+      } else {
+        finalValues.notes = cleanNotes
       }
 
       upsertReport.mutate(formValuesToUpsertParams(finalValues), {
         onSuccess: () => router.back(),
       })
     },
+
     (errors) => {
       // A field inside a collapsed section (e.g. Signature, in Details)
       // can fail validation with nothing on screen to show it — expand
