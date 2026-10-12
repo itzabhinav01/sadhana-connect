@@ -16,6 +16,14 @@ jest.mock('../../../src/presentation/components/DailySadhanaReminderSection', ()
   }
 })
 
+jest.mock('../../../src/presentation/components/SadhanaSheetSectionsConfigSection', () => {
+  const { Text } = require('react-native')
+  return {
+    SadhanaSheetSectionsConfigSection: () => <Text>Sadhana Sheet Sections Config Section</Text>,
+  }
+})
+
+
 import { cleanup, fireEvent, render } from '@testing-library/react-native'
 
 import SettingsScreen from './settings'

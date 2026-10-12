@@ -8,6 +8,7 @@ import { Button } from '../../../src/presentation/components/Button'
 import { Card } from '../../../src/presentation/components/Card'
 import { AppUpdateSection } from '../../../src/presentation/components/AppUpdateSection'
 import { DailySadhanaReminderSection } from '../../../src/presentation/components/DailySadhanaReminderSection'
+import { SadhanaSheetSectionsConfigSection } from '../../../src/presentation/components/SadhanaSheetSectionsConfigSection'
 import { fontFamily, fontSize, radius, spacing } from '../../../src/shared/theme'
 import type { ThemeColors } from '../../../src/shared/theme'
 
@@ -42,7 +43,10 @@ export default function SettingsScreen() {
 
       <DailySadhanaReminderSection />
 
+      <SadhanaSheetSectionsConfigSection />
+
       <AppUpdateSection />
+
 
       <Card title="About Sadhana Connect">
         <View style={styles.aboutHeader}>

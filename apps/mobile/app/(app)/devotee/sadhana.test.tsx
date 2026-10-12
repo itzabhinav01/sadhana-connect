@@ -15,6 +15,34 @@ jest.mock('../../../../../packages/sadhana/src/use-upsert-sadhana-report', () =>
   useUpsertSadhanaReport: jest.fn(),
 }))
 
+jest.mock('../../../../../packages/sadhana/src/use-sadhana-sections-config', () => ({
+  useSadhanaSectionsConfig: () => ({
+    config: {
+      standardSections: {
+        chanting: true,
+        reading: true,
+        hearing: true,
+        study: true,
+        rest: true,
+        schedule: true,
+        details: true,
+      },
+      customSections: [],
+    },
+    toggleStandardSection: jest.fn(),
+    toggleCustomSection: jest.fn(),
+    addCustomSection: jest.fn(),
+    deleteCustomSection: jest.fn(),
+    resetToDefault: jest.fn(),
+  }),
+  useCustomSectionValues: () => ({
+    values: {},
+    setFieldValue: jest.fn(),
+    saveValues: jest.fn(),
+  }),
+}))
+
+
 const mockUseLocalSearchParams = jest.fn(() => ({}))
 
 jest.mock('expo-router', () => ({

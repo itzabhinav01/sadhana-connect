@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BookOpen, Briefcase, GraduationCap, Headphones, Moon, PenLine, Repeat } from 'lucide-react'
+import { BookOpen, Briefcase, GraduationCap, Headphones, Moon, PenLine, Repeat, Sparkles } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -7,12 +7,15 @@ import {
   emptyFormValues,
   formValuesToUpsertParams,
   reportToFormValues,
+  useCustomSectionValues,
+  useSadhanaSectionsConfig,
 } from '@sadhana-connect/sadhana'
 import {
   type SadhanaReportFormInput,
   sadhanaReportSchema,
 } from '@sadhana-connect/sadhana'
 import { useUpsertSadhanaReport } from '@sadhana-connect/sadhana'
+
 import type { SadhanaReport } from '@sadhana-connect/domain/entities/sadhana-report'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import {
@@ -50,7 +53,9 @@ const SECTION_STYLE: Record<
   rest: { border: 'border-l-rest', background: 'bg-rest-soft', text: 'text-rest' },
   day: { border: 'border-l-schedule', background: 'bg-schedule-soft', text: 'text-schedule' },
   notes: { border: 'border-l-schedule', background: 'bg-muted/40', text: 'text-muted-foreground' },
+  custom: { border: 'border-l-primary', background: 'bg-primary/5', text: 'text-primary' },
 }
+
 
 interface SadhanaReportFormProps {
   date: string
@@ -62,7 +67,7 @@ interface SadhanaReportFormProps {
   prefillRounds?: number
 }
 
-type SectionKey = 'chanting' | 'reading' | 'hearing' | 'study' | 'rest' | 'day' | 'notes'
+type SectionKey = 'chanting' | 'reading' | 'hearing' | 'study' | 'rest' | 'day' | 'notes' | 'custom'
 
 // Mirrors mobile's section structure: Chanting, Reading, Hearing, Study,
 // Rest, Day, Notes & Signature — none of the sections are compulsory.
@@ -150,6 +155,13 @@ export function SadhanaReportForm({
   const upsertReport = useUpsertSadhanaReport()
   const [isEditingMode, setIsEditingMode] = useState(Boolean(existingReport))
 
+  const { config: sectionsConfig } = useSadhanaSectionsConfig()
+  const { values: customValues, setFieldValue: setCustomFieldValue } = useCustomSectionValues(date)
+  const activeCustomSections = useMemo(
+    () => sectionsConfig.customSections.filter((s) => s.enabled),
+    [sectionsConfig.customSections],
+  )
+
   const defaultValues = useMemo(() => {
     const base = existingReport
       ? reportToFormValues(existingReport)
@@ -171,10 +183,25 @@ export function SadhanaReportForm({
 
   const onSubmit = form.handleSubmit(
     (values) => {
-      upsertReport.mutate(formValuesToUpsertParams(values), {
+      let finalValues = { ...values }
+      const filledCustomItems = activeCustomSections
+        .filter((sec) => customValues[sec.id] !== undefined && customValues[sec.id] !== '' && customValues[sec.id] !== false)
+        .map((sec) => `${sec.title}: ${sec.fieldType === 'boolean' ? 'Yes' : customValues[sec.id]}${sec.unit ? ` ${sec.unit}` : ''}`)
+
+      if (filledCustomItems.length > 0) {
+        const customBlock = `[Additional]: ${filledCustomItems.join(', ')}`
+        if (!finalValues.notes.includes('[Additional]:')) {
+          finalValues.notes = finalValues.notes
+            ? `${finalValues.notes}\n${customBlock}`
+            : customBlock
+        }
+      }
+
+      upsertReport.mutate(formValuesToUpsertParams(finalValues), {
         onSuccess: () => setIsEditingMode(true),
       })
     },
+
     (errors) => {
       // A field inside a collapsed section (e.g. a typo in Book Name)
       // can fail validation with nothing on screen to show it — open
@@ -248,345 +275,441 @@ export function SadhanaReportForm({
           onValueChange={(value) => setOpenSections(value as SectionKey[])}
           className="flex flex-col gap-3"
         >
-          <AccordionItem
-            value="chanting"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.chanting.border,
-              SECTION_STYLE.chanting.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <Repeat className={cn('size-4', SECTION_STYLE.chanting.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.chanting.text)}>
-                  Chanting
+          {sectionsConfig.standardSections.chanting !== false ? (
+            <AccordionItem
+              value="chanting"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.chanting.border,
+                SECTION_STYLE.chanting.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <Repeat className={cn('size-4', SECTION_STYLE.chanting.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.chanting.text)}>
+                    Chanting
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <NumberFormField
-                  control={form.control}
-                  name="roundsBefore430"
-                  label="Rounds before 4:30 AM"
-                  showStepper
-                  quickAmounts={[1, 2, 4]}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <NumberFormField
+                    control={form.control}
+                    name="roundsBefore430"
+                    label="Rounds before 4:30 AM"
+                    showStepper
+                    quickAmounts={[1, 2, 4]}
+                  />
 
-                <NumberFormField
-                  control={form.control}
-                  name="roundsTill7am"
-                  label="Rounds till 7 AM"
-                  showStepper
-                  quickAmounts={[4, 8, 16]}
-                />
+                  <NumberFormField
+                    control={form.control}
+                    name="roundsTill7am"
+                    label="Rounds till 7 AM"
+                    showStepper
+                    quickAmounts={[4, 8, 16]}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="lastRoundTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Round Time</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="lastRoundTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Round Time</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <NumberFormField
-                  control={form.control}
-                  name="totalRounds"
-                  label="Total Rounds"
-                  showStepper
-                  quickAmounts={[8, 16, 25]}
-                  helpText="Enter the complete number of rounds chanted today — this may include rounds chanted after 7 AM that aren't reflected in the fields above."
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  <NumberFormField
+                    control={form.control}
+                    name="totalRounds"
+                    label="Total Rounds"
+                    showStepper
+                    quickAmounts={[8, 16, 25]}
+                    helpText="Enter the complete number of rounds chanted today — this may include rounds chanted after 7 AM that aren't reflected in the fields above."
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="reading"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.reading.border,
-              SECTION_STYLE.reading.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <BookOpen className={cn('size-4', SECTION_STYLE.reading.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.reading.text)}>
-                  Reading
+          {sectionsConfig.standardSections.reading !== false ? (
+            <AccordionItem
+              value="reading"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.reading.border,
+                SECTION_STYLE.reading.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <BookOpen className={cn('size-4', SECTION_STYLE.reading.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.reading.text)}>
+                    Reading
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <NumberFormField
-                  control={form.control}
-                  name="readingMinutes"
-                  label="Reading Minutes"
-                  quickAmounts={[10, 15, 30, 60]}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <NumberFormField
+                    control={form.control}
+                    name="readingMinutes"
+                    label="Reading Minutes"
+                    quickAmounts={[10, 15, 30, 60]}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="bookName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Book Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  <FormField
+                    control={form.control}
+                    name="bookName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Book Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="hearing"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.hearing.border,
-              SECTION_STYLE.hearing.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <Headphones className={cn('size-4', SECTION_STYLE.hearing.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.hearing.text)}>
-                  Hearing
+          {sectionsConfig.standardSections.hearing !== false ? (
+            <AccordionItem
+              value="hearing"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.hearing.border,
+                SECTION_STYLE.hearing.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <Headphones className={cn('size-4', SECTION_STYLE.hearing.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.hearing.text)}>
+                    Hearing
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <NumberFormField
-                  control={form.control}
-                  name="hearingMinutes"
-                  label="Hearing Minutes"
-                  quickAmounts={[10, 15, 30, 60]}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <NumberFormField
+                    control={form.control}
+                    name="hearingMinutes"
+                    label="Hearing Minutes"
+                    quickAmounts={[10, 15, 30, 60]}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="speakerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Speaker Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  <FormField
+                    control={form.control}
+                    name="speakerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Speaker Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="study"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.study.border,
-              SECTION_STYLE.study.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <GraduationCap className={cn('size-4', SECTION_STYLE.study.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.study.text)}>
-                  Study
+
+          {sectionsConfig.standardSections.study !== false ? (
+            <AccordionItem
+              value="study"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.study.border,
+                SECTION_STYLE.study.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <GraduationCap className={cn('size-4', SECTION_STYLE.study.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.study.text)}>
+                    Study
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <NumberFormField
-                  control={form.control}
-                  name="studyHours"
-                  label="Study (hours)"
-                  allowDecimal
-                  quickAmounts={[1, 2, 3, 4]}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <NumberFormField
+                    control={form.control}
+                    name="studyHours"
+                    label="Study (hours)"
+                    allowDecimal
+                    quickAmounts={[1, 2, 3, 4]}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="rest"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.rest.border,
-              SECTION_STYLE.rest.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <Moon className={cn('size-4', SECTION_STYLE.rest.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.rest.text)}>
-                  Rest
+          {sectionsConfig.standardSections.rest !== false ? (
+            <AccordionItem
+              value="rest"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.rest.border,
+                SECTION_STYLE.rest.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <Moon className={cn('size-4', SECTION_STYLE.rest.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.rest.text)}>
+                    Rest
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="sleepTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sleep Time</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="sleepTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sleep Time</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="wakeTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Wake Up</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="wakeTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Wake Up</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <NumberFormField
-                  control={form.control}
-                  name="dayRestMinutes"
-                  label="Day Rest (minutes)"
-                  quickAmounts={[15, 30, 60]}
-                />
+                  <NumberFormField
+                    control={form.control}
+                    name="dayRestMinutes"
+                    label="Day Rest (minutes)"
+                    quickAmounts={[15, 30, 60]}
+                  />
 
-                <NumberFormField
-                  control={form.control}
-                  name="totalRestMinutes"
-                  label="Total Rest (hours)"
-                  allowDecimal
-                  quickAmounts={[5, 6, 7, 8]}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  <NumberFormField
+                    control={form.control}
+                    name="totalRestMinutes"
+                    label="Total Rest (hours)"
+                    allowDecimal
+                    quickAmounts={[5, 6, 7, 8]}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="day"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.day.border,
-              SECTION_STYLE.day.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <Briefcase className={cn('size-4', SECTION_STYLE.day.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.day.text)}>
-                  Day
+          {sectionsConfig.standardSections.schedule !== false ? (
+            <AccordionItem
+              value="day"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.day.border,
+                SECTION_STYLE.day.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <Briefcase className={cn('size-4', SECTION_STYLE.day.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.day.text)}>
+                    Day
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="officeGoingTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Office Going</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="officeGoingTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Office Going</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="officeReturnTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Office Return</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  <FormField
+                    control={form.control}
+                    name="officeReturnTime"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Office Return</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-          <AccordionItem
-            value="notes"
-            className={cn(
-              'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
-              SECTION_STYLE.notes.border,
-              SECTION_STYLE.notes.background,
-            )}
-          >
-            <AccordionTrigger>
-              <span className="flex items-center gap-2">
-                <PenLine className={cn('size-4', SECTION_STYLE.notes.text)} aria-hidden="true" />
-                <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.notes.text)}>
-                  Notes &amp; Signature
+          {activeCustomSections.length > 0 ? (
+            <AccordionItem
+              value="custom"
+              className="overflow-hidden rounded-xl border-b-0 border-l-4 border-l-primary bg-primary/5 px-4"
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" aria-hidden="true" />
+                  <span className="text-xs font-bold tracking-wide uppercase text-primary">
+                    Additional Practices ({activeCustomSections.length})
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-col gap-4">
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {activeCustomSections.map((sec) => (
+                    <div
+                      key={sec.id}
+                      className="flex flex-col gap-1.5 rounded-lg border border-border/60 bg-card p-3 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">
+                          {sec.title}
+                          {sec.unit ? ` (${sec.unit})` : ''}
+                        </span>
+                        <span className="text-[10px] uppercase font-semibold text-muted-foreground">
+                          {sec.fieldType}
+                        </span>
+                      </div>
+                      {sec.description ? (
+                        <span className="text-xs text-muted-foreground">
+                          {sec.description}
+                        </span>
+                      ) : null}
+                      {sec.fieldType === 'boolean' ? (
+                        <div className="flex items-center gap-2 pt-1">
+                          <input
+                            type="checkbox"
+                            id={`custom-${sec.id}`}
+                            className="size-4 rounded border-border text-primary focus:ring-primary"
+                            checked={Boolean(customValues[sec.id])}
+                            onChange={(e) =>
+                              void setCustomFieldValue(sec.id, e.target.checked)
+                            }
+                          />
+                          <label
+                            htmlFor={`custom-${sec.id}`}
+                            className="cursor-pointer text-xs text-foreground"
+                          >
+                            Completed / Attended
+                          </label>
+                        </div>
+                      ) : (
+                        <Input
+                          type={
+                            sec.fieldType === 'number' || sec.fieldType === 'decimal'
+                              ? 'number'
+                              : sec.fieldType === 'time'
+                                ? 'time'
+                                : 'text'
+                          }
+                          step={sec.fieldType === 'decimal' ? '0.1' : undefined}
+                          placeholder={sec.unit ? `e.g. 15 ${sec.unit}` : 'Enter value'}
+                          value={
+                            customValues[sec.id] !== undefined
+                              ? String(customValues[sec.id])
+                              : ''
+                          }
+                          onChange={(e) =>
+                            void setCustomFieldValue(sec.id, e.target.value)
+                          }
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
 
-                <FormField
-                  control={form.control}
-                  name="signatureText"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Signature</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        Type your name to confirm this report is accurate.
-                        Optional.
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+          {sectionsConfig.standardSections.details !== false ? (
+            <AccordionItem
+              value="notes"
+              className={cn(
+                'overflow-hidden rounded-xl border-b-0 border-l-4 px-4',
+                SECTION_STYLE.notes.border,
+                SECTION_STYLE.notes.background,
+              )}
+            >
+              <AccordionTrigger>
+                <span className="flex items-center gap-2">
+                  <PenLine className={cn('size-4', SECTION_STYLE.notes.text)} aria-hidden="true" />
+                  <span className={cn('text-xs font-bold tracking-wide uppercase', SECTION_STYLE.notes.text)}>
+                    Notes &amp; Signature
+                  </span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notes</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="signatureText"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Signature</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <p className="text-sm text-muted-foreground">
+                          Type your name to confirm this report is accurate.
+                          Optional.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : null}
         </Accordion>
+
 
         <Button
           type="submit"

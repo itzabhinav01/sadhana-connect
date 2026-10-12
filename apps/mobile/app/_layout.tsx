@@ -19,6 +19,7 @@ import { useTheme } from '../src/application/theme/use-theme'
 import { dailySadhanaNotificationService } from '../src/infrastructure/notifications/daily-sadhana-notification-service'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { setBookProgressStorageAdapter } from '@sadhana-connect/books'
+import { setSadhanaSectionsStorageAdapter } from '@sadhana-connect/sadhana'
 import { secureSessionStorage } from '../src/infrastructure/local-storage/secure-session-storage'
 import { AppUpdateModal } from '../src/presentation/components/AppUpdateModal'
 import { useAppUpdates } from '../src/presentation/hooks/use-app-updates'
@@ -38,6 +39,7 @@ initSupabaseClient({
 })
 
 setBookProgressStorageAdapter(AsyncStorage)
+setSadhanaSectionsStorageAdapter(AsyncStorage)
 
 const queryClient = new QueryClient()
 

@@ -54,4 +54,9 @@ export const sadhanaQueryKeys = {
     endDate: string,
   ) =>
     ['sadhana-report', 'devotee-full-history', viewerUserId, devoteeId, startDate, endDate] as const,
+  // Devotee sheet configuration (Standard sections hide/show + Custom sections)
+  sectionsConfig: (userId: string | null) => ['sadhana-sections-config', userId] as const,
+  customSectionValues: (userId: string | null, date: string) =>
+    ['sadhana-custom-values', userId, date] as const,
 }
+

@@ -1,18 +1,23 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  type CustomSadhanaSection,
   type SadhanaReportFormInput,
   emptyFormValues,
   formValuesToUpsertParams,
   reportToFormValues,
   sadhanaReportSchema,
+  useCustomSectionValues,
   useSadhanaReport,
+  useSadhanaSectionsConfig,
   useUpsertSadhanaReport,
 } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { ScrollView, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
+import { fontSize, radius } from '../../../src/shared/theme'
+
 
 import { useTheme } from '../../../src/application/theme/use-theme'
 import { Accordion, useSectionAccent } from '../../../src/presentation/components/Accordion'
@@ -163,6 +168,14 @@ function SadhanaFormBody({
   const upsertReport = useUpsertSadhanaReport()
   const isEditingMode = Boolean(existingReport)
 
+  const { config: sectionsConfig } = useSadhanaSectionsConfig()
+  const { values: customValues, setFieldValue: setCustomFieldValue } = useCustomSectionValues(date)
+  const [customExpanded, setCustomExpanded] = useState(false)
+  const activeCustomSections = useMemo(
+    () => sectionsConfig.customSections.filter((s) => s.enabled),
+    [sectionsConfig.customSections],
+  )
+
   const base = existingReport ? reportToFormValues(existingReport) : emptyFormValues(date)
   const defaultValues = prefillRounds !== undefined ? { ...base, totalRounds: String(prefillRounds) } : base
 
@@ -201,7 +214,21 @@ function SadhanaFormBody({
 
   const onSubmit = handleSubmit(
     (values) => {
-      upsertReport.mutate(formValuesToUpsertParams(values), {
+      let finalValues = { ...values }
+      const filledCustomItems = activeCustomSections
+        .filter((sec) => customValues[sec.id] !== undefined && customValues[sec.id] !== '' && customValues[sec.id] !== false)
+        .map((sec) => `${sec.title}: ${sec.fieldType === 'boolean' ? 'Yes' : customValues[sec.id]}${sec.unit ? ` ${sec.unit}` : ''}`)
+
+      if (filledCustomItems.length > 0) {
+        const customBlock = `[Additional]: ${filledCustomItems.join(', ')}`
+        if (!finalValues.notes.includes('[Additional]:')) {
+          finalValues.notes = finalValues.notes
+            ? `${finalValues.notes}\n${customBlock}`
+            : customBlock
+        }
+      }
+
+      upsertReport.mutate(formValuesToUpsertParams(finalValues), {
         onSuccess: () => router.back(),
       })
     },
@@ -221,6 +248,7 @@ function SadhanaFormBody({
       })
     },
   )
+
 
   return (
     <>
@@ -243,128 +271,160 @@ function SadhanaFormBody({
           onValueChange={onDateChange}
         />
 
-        <Accordion
-          title="Chanting"
-          accent={chantingAccent}
-          expanded={expanded.chanting}
-          onToggle={() => toggleSection('chanting')}
-          summary={chantingSummary}
-        >
-          <NumberField
-            control={control}
-            name="roundsBefore430"
-            label="Rounds before 4:30 AM"
-            showStepper
-            quickAmounts={[1, 2, 4]}
-          />
-          <NumberField
-            control={control}
-            name="roundsTill7am"
-            label="Rounds till 7 AM"
-            showStepper
-            quickAmounts={[4, 8, 16]}
-          />
-          <DateTimeField control={control} name="lastRoundTime" label="Last Round Time" mode="time" clearable />
-          <NumberField
-            control={control}
-            name="totalRounds"
-            label="Total Rounds"
-            showStepper
-            quickAmounts={[8, 16, 25]}
-          />
-        </Accordion>
+        {sectionsConfig.standardSections.chanting !== false ? (
+          <Accordion
+            title="Chanting"
+            accent={chantingAccent}
+            expanded={expanded.chanting}
+            onToggle={() => toggleSection('chanting')}
+            summary={chantingSummary}
+          >
+            <NumberField
+              control={control}
+              name="roundsBefore430"
+              label="Rounds before 4:30 AM"
+              showStepper
+              quickAmounts={[1, 2, 4]}
+            />
+            <NumberField
+              control={control}
+              name="roundsTill7am"
+              label="Rounds till 7 AM"
+              showStepper
+              quickAmounts={[4, 8, 16]}
+            />
+            <DateTimeField control={control} name="lastRoundTime" label="Last Round Time" mode="time" clearable />
+            <NumberField
+              control={control}
+              name="totalRounds"
+              label="Total Rounds"
+              showStepper
+              quickAmounts={[8, 16, 25]}
+            />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Reading"
-          accent={readingAccent}
-          expanded={expanded.reading}
-          onToggle={() => toggleSection('reading')}
-          summary={readingSummary}
-        >
-          <NumberField
-            control={control}
-            name="readingMinutes"
-            label="Reading Minutes"
-            quickAmounts={[10, 15, 30, 60]}
-          />
-          <TextField control={control} name="bookName" label="Book Name" />
-        </Accordion>
+        {sectionsConfig.standardSections.reading !== false ? (
+          <Accordion
+            title="Reading"
+            accent={readingAccent}
+            expanded={expanded.reading}
+            onToggle={() => toggleSection('reading')}
+            summary={readingSummary}
+          >
+            <NumberField
+              control={control}
+              name="readingMinutes"
+              label="Reading Minutes"
+              quickAmounts={[10, 15, 30, 60]}
+            />
+            <TextField control={control} name="bookName" label="Book Name" />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Hearing"
-          accent={hearingAccent}
-          expanded={expanded.hearing}
-          onToggle={() => toggleSection('hearing')}
-          summary={hearingSummary}
-        >
-          <NumberField
-            control={control}
-            name="hearingMinutes"
-            label="Hearing Minutes"
-            quickAmounts={[10, 15, 30, 60]}
-          />
-          <TextField control={control} name="speakerName" label="Speaker Name" />
-        </Accordion>
+        {sectionsConfig.standardSections.hearing !== false ? (
+          <Accordion
+            title="Hearing"
+            accent={hearingAccent}
+            expanded={expanded.hearing}
+            onToggle={() => toggleSection('hearing')}
+            summary={hearingSummary}
+          >
+            <NumberField
+              control={control}
+              name="hearingMinutes"
+              label="Hearing Minutes"
+              quickAmounts={[10, 15, 30, 60]}
+            />
+            <TextField control={control} name="speakerName" label="Speaker Name" />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Study"
-          accent={studyAccent}
-          expanded={expanded.study}
-          onToggle={() => toggleSection('study')}
-          summary={studySummary}
-        >
-          <NumberField
-            control={control}
-            name="studyHours"
-            label="Study (hours)"
-            allowDecimal
-            quickAmounts={[1, 2, 3, 4]}
-          />
-        </Accordion>
+        {sectionsConfig.standardSections.study !== false ? (
+          <Accordion
+            title="Study"
+            accent={studyAccent}
+            expanded={expanded.study}
+            onToggle={() => toggleSection('study')}
+            summary={studySummary}
+          >
+            <NumberField
+              control={control}
+              name="studyHours"
+              label="Study (hours)"
+              allowDecimal
+              quickAmounts={[1, 2, 3, 4]}
+            />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Rest & Sleep"
-          accent={restAccent}
-          expanded={expanded.rest}
-          onToggle={() => toggleSection('rest')}
-          summary={restSummary}
-        >
-          <DateTimeField control={control} name="sleepTime" label="Sleep Time" mode="time" clearable />
-          <DateTimeField control={control} name="wakeTime" label="Wake Up" mode="time" clearable />
-          <NumberField
-            control={control}
-            name="dayRestMinutes"
-            label="Day Rest (minutes)"
-            quickAmounts={[15, 30, 60]}
-          />
-          <NumberField
-            control={control}
-            name="totalRestMinutes"
-            label="Total Rest (hours)"
-            allowDecimal
-            quickAmounts={[5, 6, 7, 8]}
-          />
-        </Accordion>
+        {sectionsConfig.standardSections.rest !== false ? (
+          <Accordion
+            title="Rest & Sleep"
+            accent={restAccent}
+            expanded={expanded.rest}
+            onToggle={() => toggleSection('rest')}
+            summary={restSummary}
+          >
+            <DateTimeField control={control} name="sleepTime" label="Sleep Time" mode="time" clearable />
+            <DateTimeField control={control} name="wakeTime" label="Wake Up" mode="time" clearable />
+            <NumberField
+              control={control}
+              name="dayRestMinutes"
+              label="Day Rest (minutes)"
+              quickAmounts={[15, 30, 60]}
+            />
+            <NumberField
+              control={control}
+              name="totalRestMinutes"
+              label="Total Rest (hours)"
+              allowDecimal
+              quickAmounts={[5, 6, 7, 8]}
+            />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Schedule"
-          accent={scheduleAccent}
-          expanded={expanded.schedule}
-          onToggle={() => toggleSection('schedule')}
-          summary={scheduleSummary}
-        >
-          <DateTimeField control={control} name="officeGoingTime" label="Office Going" mode="time" clearable />
-          <DateTimeField control={control} name="officeReturnTime" label="Office Return" mode="time" clearable />
-        </Accordion>
+        {sectionsConfig.standardSections.schedule !== false ? (
+          <Accordion
+            title="Schedule"
+            accent={scheduleAccent}
+            expanded={expanded.schedule}
+            onToggle={() => toggleSection('schedule')}
+            summary={scheduleSummary}
+          >
+            <DateTimeField control={control} name="officeGoingTime" label="Office Going" mode="time" clearable />
+            <DateTimeField control={control} name="officeReturnTime" label="Office Return" mode="time" clearable />
+          </Accordion>
+        ) : null}
 
-        <Accordion
-          title="Details"
-          expanded={expanded.details}
-          onToggle={() => toggleSection('details')}
-        >
-          <TextField control={control} name="notes" label="Notes" />
-          <TextField control={control} name="signatureText" label="Signature" />
-        </Accordion>
+        {activeCustomSections.length > 0 ? (
+          <Accordion
+            title="Additional Practices"
+            expanded={customExpanded}
+            onToggle={() => setCustomExpanded((prev) => !prev)}
+            summary={`${activeCustomSections.length} practice${activeCustomSections.length > 1 ? 's' : ''}`}
+          >
+            {activeCustomSections.map((sec) => (
+              <CustomSectionFieldRow
+                key={sec.id}
+                section={sec}
+                value={customValues[sec.id]}
+                onChange={(val) => void setCustomFieldValue(sec.id, val)}
+              />
+            ))}
+          </Accordion>
+        ) : null}
+
+        {sectionsConfig.standardSections.details !== false ? (
+          <Accordion
+            title="Details"
+            expanded={expanded.details}
+            onToggle={() => toggleSection('details')}
+          >
+            <TextField control={control} name="notes" label="Notes" />
+            <TextField control={control} name="signatureText" label="Signature" />
+          </Accordion>
+        ) : null}
 
         {existingReport ? (
           <Accordion
@@ -376,6 +436,7 @@ function SadhanaFormBody({
             <SadhanaReportComments sadhanaReportId={existingReport.id} />
           </Accordion>
         ) : null}
+
       </ScrollView>
 
       <StickyFooterBar>
@@ -400,3 +461,96 @@ function createStyles(colors: ThemeColors) {
     },
   })
 }
+
+function CustomSectionFieldRow({
+  section,
+  value,
+  onChange,
+}: {
+  section: CustomSadhanaSection
+  value: any
+  onChange: (val: any) => void
+}) {
+  const { colors } = useTheme()
+  const label = `${section.title}${section.unit ? ` (${section.unit})` : ''}`
+
+  if (section.fieldType === 'boolean') {
+    const isChecked = Boolean(value)
+    return (
+      <View style={customFieldStyles.rowBetween}>
+        <View style={{ flex: 1 }}>
+          <Text style={[customFieldStyles.label, { color: colors.foreground }]}>{section.title}</Text>
+          {section.description ? (
+            <Text style={[customFieldStyles.desc, { color: colors.muted }]}>{section.description}</Text>
+          ) : null}
+        </View>
+        <Switch
+          value={isChecked}
+          onValueChange={onChange}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor={colors.card}
+          accessibilityLabel={section.title}
+        />
+      </View>
+    )
+  }
+
+  return (
+    <View style={customFieldStyles.fieldCol}>
+      <Text style={[customFieldStyles.label, { color: colors.foreground }]}>{label}</Text>
+      {section.description ? (
+        <Text style={[customFieldStyles.desc, { color: colors.muted }]}>{section.description}</Text>
+      ) : null}
+      <TextInput
+        style={[
+          customFieldStyles.input,
+          {
+            color: colors.foreground,
+            borderColor: colors.border,
+            backgroundColor: colors.card,
+          },
+        ]}
+        value={value !== undefined && value !== null ? String(value) : ''}
+        onChangeText={onChange}
+        keyboardType={
+          section.fieldType === 'number'
+            ? 'number-pad'
+            : section.fieldType === 'decimal'
+              ? 'decimal-pad'
+              : 'default'
+        }
+        placeholder={section.unit ? `e.g. 15 ${section.unit}` : 'Enter value'}
+        placeholderTextColor={colors.muted}
+      />
+    </View>
+  )
+}
+
+const customFieldStyles = StyleSheet.create({
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    gap: 12,
+  },
+  fieldCol: {
+    gap: 4,
+    paddingVertical: 6,
+  },
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+  },
+  desc: {
+    fontSize: fontSize.xs,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: fontSize.sm,
+  },
+})
+

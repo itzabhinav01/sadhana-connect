@@ -10,6 +10,7 @@ import {
 } from '@/presentation/components/ui/card'
 import { SettingsInstallSection } from '@/presentation/pages/SettingsInstallSection'
 import { DailySadhanaReminderCard } from '@/presentation/components/shared/DailySadhanaReminderCard'
+import { SadhanaSheetSectionsConfigCard } from '@/presentation/components/sadhana/SadhanaSheetSectionsConfigCard'
 
 export const GITHUB_REPO_URL = 'https://github.com/itzabhinav01/sadhana-connect'
 
@@ -18,12 +19,15 @@ export function SettingsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your app and notification preferences.</p>
+        <p className="text-sm text-muted-foreground">Manage your app, sadhana sheet sections, and notification preferences.</p>
       </div>
 
       <DailySadhanaReminderCard />
 
+      <SadhanaSheetSectionsConfigCard />
+
       <SettingsInstallSection />
+
 
       <Card className="overflow-hidden border-primary/20">
         <CardHeader className="pb-3">
