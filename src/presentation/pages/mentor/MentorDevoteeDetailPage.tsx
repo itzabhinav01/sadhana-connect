@@ -123,7 +123,7 @@ export function MentorDevoteeDetailPage() {
 
           <PrabhupadaBooksTracker
             profileId={devoteeId}
-            editable={false}
+            editable={true}
             title={`${profileQuery.data.fullName}'s Prabhupada Books Reading`}
           />
         </>

@@ -93,7 +93,7 @@ function DevoteeInfoPanel({
 
       <PrabhupadaBooksTrackerSection
         profileId={devoteeId}
-        editable={false}
+        editable={true}
         title={`${devoteeName ?? 'Devotee'}'s Prabhupada Books`}
       />
     </>

@@ -1,6 +1,8 @@
 import {
   BookOpen,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock,
   ExternalLink,
   Search,
@@ -23,6 +25,7 @@ interface PrabhupadaBooksTrackerProps {
   profileId: string | null | undefined
   editable?: boolean
   title?: string
+  defaultExpanded?: boolean
 }
 
 type FilterTab = 'all' | 'completed' | 'reading' | 'not_started'
@@ -31,10 +34,12 @@ export function PrabhupadaBooksTracker({
   profileId,
   editable = false,
   title = 'Prabhupada Books Reading Tracker',
+  defaultExpanded = false,
 }: PrabhupadaBooksTrackerProps) {
   const searchInputId = useId()
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const { data, isLoading } = useDevoteeBookProgress(profileId)
-  const updateMutation = useUpdateBookProgress()
+  const updateMutation = useUpdateBookProgress(profileId)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTab, setFilterTab] = useState<FilterTab>('all')
@@ -74,7 +79,7 @@ export function PrabhupadaBooksTracker({
 
   const handleStatusChange = (bookId: number, newStatus: BookReadingStatus) => {
     if (!editable) return
-    updateMutation.mutate({ bookId, status: newStatus })
+    updateMutation.mutate({ bookId, status: newStatus, profileId })
   }
 
   return (
@@ -92,13 +97,30 @@ export function PrabhupadaBooksTracker({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-black text-primary">
-              {summary.completionPercentage}%
-            </span>
-            <span className="text-xs font-medium text-muted-foreground">
-              Completed
-            </span>
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-2xl font-black text-primary">
+                {summary.completionPercentage}%
+              </span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Completed
+              </span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="h-8 gap-1 px-2.5 text-xs font-semibold"
+              aria-label={isExpanded ? 'Collapse books' : 'Expand books'}
+            >
+              <span>{isExpanded ? 'Hide' : 'Show'}</span>
+              {isExpanded ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+            </Button>
           </div>
         </div>
 
@@ -125,168 +147,218 @@ export function PrabhupadaBooksTracker({
             </div>
           </div>
         </div>
+
+        {/* Collapsed view CTA */}
+        {!isExpanded ? (
+          <div className="mt-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExpanded(true)}
+              className="w-full text-xs font-semibold"
+            >
+              Show Books ({books.length})
+              <ChevronDown className="ml-1.5 h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ) : null}
       </CardHeader>
 
-      <CardContent className="space-y-4 pt-5">
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {editable ? (
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                id={searchInputId}
-                type="search"
-                role="searchbox"
-                placeholder="Search books by title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 text-sm"
-              />
-            </div>
-          ) : null}
-          <div className="flex flex-wrap gap-1.5">
-            <Button
-              type="button"
-              variant={filterTab === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilterTab('all')}
-              className="h-8 text-xs font-semibold"
-            >
-              All ({books.length || 36})
-            </Button>
-            <Button
-              type="button"
-              variant={filterTab === 'completed' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilterTab('completed')}
-              className="h-8 text-xs font-semibold"
-            >
-              Completed ({summary.completed})
-            </Button>
-            <Button
-              type="button"
-              variant={filterTab === 'reading' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilterTab('reading')}
-              className="h-8 text-xs font-semibold"
-            >
-              Reading ({summary.reading})
-            </Button>
-            <Button
-              type="button"
-              variant={filterTab === 'not_started' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilterTab('not_started')}
-              className="h-8 text-xs font-semibold"
-            >
-              To Read ({summary.notStarted})
-            </Button>
-          </div>
-        </div>
-
-        {/* Book items list */}
-        {isLoading ? (
-          <div className="py-10 text-center text-sm text-muted-foreground">
-            Loading Prabhupada books...
-          </div>
-        ) : filteredBooks.length === 0 ? (
-          <div className="rounded-xl border border-dashed py-10 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
-              No books found matching your filter
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border/60 rounded-xl border">
-            {filteredBooks.map((book: BookWithProgress) => (
-              <div
-                key={book.id}
-                className="flex flex-col gap-3 p-3.5 transition-colors hover:bg-muted/20 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                    {book.sequenceNumber}
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {book.title}
-                    </h3>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      {book.readingUrl && (
-                        <a
-                          href={book.readingUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                        >
-                          Read Online <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  {editable ? (
-                    <div className="inline-flex rounded-lg border bg-muted/30 p-0.5 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(book.id, 'not_started')}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          book.status === 'not_started'
-                            ? 'bg-background text-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        To Read
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(book.id, 'reading')}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          book.status === 'reading'
-                            ? 'bg-amber-500 text-white shadow-sm dark:bg-amber-600'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Reading
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStatusChange(book.id, 'completed')}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-all ${
-                          book.status === 'completed'
-                            ? 'bg-emerald-600 text-white shadow-sm dark:bg-emerald-500'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        Completed
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      {book.status === 'completed' && (
-                        <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-600 text-white gap-1 text-xs font-semibold">
-                          <CheckCircle2 className="h-3 w-3" /> Completed
-                        </Badge>
-                      )}
-                      {book.status === 'reading' && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 gap-1 text-xs font-semibold">
-                          <Clock className="h-3 w-3" /> Reading
-                        </Badge>
-                      )}
-                      {book.status === 'not_started' && (
-                        <Badge variant="secondary" className="text-muted-foreground text-xs font-medium">
-                          To Read
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </div>
+      {isExpanded ? (
+        <CardContent className="space-y-4 pt-5">
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {editable ? (
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id={searchInputId}
+                  type="search"
+                  role="searchbox"
+                  placeholder="Search books by title..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 text-sm"
+                />
               </div>
-            ))}
+            ) : null}
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                type="button"
+                variant={filterTab === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterTab('all')}
+                className="h-8 text-xs font-semibold"
+              >
+                All ({books.length || 36})
+              </Button>
+              <Button
+                type="button"
+                variant={filterTab === 'completed' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterTab('completed')}
+                className="h-8 text-xs font-semibold"
+              >
+                Completed ({summary.completed})
+              </Button>
+              <Button
+                type="button"
+                variant={filterTab === 'reading' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterTab('reading')}
+                className="h-8 text-xs font-semibold"
+              >
+                Reading ({summary.reading})
+              </Button>
+              <Button
+                type="button"
+                variant={filterTab === 'not_started' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterTab('not_started')}
+                className="h-8 text-xs font-semibold"
+              >
+                To Read ({summary.notStarted})
+              </Button>
+            </div>
           </div>
-        )}
-      </CardContent>
+
+          {/* Book Cards */}
+          {isLoading ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Loading Prabhupada books catalog...
+            </div>
+          ) : filteredBooks.length === 0 ? (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No books found matching &quot;{searchQuery}&quot; in this view.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {filteredBooks.map((book) => {
+                const isCompleted = book.status === 'completed'
+                const isReading = book.status === 'reading'
+                const isNotStarted = book.status === 'not_started'
+
+                return (
+                  <div
+                    key={book.id}
+                    className={`flex flex-col justify-between rounded-xl border p-3.5 transition-colors ${
+                      isCompleted
+                        ? 'border-emerald-200 bg-emerald-50/30 dark:border-emerald-950 dark:bg-emerald-950/10'
+                        : isReading
+                          ? 'border-amber-200 bg-amber-50/30 dark:border-amber-950 dark:bg-amber-950/10'
+                          : 'border-border bg-card'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <Badge
+                          variant="secondary"
+                          className="mt-0.5 shrink-0 px-1.5 py-0.5 text-[11px] font-bold"
+                        >
+                          #{book.sequenceNumber}
+                        </Badge>
+                        <div>
+                          <h4 className="text-sm font-semibold leading-tight text-foreground">
+                            {book.title}
+                          </h4>
+                          {book.readingUrl ? (
+                            <a
+                              href={book.readingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                            >
+                              <span>Read Online</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {/* Status indicator badge (shown only in read-only mode) */}
+                      {!editable ? (
+                        <div className="shrink-0">
+                          {isCompleted ? (
+                            <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+                              Completed
+                            </Badge>
+                          ) : isReading ? (
+                            <Badge className="bg-amber-500 text-white hover:bg-amber-500">
+                              Reading
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">
+                              To Read
+                            </Badge>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* Interactive Status Controls (shown when editable) */}
+                    {editable ? (
+                      <div className="mt-3 flex items-center gap-1.5 border-t pt-2.5">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={isNotStarted ? 'secondary' : 'ghost'}
+                          onClick={() => handleStatusChange(book.id, 'not_started')}
+                          className={`h-7 flex-1 text-xs font-medium ${
+                            isNotStarted ? 'border border-muted font-bold' : ''
+                          }`}
+                        >
+                          To Read
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={isReading ? 'default' : 'ghost'}
+                          onClick={() => handleStatusChange(book.id, 'reading')}
+                          className={`h-7 flex-1 text-xs font-medium ${
+                            isReading
+                              ? 'bg-amber-500 text-white hover:bg-amber-600 font-bold'
+                              : 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
+                          }`}
+                        >
+                          Reading
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={isCompleted ? 'default' : 'ghost'}
+                          onClick={() => handleStatusChange(book.id, 'completed')}
+                          className={`h-7 flex-1 text-xs font-medium ${
+                            isCompleted
+                              ? 'bg-emerald-600 text-white hover:bg-emerald-700 font-bold'
+                              : 'text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
+                          }`}
+                        >
+                          Done
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Bottom collapse button */}
+          <div className="pt-2 text-center">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(false)}
+              className="text-xs text-muted-foreground"
+            >
+              Hide Books
+              <ChevronUp className="ml-1.5 h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </CardContent>
+      ) : null}
     </Card>
   )
 }

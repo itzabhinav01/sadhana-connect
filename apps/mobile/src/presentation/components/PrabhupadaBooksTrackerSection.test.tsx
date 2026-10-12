@@ -64,8 +64,8 @@ describe('PrabhupadaBooksTrackerSection', () => {
     jest.clearAllMocks()
   })
 
-  it('renders summary statistics and book titles', async () => {
-    const { getByText } = await render(
+  it('renders summary statistics and is collapsed by default', async () => {
+    const { getByText, queryByText } = await render(
       <PrabhupadaBooksTrackerSection profileId="u1" />,
     )
 
@@ -74,14 +74,19 @@ describe('PrabhupadaBooksTrackerSection', () => {
     expect(getByText('1 Done')).toBeTruthy()
     expect(getByText('1 Reading')).toBeTruthy()
     expect(getByText('1 To Read')).toBeTruthy()
-    expect(getByText('On The Way to Krishna')).toBeTruthy()
-    expect(getByText('Elevation to Krishna Consciousness')).toBeTruthy()
+    expect(getByText(/Show Books/)).toBeTruthy()
+
+    // Collapsed by default — book list is hidden until expanded
+    expect(queryByText('On The Way to Krishna')).toBeNull()
   })
 
-  it('allows updating book status when editable is true', async () => {
-    const { getAllByText } = await render(
-      <PrabhupadaBooksTrackerSection profileId="u1" editable={true} />,
+  it('expands to reveal books and allows updating book status when editable is true', async () => {
+    const { getByText, getAllByText } = await render(
+      <PrabhupadaBooksTrackerSection profileId="u1" editable={true} defaultExpanded={true} />,
     )
+
+    expect(getByText('On The Way to Krishna')).toBeTruthy()
+    expect(getByText('Elevation to Krishna Consciousness')).toBeTruthy()
 
     const readingButtons = getAllByText('Reading')
     fireEvent.press(readingButtons[0]!)
@@ -89,6 +94,24 @@ describe('PrabhupadaBooksTrackerSection', () => {
     expect(mockMutate).toHaveBeenCalledWith({
       bookId: 1,
       status: 'reading',
+      profileId: 'u1',
     })
+  })
+
+  it('toggles expand and collapse when pressing toggle buttons', async () => {
+    const { getByText, queryByText, getByRole } = await render(
+      <PrabhupadaBooksTrackerSection profileId="u1" />,
+    )
+
+    expect(queryByText('On The Way to Krishna')).toBeNull()
+
+    // Expand
+    await fireEvent.press(getByRole('button', { name: 'Show all 3 books' }))
+    expect(getByText('On The Way to Krishna')).toBeTruthy()
+    expect(getByRole('button', { name: 'Hide books' })).toBeTruthy()
+
+    // Collapse
+    await fireEvent.press(getByRole('button', { name: 'Hide books' }))
+    expect(queryByText('On The Way to Krishna')).toBeNull()
   })
 })

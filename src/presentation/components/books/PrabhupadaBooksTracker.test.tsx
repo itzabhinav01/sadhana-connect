@@ -84,27 +84,32 @@ describe('PrabhupadaBooksTracker', () => {
     )
   }
 
-  it('renders tracker title, summary stats and book titles', () => {
+  it('renders tracker title, summary stats and is collapsed by default', () => {
     renderTracker()
     expect(screen.getByText('Prabhupada Books Reading Tracker')).toBeInTheDocument()
     expect(screen.getByText('33%')).toBeInTheDocument()
     expect(screen.getByText('1 Completed')).toBeInTheDocument()
     expect(screen.getByText('1 Reading')).toBeInTheDocument()
     expect(screen.getByText('1 To Read')).toBeInTheDocument()
-    expect(screen.getByText('On The Way to Krishna')).toBeInTheDocument()
-    expect(screen.getByText('Elevation to Krishna Consciousness')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /show books/i })).toBeInTheDocument()
+
+    // Books list is hidden when collapsed
+    expect(screen.queryByText('On The Way to Krishna')).not.toBeInTheDocument()
   })
 
-  it('renders read online link for books with urls', () => {
-    renderTracker()
+  it('renders book list and read online link when expanded', () => {
+    renderTracker({ defaultExpanded: true })
+    expect(screen.getByText('On The Way to Krishna')).toBeInTheDocument()
+    expect(screen.getByText('Elevation to Krishna Consciousness')).toBeInTheDocument()
+
     const readLinks = screen.getAllByRole('link', { name: /read online/i })
     expect(readLinks.length).toBe(2)
     expect(readLinks[0]).toHaveAttribute('href', 'https://vedabase.io/en/library/owk/')
   })
 
-  it('allows changing status when editable is true', async () => {
+  it('allows changing status when editable is true and expanded', async () => {
     const user = userEvent.setup()
-    renderTracker({ editable: true })
+    renderTracker({ editable: true, defaultExpanded: true })
 
     const toReadButtons = screen.getAllByRole('button', { name: 'To Read' })
     await user.click(toReadButtons[0]!)
@@ -112,6 +117,22 @@ describe('PrabhupadaBooksTracker', () => {
     expect(mutateMock).toHaveBeenCalledWith({
       bookId: 1,
       status: 'not_started',
+      profileId: 'user-1',
     })
+  })
+
+  it('toggles expand and collapse when clicking toggle button', async () => {
+    const user = userEvent.setup()
+    renderTracker()
+
+    expect(screen.queryByText('On The Way to Krishna')).not.toBeInTheDocument()
+
+    // Click Show Books
+    await user.click(screen.getByRole('button', { name: /show books/i }))
+    expect(screen.getByText('On The Way to Krishna')).toBeInTheDocument()
+
+    // Click Hide Books
+    await user.click(screen.getByRole('button', { name: /hide books/i }))
+    expect(screen.queryByText('On The Way to Krishna')).not.toBeInTheDocument()
   })
 })

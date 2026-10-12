@@ -116,7 +116,7 @@ create policy devotee_book_progress_select
     or private.is_super_admin()
   );
 
--- Devotee can insert their own book progress
+-- Devotee, assigned mentor, or super admin can insert book progress
 drop policy if exists devotee_book_progress_insert on public.devotee_book_progress;
 create policy devotee_book_progress_insert
   on public.devotee_book_progress
@@ -124,10 +124,11 @@ create policy devotee_book_progress_insert
   to authenticated
   with check (
     profile_id = auth.uid()
+    or private.is_mentor_of(profile_id)
     or private.is_super_admin()
   );
 
--- Devotee can update their own book progress
+-- Devotee, assigned mentor, or super admin can update book progress
 drop policy if exists devotee_book_progress_update on public.devotee_book_progress;
 create policy devotee_book_progress_update
   on public.devotee_book_progress
@@ -135,14 +136,16 @@ create policy devotee_book_progress_update
   to authenticated
   using (
     profile_id = auth.uid()
+    or private.is_mentor_of(profile_id)
     or private.is_super_admin()
   )
   with check (
     profile_id = auth.uid()
+    or private.is_mentor_of(profile_id)
     or private.is_super_admin()
   );
 
--- Devotee can delete their own book progress
+-- Devotee, assigned mentor, or super admin can delete book progress
 drop policy if exists devotee_book_progress_delete on public.devotee_book_progress;
 create policy devotee_book_progress_delete
   on public.devotee_book_progress
@@ -150,6 +153,7 @@ create policy devotee_book_progress_delete
   to authenticated
   using (
     profile_id = auth.uid()
+    or private.is_mentor_of(profile_id)
     or private.is_super_admin()
   );
 

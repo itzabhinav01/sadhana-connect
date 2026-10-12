@@ -123,7 +123,7 @@ export default function MentorDevoteeDetailScreen() {
 
       <PrabhupadaBooksTrackerSection
         profileId={devoteeId}
-        editable={false}
+        editable={true}
         title={`${profileQuery.data.fullName}'s Prabhupada Books`}
       />
 

@@ -22,10 +22,11 @@ import { Card } from './Card'
 import { Chip } from './Chip'
 import { Icon } from './Icon'
 
-interface PrabhupadaBooksTrackerSectionProps {
+export interface PrabhupadaBooksTrackerSectionProps {
   profileId?: string | null
   editable?: boolean
   title?: string
+  defaultExpanded?: boolean
 }
 
 type FilterTab = 'all' | 'completed' | 'reading' | 'not_started'
@@ -34,12 +35,14 @@ export function PrabhupadaBooksTrackerSection({
   profileId,
   editable = false,
   title = 'Prabhupada Books Reading',
+  defaultExpanded = false,
 }: PrabhupadaBooksTrackerSectionProps) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors), [colors])
 
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const { data, isLoading } = useDevoteeBookProgress(profileId)
-  const updateMutation = useUpdateBookProgress()
+  const updateMutation = useUpdateBookProgress(profileId)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTab, setFilterTab] = useState<FilterTab>('all')
@@ -92,14 +95,26 @@ export function PrabhupadaBooksTrackerSection({
 
   const handleStatusChange = (bookId: number, newStatus: BookReadingStatus) => {
     if (!editable) return
-    updateMutation.mutate({ bookId, status: newStatus })
+    updateMutation.mutate({ bookId, status: newStatus, profileId })
   }
 
   return (
     <Card
       title={title}
       action={
-        <Text style={styles.percentageText}>{summary.completionPercentage}%</Text>
+        <Pressable
+          onPress={() => setIsExpanded((prev) => !prev)}
+          style={styles.headerAction}
+          accessibilityRole="button"
+          accessibilityLabel={isExpanded ? 'Collapse books' : 'Expand books'}
+        >
+          <Text style={styles.percentageText}>{summary.completionPercentage}%</Text>
+          <Icon
+            name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
+            size={18}
+            color={colors.primary}
+          />
+        </Pressable>
       }
     >
       <View style={styles.container}>
@@ -120,191 +135,219 @@ export function PrabhupadaBooksTrackerSection({
           <Chip label={`${summary.notStarted} To Read`} tone="neutral" />
         </View>
 
-        {/* Search Bar (when editable) */}
-        {editable ? (
-          <View style={styles.searchRow}>
-            <Icon name="search-outline" size={16} color={colors.muted} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search books by title..."
-              placeholderTextColor={colors.muted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            {searchQuery.length > 0 ? (
-              <Pressable
-                onPress={() => setSearchQuery('')}
-                accessibilityRole="button"
-                accessibilityLabel="Clear search"
-              >
-                <Icon name="close-outline" size={16} color={colors.muted} />
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-
-        {/* Filter Pills */}
-        <View style={styles.filterTabsRow}>
+        {/* Collapsed State Toggle Trigger */}
+        {!isExpanded ? (
           <Pressable
-            onPress={() => setFilterTab('all')}
-            style={[
-              styles.filterTab,
-              filterTab === 'all' && styles.filterTabActive,
-            ]}
+            onPress={() => setIsExpanded(true)}
+            style={styles.toggleExpandButton}
+            accessibilityRole="button"
+            accessibilityLabel={`Show all ${books.length} books`}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                filterTab === 'all' && styles.filterTabTextActive,
-              ]}
-            >
-              All ({books.length || 36})
+            <Text style={styles.toggleExpandButtonText}>
+              Show Books ({books.length})
             </Text>
+            <Icon name="chevron-down-outline" size={16} color={colors.primary} />
           </Pressable>
-          <Pressable
-            onPress={() => setFilterTab('completed')}
-            style={[
-              styles.filterTab,
-              filterTab === 'completed' && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                filterTab === 'completed' && styles.filterTabTextActive,
-              ]}
-            >
-              Done ({summary.completed})
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setFilterTab('reading')}
-            style={[
-              styles.filterTab,
-              filterTab === 'reading' && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                filterTab === 'reading' && styles.filterTabTextActive,
-              ]}
-            >
-              Reading ({summary.reading})
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setFilterTab('not_started')}
-            style={[
-              styles.filterTab,
-              filterTab === 'not_started' && styles.filterTabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterTabText,
-                filterTab === 'not_started' && styles.filterTabTextActive,
-              ]}
-            >
-              To Read ({summary.notStarted})
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Books List */}
-        {isLoading ? (
-          <Text style={styles.emptyText}>Loading Prabhupada books...</Text>
-        ) : filteredBooks.length === 0 ? (
-          <Text style={styles.emptyText}>No books matching filter.</Text>
         ) : (
-          <View style={styles.bookList}>
-            {filteredBooks.map((book: BookWithProgress) => (
-              <View key={book.id} style={styles.bookCard}>
-                <View style={styles.bookHeaderRow}>
-                  <View style={styles.sequenceBadge}>
-                    <Text style={styles.sequenceText}>#{book.sequenceNumber}</Text>
-                  </View>
-                  <View style={styles.bookTitleContainer}>
-                    <Text style={styles.bookTitle}>{book.title}</Text>
-                    {book.readingUrl ? (
-                      <Pressable
-                        onPress={() => void handleOpenUrl(book.readingUrl)}
-                        style={styles.readLinkButton}
-                        accessibilityRole="link"
-                      >
-                        <Text style={styles.readLinkText}>Read Online</Text>
-                        <Icon name="open-outline" size={13} color={colors.primary} />
-                      </Pressable>
-                    ) : null}
-                  </View>
-                </View>
+          <>
+            {/* Search Bar (when editable) */}
+            {editable ? (
+              <View style={styles.searchRow}>
+                <Icon name="search-outline" size={16} color={colors.muted} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search books by title..."
+                  placeholderTextColor={colors.muted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                {searchQuery.length > 0 ? (
+                  <Pressable
+                    onPress={() => setSearchQuery('')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear search"
+                  >
+                    <Icon name="close-outline" size={16} color={colors.muted} />
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
 
-                {/* Status action */}
-                {editable ? (
-                  <View style={styles.statusButtonsGroup}>
-                    <Pressable
-                      onPress={() => handleStatusChange(book.id, 'not_started')}
-                      style={[
-                        styles.statusBtn,
-                        book.status === 'not_started' && styles.statusBtnActiveNeutral,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusBtnText,
-                          book.status === 'not_started' && styles.statusBtnTextActive,
-                        ]}
-                      >
-                        To Read
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleStatusChange(book.id, 'reading')}
-                      style={[
-                        styles.statusBtn,
-                        book.status === 'reading' && styles.statusBtnActiveWarning,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusBtnText,
-                          book.status === 'reading' && styles.statusBtnTextActive,
-                        ]}
-                      >
-                        Reading
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleStatusChange(book.id, 'completed')}
-                      style={[
-                        styles.statusBtn,
-                        book.status === 'completed' && styles.statusBtnActiveSuccess,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusBtnText,
-                          book.status === 'completed' && styles.statusBtnTextActive,
-                        ]}
-                      >
-                        Done
-                      </Text>
-                    </Pressable>
-                  </View>
-                ) : (
-                  <View style={styles.readOnlyBadgeContainer}>
-                    {book.status === 'completed' ? (
-                      <Chip label="Completed" tone="success" />
-                    ) : book.status === 'reading' ? (
-                      <Chip label="Reading" tone="warning" />
+            {/* Filter Pills */}
+            <View style={styles.filterTabsRow}>
+              <Pressable
+                onPress={() => setFilterTab('all')}
+                style={[
+                  styles.filterTab,
+                  filterTab === 'all' && styles.filterTabActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    filterTab === 'all' && styles.filterTabTextActive,
+                  ]}
+                >
+                  All ({books.length || 36})
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setFilterTab('completed')}
+                style={[
+                  styles.filterTab,
+                  filterTab === 'completed' && styles.filterTabActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    filterTab === 'completed' && styles.filterTabTextActive,
+                  ]}
+                >
+                  Done ({summary.completed})
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setFilterTab('reading')}
+                style={[
+                  styles.filterTab,
+                  filterTab === 'reading' && styles.filterTabActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    filterTab === 'reading' && styles.filterTabTextActive,
+                  ]}
+                >
+                  Reading ({summary.reading})
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setFilterTab('not_started')}
+                style={[
+                  styles.filterTab,
+                  filterTab === 'not_started' && styles.filterTabActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    filterTab === 'not_started' && styles.filterTabTextActive,
+                  ]}
+                >
+                  To Read ({summary.notStarted})
+                </Text>
+              </Pressable>
+            </View>
+
+            {/* Books List */}
+            {isLoading ? (
+              <Text style={styles.emptyText}>Loading Prabhupada books...</Text>
+            ) : filteredBooks.length === 0 ? (
+              <Text style={styles.emptyText}>No books matching filter.</Text>
+            ) : (
+              <View style={styles.bookList}>
+                {filteredBooks.map((book: BookWithProgress) => (
+                  <View key={book.id} style={styles.bookCard}>
+                    <View style={styles.bookHeaderRow}>
+                      <View style={styles.sequenceBadge}>
+                        <Text style={styles.sequenceText}>#{book.sequenceNumber}</Text>
+                      </View>
+                      <View style={styles.bookTitleContainer}>
+                        <Text style={styles.bookTitle}>{book.title}</Text>
+                        {book.readingUrl ? (
+                          <Pressable
+                            onPress={() => void handleOpenUrl(book.readingUrl)}
+                            style={styles.readLinkButton}
+                            accessibilityRole="link"
+                          >
+                            <Text style={styles.readLinkText}>Read Online</Text>
+                            <Icon name="open-outline" size={13} color={colors.primary} />
+                          </Pressable>
+                        ) : null}
+                      </View>
+                    </View>
+
+                    {/* Status action */}
+                    {editable ? (
+                      <View style={styles.statusButtonsGroup}>
+                        <Pressable
+                          onPress={() => handleStatusChange(book.id, 'not_started')}
+                          style={[
+                            styles.statusBtn,
+                            book.status === 'not_started' && styles.statusBtnActiveNeutral,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusBtnText,
+                              book.status === 'not_started' && styles.statusBtnTextActive,
+                            ]}
+                          >
+                            To Read
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => handleStatusChange(book.id, 'reading')}
+                          style={[
+                            styles.statusBtn,
+                            book.status === 'reading' && styles.statusBtnActiveWarning,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusBtnText,
+                              book.status === 'reading' && styles.statusBtnTextActive,
+                            ]}
+                          >
+                            Reading
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => handleStatusChange(book.id, 'completed')}
+                          style={[
+                            styles.statusBtn,
+                            book.status === 'completed' && styles.statusBtnActiveSuccess,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.statusBtnText,
+                              book.status === 'completed' && styles.statusBtnTextActive,
+                            ]}
+                          >
+                            Done
+                          </Text>
+                        </Pressable>
+                      </View>
                     ) : (
-                      <Chip label="To Read" tone="neutral" />
+                      <View style={styles.readOnlyBadgeContainer}>
+                        {book.status === 'completed' ? (
+                          <Chip label="Completed" tone="success" />
+                        ) : book.status === 'reading' ? (
+                          <Chip label="Reading" tone="warning" />
+                        ) : (
+                          <Chip label="To Read" tone="neutral" />
+                        )}
+                      </View>
                     )}
                   </View>
-                )}
+                ))}
               </View>
-            ))}
-          </View>
+            )}
+
+            {/* Collapse footer button */}
+            <Pressable
+              onPress={() => setIsExpanded(false)}
+              style={styles.collapseButton}
+              accessibilityRole="button"
+              accessibilityLabel="Hide books"
+            >
+              <Text style={styles.collapseButtonText}>Hide Books</Text>
+              <Icon name="chevron-up-outline" size={14} color={colors.muted} />
+            </Pressable>
+          </>
         )}
       </View>
     </Card>
@@ -315,6 +358,11 @@ function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       gap: spacing.sm,
+    },
+    headerAction: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
     },
     percentageText: {
       fontSize: fontSize.lg,
@@ -338,6 +386,37 @@ function createStyles(colors: ThemeColors) {
       alignItems: 'center',
       gap: spacing.xs,
       flexWrap: 'wrap',
+    },
+    toggleExpandButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: radius.md,
+      backgroundColor: colors.primary + '15',
+      marginTop: spacing.xs,
+    },
+    toggleExpandButtonText: {
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      fontFamily: fontFamily.semiBold,
+      color: colors.primary,
+    },
+    collapseButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      paddingVertical: spacing.xs + 2,
+      marginTop: spacing.xs,
+      alignSelf: 'center',
+    },
+    collapseButtonText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.medium,
+      color: colors.muted,
     },
     searchRow: {
       flexDirection: 'row',
@@ -381,46 +460,36 @@ function createStyles(colors: ThemeColors) {
     },
     filterTabTextActive: {
       color: '#ffffff',
-      fontWeight: '700',
-      fontFamily: fontFamily.bold,
-    },
-    emptyText: {
-      fontSize: fontSize.sm,
-      color: colors.muted,
-      textAlign: 'center',
-      paddingVertical: spacing.md,
+      fontWeight: '600',
     },
     bookList: {
-      gap: spacing.xs,
-      marginTop: 2,
+      gap: spacing.sm,
+      marginTop: spacing.xs,
     },
     bookCard: {
       padding: spacing.sm,
       borderRadius: radius.md,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
       backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
       gap: spacing.xs,
     },
     bookHeaderRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      gap: spacing.xs,
+      gap: spacing.sm,
     },
     sequenceBadge: {
-      minWidth: 26,
-      height: 22,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
       borderRadius: radius.sm,
-      backgroundColor: colors.primary + '18',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
+      backgroundColor: colors.border,
     },
     sequenceText: {
-      fontSize: 11,
-      fontWeight: '700',
-      fontFamily: fontFamily.bold,
-      color: colors.primary,
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+      color: colors.foreground,
     },
     bookTitleContainer: {
       flex: 1,
@@ -428,8 +497,8 @@ function createStyles(colors: ThemeColors) {
     },
     bookTitle: {
       fontSize: fontSize.sm,
-      fontWeight: '600',
       fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
       color: colors.foreground,
       lineHeight: 18,
     },
@@ -437,51 +506,60 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 3,
+      alignSelf: 'flex-start',
       marginTop: 2,
     },
     readLinkText: {
-      fontSize: 11,
-      fontWeight: '600',
+      fontSize: fontSize.xs,
       fontFamily: fontFamily.medium,
       color: colors.primary,
+      textDecorationLine: 'underline',
     },
     statusButtonsGroup: {
       flexDirection: 'row',
-      borderRadius: radius.sm,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
-      backgroundColor: colors.background,
-      overflow: 'hidden',
-      marginTop: 2,
+      gap: spacing.xs,
+      marginTop: 4,
     },
     statusBtn: {
       flex: 1,
-      paddingVertical: 5,
+      paddingVertical: 6,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
       alignItems: 'center',
-      justifyContent: 'center',
+      backgroundColor: colors.background,
     },
     statusBtnActiveNeutral: {
       backgroundColor: colors.border,
+      borderColor: colors.border,
     },
     statusBtnActiveWarning: {
       backgroundColor: '#f59e0b',
+      borderColor: '#f59e0b',
     },
     statusBtnActiveSuccess: {
       backgroundColor: '#10b981',
+      borderColor: '#10b981',
     },
     statusBtnText: {
-      fontSize: 11,
+      fontSize: fontSize.xs,
       fontFamily: fontFamily.medium,
-      color: colors.muted,
+      color: colors.foreground,
     },
     statusBtnTextActive: {
       color: '#ffffff',
       fontWeight: '700',
-      fontFamily: fontFamily.bold,
     },
     readOnlyBadgeContainer: {
-      alignSelf: 'flex-start',
       marginTop: 2,
+      alignSelf: 'flex-start',
+    },
+    emptyText: {
+      fontSize: fontSize.sm,
+      fontFamily: fontFamily.regular,
+      color: colors.muted,
+      textAlign: 'center',
+      paddingVertical: spacing.md,
     },
   })
 }
