@@ -126,6 +126,9 @@ export function PrabhupadaBooksTracker({
 
         {/* Progress bar */}
         <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-foreground">
+            <span>{summary.completed} of {summary.total} Prabhupada Books Read</span>
+          </div>
           <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
@@ -169,20 +172,18 @@ export function PrabhupadaBooksTracker({
         <CardContent className="space-y-4 pt-5">
           {/* Search & Filter Bar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {editable ? (
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id={searchInputId}
-                  type="search"
-                  role="searchbox"
-                  placeholder="Search books by title..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 text-sm"
-                />
-              </div>
-            ) : null}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                id={searchInputId}
+                type="search"
+                role="searchbox"
+                placeholder="Search books by title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 text-sm"
+              />
+            </div>
             <div className="flex flex-wrap gap-1.5">
               <Button
                 type="button"

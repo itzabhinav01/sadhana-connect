@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { BookOpen, Briefcase, GraduationCap, Headphones, Moon, PenLine, Repeat, Sparkles } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -217,6 +217,18 @@ export function SadhanaReportForm({
     defaultValues,
   })
 
+  const roundsBefore430 = form.watch('roundsBefore430')
+  const roundsTill7am = form.watch('roundsTill7am')
+  const totalRounds = form.watch('totalRounds')
+  const morningSum = (Number(roundsBefore430) || 0) + (Number(roundsTill7am) || 0)
+  const [autoSumEnabled, setAutoSumEnabled] = useState(false)
+
+  useEffect(() => {
+    if (autoSumEnabled && morningSum > 0) {
+      form.setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })
+    }
+  }, [autoSumEnabled, morningSum, form])
+
   const onSubmit = form.handleSubmit(
     (values) => {
       let finalValues = { ...values }
@@ -338,7 +350,11 @@ export function SadhanaReportForm({
                     name="roundsBefore430"
                     label="Rounds before 4:30 AM"
                     showStepper
-                    quickAmounts={[1, 2, 4]}
+                    quickAmounts={[
+                      { label: '+1', mode: 'add', amount: 1 },
+                      { label: '+2', mode: 'add', amount: 2 },
+                      { label: '+4', mode: 'add', amount: 4 },
+                    ]}
                   />
 
                   <NumberFormField
@@ -346,7 +362,11 @@ export function SadhanaReportForm({
                     name="roundsTill7am"
                     label="Rounds till 7 AM"
                     showStepper
-                    quickAmounts={[4, 8, 16]}
+                    quickAmounts={[
+                      { label: '+1', mode: 'add', amount: 1 },
+                      { label: '+4', mode: 'add', amount: 4 },
+                      { label: '+8', mode: 'add', amount: 8 },
+                    ]}
                   />
 
                   <FormField
@@ -363,12 +383,51 @@ export function SadhanaReportForm({
                     )}
                   />
 
+                  <div className="flex flex-col gap-2 sm:col-span-2">
+                    {morningSum > 0 && String(morningSum) !== totalRounds ? (
+                      <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-3 py-2 text-xs">
+                        <span className="font-medium text-foreground">
+                          Morning rounds sum: <strong>{morningSum}</strong>
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs"
+                          onClick={() => form.setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })}
+                        >
+                          Set Total to {morningSum}
+                        </Button>
+                      </div>
+                    ) : null}
+
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={autoSumEnabled}
+                        onChange={(e) => {
+                          const next = e.target.checked
+                          setAutoSumEnabled(next)
+                          if (next && morningSum > 0) {
+                            form.setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })
+                          }
+                        }}
+                        className="rounded border-input text-primary focus:ring-primary size-4"
+                      />
+                      <span>Sum automatically from components</span>
+                    </label>
+                  </div>
+
                   <NumberFormField
                     control={form.control}
                     name="totalRounds"
                     label="Total Rounds"
                     showStepper
-                    quickAmounts={[8, 16, 25]}
+                    quickAmounts={[
+                      { label: '+1', mode: 'add', amount: 1 },
+                      { label: '+4', mode: 'add', amount: 4 },
+                      { label: '16 (Full)', mode: 'set', amount: 16 },
+                    ]}
                     helpText="Enter the complete number of rounds chanted today — this may include rounds chanted after 7 AM that aren't reflected in the fields above."
                   />
                 </div>
@@ -399,7 +458,11 @@ export function SadhanaReportForm({
                     control={form.control}
                     name="readingMinutes"
                     label="Reading Minutes"
-                    quickAmounts={[10, 15, 30, 60]}
+                    quickAmounts={[
+                      { label: '+15m', mode: 'add', amount: 15 },
+                      { label: '+30m', mode: 'add', amount: 30 },
+                      { label: '+60m', mode: 'add', amount: 60 },
+                    ]}
                   />
 
                   <FormField
@@ -443,7 +506,11 @@ export function SadhanaReportForm({
                     control={form.control}
                     name="hearingMinutes"
                     label="Hearing Minutes"
-                    quickAmounts={[10, 15, 30, 60]}
+                    quickAmounts={[
+                      { label: '+15m', mode: 'add', amount: 15 },
+                      { label: '+30m', mode: 'add', amount: 30 },
+                      { label: '+60m', mode: 'add', amount: 60 },
+                    ]}
                   />
 
                   <FormField

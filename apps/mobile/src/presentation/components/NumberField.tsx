@@ -7,6 +7,14 @@ import { fontSize, spacing, fontFamily, touchTarget } from '../../shared/theme'
 import type { ThemeColors } from '../../shared/theme'
 import { Button } from './Button'
 
+export interface QuickAmountOption {
+  label: string
+  mode?: 'add' | 'set'
+  amount: number
+}
+
+export type QuickAmountItem = number | QuickAmountOption
+
 interface NumberFieldProps<T extends FieldValues> {
   control: Control<T>
   name: Path<T>
@@ -15,7 +23,7 @@ interface NumberFieldProps<T extends FieldValues> {
   // through the day (round counts) — not e.g. reading minutes, where a
   // single quick-amount tap already covers the common case.
   showStepper?: boolean
-  quickAmounts?: number[]
+  quickAmounts?: QuickAmountItem[]
   allowDecimal?: boolean
 }
 
@@ -74,15 +82,36 @@ export function NumberField<T extends FieldValues>({
             </View>
             {quickAmounts ? (
               <View style={styles.presetRow}>
-                {quickAmounts.map((amount) => (
-                  <Button
-                    key={amount}
-                    title={String(amount)}
-                    accessibilityLabel={`Set ${label} to ${amount}`}
-                    variant={numericValue === amount ? 'primary' : 'outline'}
-                    onPress={() => onChange(String(amount))}
-                  />
-                ))}
+                {quickAmounts.map((item, index) => {
+                  const opt: QuickAmountOption =
+                    typeof item === 'number'
+                      ? { label: String(item), mode: 'set', amount: item }
+                      : item
+                  const isSetMatch = opt.mode === 'set' && numericValue === opt.amount
+
+                  const handlePress = () => {
+                    if (opt.mode === 'add') {
+                      onChange(String(Math.max(0, numericValue + opt.amount)))
+                    } else {
+                      onChange(String(opt.amount))
+                    }
+                  }
+
+                  return (
+                    <Button
+                      key={`${opt.label}-${index}`}
+                      title={opt.label}
+                      size="sm"
+                      accessibilityLabel={
+                        opt.mode === 'add'
+                          ? `Add ${opt.label} to ${label}`
+                          : `Set ${label} to ${opt.amount}`
+                      }
+                      variant={isSetMatch ? 'primary' : 'outline'}
+                      onPress={handlePress}
+                    />
+                  )
+                })}
               </View>
             ) : null}
             {error ? <Text style={styles.errorText}>{error.message}</Text> : null}

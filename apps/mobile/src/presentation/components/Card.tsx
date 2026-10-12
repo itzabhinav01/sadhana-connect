@@ -34,7 +34,7 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.md,
       gap: spacing.sm,
       backgroundColor: colors.card,
-      borderWidth: StyleSheet.hairlineWidth,
+      borderWidth: 1,
       borderColor: colors.border,
       shadowColor: colors.shadow,
       shadowOpacity: 0.05,

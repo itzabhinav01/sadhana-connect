@@ -12,6 +12,14 @@ import {
 import { Input } from '@/presentation/components/ui/input'
 import { cn } from '@/shared/utils/cn'
 
+export interface QuickAmountOption {
+  label: string
+  mode?: 'add' | 'set'
+  amount: number
+}
+
+export type QuickAmountItem = number | QuickAmountOption
+
 interface NumberFormFieldProps<T extends FieldValues> {
   control: Control<T>
   name: Path<T>
@@ -20,7 +28,7 @@ interface NumberFormFieldProps<T extends FieldValues> {
   // day (round counts) — matches apps/mobile's NumberField exactly, same
   // fields get one on both platforms.
   showStepper?: boolean
-  quickAmounts?: number[]
+  quickAmounts?: QuickAmountItem[]
   allowDecimal?: boolean
   helpText?: string
 }
@@ -82,19 +90,36 @@ export function NumberFormField<T extends FieldValues>({
             </div>
             {quickAmounts ? (
               <div className="flex flex-wrap gap-2">
-                {quickAmounts.map((amount) => {
-                  const isActive = field.value === String(amount)
+                {quickAmounts.map((item, index) => {
+                  const opt: QuickAmountOption =
+                    typeof item === 'number'
+                      ? { label: String(item), mode: 'set', amount: item }
+                      : item
+                  const isSetMatch = opt.mode === 'set' && field.value === String(opt.amount)
+
+                  const handlePress = () => {
+                    if (opt.mode === 'add') {
+                      field.onChange(String(Math.max(0, numericValue + opt.amount)))
+                    } else {
+                      field.onChange(String(opt.amount))
+                    }
+                  }
+
                   return (
                     <Button
-                      key={amount}
+                      key={`${opt.label}-${index}`}
                       type="button"
                       size="sm"
-                      variant={isActive ? 'default' : 'outline'}
-                      aria-label={`Set ${label} to ${amount}`}
-                      className={cn(isActive && 'pointer-events-none')}
-                      onClick={() => field.onChange(String(amount))}
+                      variant={isSetMatch ? 'default' : 'outline'}
+                      aria-label={
+                        opt.mode === 'add'
+                          ? `Add ${opt.label} to ${label}`
+                          : `Set ${label} to ${opt.amount}`
+                      }
+                      className={cn(isSetMatch && 'pointer-events-none')}
+                      onClick={handlePress}
                     >
-                      {amount}
+                      {opt.label}
                     </Button>
                   )
                 })}

@@ -7,12 +7,12 @@ import {
 } from '@expo-google-fonts/poppins'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@sadhana-connect/auth'
-import { initSupabaseClient } from '@sadhana-connect/infra-supabase'
+import { getSupabaseClient, initSupabaseClient } from '@sadhana-connect/infra-supabase'
 import * as Linking from 'expo-linking'
 import { Stack, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
-import { Text, TextInput } from 'react-native'
+import { AppState, Text, TextInput } from 'react-native'
 
 import { ThemeProvider } from '../src/application/theme/theme-provider'
 import { useTheme } from '../src/application/theme/use-theme'
@@ -116,6 +116,24 @@ export default function RootLayout() {
     })
     return () => unsubscribe()
   }, [router])
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      try {
+        const client = getSupabaseClient()
+        if (state === 'active') {
+          client.auth.startAutoRefresh()
+        } else {
+          client.auth.stopAutoRefresh()
+        }
+      } catch {
+        // Client might not be initialized in isolated test runners
+      }
+    })
+    return () => {
+      subscription.remove()
+    }
+  }, [])
 
   // Poppins is a small, locally-bundled asset (no network fetch), so this
   // resolves in well under a frame in the normal case — a blank screen

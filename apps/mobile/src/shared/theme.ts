@@ -62,7 +62,7 @@ export const darkColors: ThemeColors = {
   foreground: '#f4f4f5',
   muted: '#a1a1aa',
   mutedBackground: '#1c1c24',
-  border: '#3f3f52',
+  border: '#4b4b62',
   primary: '#818cf8',
   primaryForeground: '#1e1b4b',
   primarySoft: '#1e1e33',

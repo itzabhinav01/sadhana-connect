@@ -13,9 +13,9 @@ import {
 } from '@sadhana-connect/sadhana'
 import { getLocalDateIso } from '@sadhana-connect/shared'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
 import { fontSize, radius } from '../../../src/shared/theme'
 
 
@@ -24,6 +24,7 @@ import { Accordion, useSectionAccent } from '../../../src/presentation/component
 import { Button } from '../../../src/presentation/components/Button'
 import { DateTimeField } from '../../../src/presentation/components/DateTimeField'
 import { ErrorBanner } from '../../../src/presentation/components/ErrorBanner'
+import { Icon } from '../../../src/presentation/components/Icon'
 import { LoadingScreen } from '../../../src/presentation/components/LoadingScreen'
 import { NumberField } from '../../../src/presentation/components/NumberField'
 import { SadhanaDateStrip } from '../../../src/presentation/components/SadhanaDateStrip'
@@ -183,7 +184,7 @@ function SadhanaFormBody({
   }
   const defaultValues = prefillRounds !== undefined ? { ...base, totalRounds: String(prefillRounds) } : base
 
-  const { control, handleSubmit } = useForm<SadhanaReportFormInput>({
+  const { control, handleSubmit, setValue } = useForm<SadhanaReportFormInput>({
     resolver: zodResolver(sadhanaReportSchema),
     defaultValues,
   })
@@ -228,6 +229,17 @@ function SadhanaFormBody({
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
 
   const totalRounds = useWatch({ control, name: 'totalRounds' })
+  const roundsBefore430 = useWatch({ control, name: 'roundsBefore430' })
+  const roundsTill7am = useWatch({ control, name: 'roundsTill7am' })
+  const morningSum = (Number(roundsBefore430) || 0) + (Number(roundsTill7am) || 0)
+  const [autoSumEnabled, setAutoSumEnabled] = useState(false)
+
+  useEffect(() => {
+    if (autoSumEnabled && morningSum > 0) {
+      setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })
+    }
+  }, [autoSumEnabled, morningSum, setValue])
+
   const readingMinutes = useWatch({ control, name: 'readingMinutes' })
   const hearingMinutes = useWatch({ control, name: 'hearingMinutes' })
   const studyHours = useWatch({ control, name: 'studyHours' })
@@ -323,22 +335,71 @@ function SadhanaFormBody({
               name="roundsBefore430"
               label="Rounds before 4:30 AM"
               showStepper
-              quickAmounts={[1, 2, 4]}
+              quickAmounts={[
+                { label: '+1', mode: 'add', amount: 1 },
+                { label: '+2', mode: 'add', amount: 2 },
+                { label: '+4', mode: 'add', amount: 4 },
+              ]}
             />
             <NumberField
               control={control}
               name="roundsTill7am"
               label="Rounds till 7 AM"
               showStepper
-              quickAmounts={[4, 8, 16]}
+              quickAmounts={[
+                { label: '+1', mode: 'add', amount: 1 },
+                { label: '+4', mode: 'add', amount: 4 },
+                { label: '+8', mode: 'add', amount: 8 },
+              ]}
             />
             <DateTimeField control={control} name="lastRoundTime" label="Last Round Time" mode="time" clearable />
+
+            {morningSum > 0 && String(morningSum) !== totalRounds ? (
+              <View style={styles.autoSumRow}>
+                <Text style={styles.autoSumHelperText}>
+                  Morning rounds sum: {morningSum}
+                </Text>
+                <Button
+                  title={`Set Total to ${morningSum}`}
+                  size="sm"
+                  variant="outline"
+                  onPress={() => setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })}
+                />
+              </View>
+            ) : null}
+
+            <Pressable
+              style={styles.autoCalcToggle}
+              onPress={() => {
+                const next = !autoSumEnabled
+                setAutoSumEnabled(next)
+                if (next && morningSum > 0) {
+                  setValue('totalRounds', String(morningSum), { shouldDirty: true, shouldValidate: true })
+                }
+              }}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: autoSumEnabled }}
+            >
+              <Icon
+                name={autoSumEnabled ? 'checkbox' : 'square-outline'}
+                size={18}
+                color={colors.primary}
+              />
+              <Text style={styles.autoCalcToggleText}>
+                Sum automatically from components
+              </Text>
+            </Pressable>
+
             <NumberField
               control={control}
               name="totalRounds"
               label="Total Rounds"
               showStepper
-              quickAmounts={[8, 16, 25]}
+              quickAmounts={[
+                { label: '+1', mode: 'add', amount: 1 },
+                { label: '+4', mode: 'add', amount: 4 },
+                { label: '16 (Full)', mode: 'set', amount: 16 },
+              ]}
             />
           </Accordion>
         ) : null}
@@ -355,7 +416,11 @@ function SadhanaFormBody({
               control={control}
               name="readingMinutes"
               label="Reading Minutes"
-              quickAmounts={[10, 15, 30, 60]}
+              quickAmounts={[
+                { label: '+15m', mode: 'add', amount: 15 },
+                { label: '+30m', mode: 'add', amount: 30 },
+                { label: '+60m', mode: 'add', amount: 60 },
+              ]}
             />
             <TextField control={control} name="bookName" label="Book Name" />
           </Accordion>
@@ -373,7 +438,11 @@ function SadhanaFormBody({
               control={control}
               name="hearingMinutes"
               label="Hearing Minutes"
-              quickAmounts={[10, 15, 30, 60]}
+              quickAmounts={[
+                { label: '+15m', mode: 'add', amount: 15 },
+                { label: '+30m', mode: 'add', amount: 30 },
+                { label: '+60m', mode: 'add', amount: 60 },
+              ]}
             />
             <TextField control={control} name="speakerName" label="Speaker Name" />
           </Accordion>
@@ -497,6 +566,36 @@ function createStyles(colors: ThemeColors) {
       padding: spacing.md,
       gap: spacing.md,
       backgroundColor: colors.background,
+    },
+    autoSumRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.mutedBackground,
+      paddingHorizontal: spacing.sm + 4,
+      paddingVertical: spacing.xs + 4,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: spacing.sm,
+      marginVertical: 4,
+    },
+    autoSumHelperText: {
+      fontSize: fontSize.xs,
+      fontWeight: '600',
+      color: colors.foreground,
+      flex: 1,
+    },
+    autoCalcToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs + 4,
+      paddingVertical: spacing.xs,
+    },
+    autoCalcToggleText: {
+      fontSize: fontSize.xs,
+      color: colors.muted,
+      fontWeight: '500',
     },
   })
 }

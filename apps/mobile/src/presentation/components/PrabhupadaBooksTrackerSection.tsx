@@ -118,6 +118,13 @@ export function PrabhupadaBooksTrackerSection({
       }
     >
       <View style={styles.container}>
+        {/* Overall Progress Banner */}
+        <View style={styles.overallProgressBanner}>
+          <Text style={styles.overallProgressText}>
+            {summary.completed} of {summary.total} Prabhupada Books Read ({summary.completionPercentage}%)
+          </Text>
+        </View>
+
         {/* Progress bar */}
         <View style={styles.progressBarTrack}>
           <View
@@ -150,28 +157,26 @@ export function PrabhupadaBooksTrackerSection({
           </Pressable>
         ) : (
           <>
-            {/* Search Bar (when editable) */}
-            {editable ? (
-              <View style={styles.searchRow}>
-                <Icon name="search-outline" size={16} color={colors.muted} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search books by title..."
-                  placeholderTextColor={colors.muted}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-                {searchQuery.length > 0 ? (
-                  <Pressable
-                    onPress={() => setSearchQuery('')}
-                    accessibilityRole="button"
-                    accessibilityLabel="Clear search"
-                  >
-                    <Icon name="close-outline" size={16} color={colors.muted} />
-                  </Pressable>
-                ) : null}
-              </View>
-            ) : null}
+            {/* Search Bar */}
+            <View style={styles.searchRow}>
+              <Icon name="search-outline" size={16} color={colors.muted} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search books by title..."
+                placeholderTextColor={colors.muted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 ? (
+                <Pressable
+                  onPress={() => setSearchQuery('')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                >
+                  <Icon name="close-outline" size={16} color={colors.muted} />
+                </Pressable>
+              ) : null}
+            </View>
 
             {/* Filter Pills */}
             <View style={styles.filterTabsRow}>
@@ -369,6 +374,18 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '800',
       fontFamily: fontFamily.bold,
       color: colors.primary,
+    },
+    overallProgressBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 2,
+    },
+    overallProgressText: {
+      fontSize: fontSize.xs,
+      fontFamily: fontFamily.semiBold,
+      fontWeight: '600',
+      color: colors.foreground,
     },
     progressBarTrack: {
       height: 6,

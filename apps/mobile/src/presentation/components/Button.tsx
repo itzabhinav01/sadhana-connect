@@ -61,7 +61,11 @@ export function Button({
       accessibilityLabel={
         isPending && pendingTitle ? pendingTitle : (accessibilityLabel ?? title)
       }
-      hitSlop={variant === 'text' || size === 'sm' ? spacing.xs : undefined}
+      hitSlop={
+        variant === 'text' || size === 'sm'
+          ? { top: 8, bottom: 8, left: 8, right: 8 }
+          : undefined
+      }
       style={({ pressed }) => [
         styles.button,
         size === 'sm' && styles.buttonSm,
