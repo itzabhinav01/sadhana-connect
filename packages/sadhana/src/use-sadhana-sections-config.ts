@@ -16,11 +16,31 @@ import {
   type StandardSectionKey,
 } from './sadhana-sections-config'
 
-const fallbackQueryClient = new QueryClient()
+let fallbackQueryClient: QueryClient | null = null
+
+const noopFallbackClient = {
+  cancelQueries: async () => {},
+  getQueryData: () => undefined,
+  setQueryData: () => {},
+  invalidateQueries: async () => {},
+} as unknown as QueryClient
+
+function getFallbackQueryClient(): QueryClient {
+  if (fallbackQueryClient) return fallbackQueryClient
+  try {
+    if (typeof QueryClient === 'function') {
+      fallbackQueryClient = new QueryClient()
+      return fallbackQueryClient
+    }
+  } catch {
+    // fallback gracefully if QueryClient is not constructible (e.g., partial mock in tests)
+  }
+  return noopFallbackClient
+}
 
 function useSafeQueryClient(): QueryClient {
   const contextClient = useContext(QueryClientContext)
-  return contextClient ?? fallbackQueryClient
+  return contextClient ?? getFallbackQueryClient()
 }
 
 export function useSadhanaSectionsConfig(profileId?: string | null) {

@@ -35,9 +35,13 @@ jest.mock('expo-router', () => ({
 
 const mockFetchQuery = jest.fn()
 
-jest.mock('@tanstack/react-query', () => ({
-  useQueryClient: jest.fn(() => ({ fetchQuery: mockFetchQuery })),
-}))
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query')
+  return {
+    ...actual,
+    useQueryClient: jest.fn(() => ({ fetchQuery: mockFetchQuery })),
+  }
+})
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react-native'
 import { useAuth } from '@sadhana-connect/auth'
