@@ -3,6 +3,7 @@ import { getSupabaseClient } from '@sadhana-connect/infra-supabase'
 import { useAuth } from '@sadhana-connect/auth'
 import { booksKeys } from './books-query-keys'
 import { calculateBookProgress } from './calculate-book-progress'
+import { saveLocalBookProgress } from './book-progress-storage'
 import type { BookReadingStatus, BookWithProgress, DevoteeBookProgress } from './books-types'
 
 export interface UpdateBookProgressParams {
@@ -22,9 +23,12 @@ export function useUpdateBookProgress(defaultProfileId?: string | null) {
         throw new Error('User must be logged in to update book progress')
       }
 
-      const supabase = getSupabaseClient()
       const completedAt = status === 'completed' ? new Date().toISOString() : null
 
+      // Save locally immediately so data is never lost even if remote DB has issues
+      saveLocalBookProgress(targetUserId, bookId, status, completedAt)
+
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from('devotee_book_progress')
         .upsert(
@@ -42,7 +46,7 @@ export function useUpdateBookProgress(defaultProfileId?: string | null) {
 
       if (error) {
         console.warn('devotee_book_progress upsert warning (migration may be pending):', error.message)
-        // Fall back to returning local optimistic record so UX continues seamlessly
+        // Fall back to returning local record so UX continues seamlessly
         return {
           id: `local-${bookId}`,
           profile_id: targetUserId,
@@ -59,6 +63,10 @@ export function useUpdateBookProgress(defaultProfileId?: string | null) {
       const targetUserId = profileId ?? defaultProfileId ?? session?.userId
       if (!targetUserId) return
 
+      const completedAt = status === 'completed' ? new Date().toISOString() : null
+      // Save locally immediately on click!
+      saveLocalBookProgress(targetUserId, bookId, status, completedAt)
+
       const queryKey = booksKeys.devoteeProgress(targetUserId)
       await queryClient.cancelQueries({ queryKey })
 
@@ -74,7 +82,7 @@ export function useUpdateBookProgress(defaultProfileId?: string | null) {
             return {
               ...book,
               status,
-              completedAt: status === 'completed' ? new Date().toISOString() : null,
+              completedAt,
             }
           }
           return book

@@ -17,6 +17,8 @@ import { Text, TextInput } from 'react-native'
 import { ThemeProvider } from '../src/application/theme/theme-provider'
 import { useTheme } from '../src/application/theme/use-theme'
 import { dailySadhanaNotificationService } from '../src/infrastructure/notifications/daily-sadhana-notification-service'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { setBookProgressStorageAdapter } from '@sadhana-connect/books'
 import { secureSessionStorage } from '../src/infrastructure/local-storage/secure-session-storage'
 import { AppUpdateModal } from '../src/presentation/components/AppUpdateModal'
 import { useAppUpdates } from '../src/presentation/hooks/use-app-updates'
@@ -34,6 +36,8 @@ initSupabaseClient({
   },
   redirectBaseUrl: Linking.createURL('/'),
 })
+
+setBookProgressStorageAdapter(AsyncStorage)
 
 const queryClient = new QueryClient()
 
