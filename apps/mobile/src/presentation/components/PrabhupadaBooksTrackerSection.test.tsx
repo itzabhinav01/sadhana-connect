@@ -14,6 +14,7 @@ jest.mock('../../../src/application/theme/use-theme', () => ({
 }))
 
 jest.mock('@sadhana-connect/books', () => ({
+  PRABHUPADA_BOOKS_LIST: [],
   useDevoteeBookProgress: jest.fn(() => ({
     data: {
       booksWithProgress: [

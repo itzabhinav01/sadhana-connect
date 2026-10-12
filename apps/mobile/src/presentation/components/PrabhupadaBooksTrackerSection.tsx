@@ -12,6 +12,7 @@ import {
 import {
   type BookReadingStatus,
   type BookWithProgress,
+  PRABHUPADA_BOOKS_LIST,
   useDevoteeBookProgress,
   useUpdateBookProgress,
 } from '@sadhana-connect/books'
@@ -43,7 +44,20 @@ export function PrabhupadaBooksTrackerSection({
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTab, setFilterTab] = useState<FilterTab>('all')
 
-  const books = data?.booksWithProgress ?? []
+  const fallbackBooks: BookWithProgress[] = useMemo(
+    () =>
+      (PRABHUPADA_BOOKS_LIST ?? []).map((b) => ({
+        ...b,
+        status: 'not_started' as BookReadingStatus,
+        completedAt: null,
+      })),
+    [],
+  )
+
+  const books =
+    data?.booksWithProgress && data.booksWithProgress.length > 0
+      ? data.booksWithProgress
+      : fallbackBooks
   const summary = data?.summary ?? {
     total: 36,
     completed: 0,
